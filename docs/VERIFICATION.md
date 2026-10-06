@@ -3,8 +3,9 @@
 ## Release 0.6.3 — 2026-10-07
 
 - Deployed to production by the owner
-  (`home-audit-fcchkkffz-staragrotrade-3957.vercel.app`); the release-gate
-  result was not reported back.
+  (`home-audit-fcchkkffz-staragrotrade-3957.vercel.app`).
+- `npm run verify:release` passed for this exact source in GitHub Actions on
+  7 October 2026 (run 37540571252), after it was imported into the repository.
 - Checked on `homeaudit.com.au`: the defect-clause guide shows the reworded
   deck and summary, fifteen red flags ending at the owners corporation item,
   and six FAQ questions; the Guides hub shows the new excerpt.
