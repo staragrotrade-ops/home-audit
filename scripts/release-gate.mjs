@@ -21,7 +21,7 @@ const coreIndexableRoutes = [
   '/guides/independent-new-home-stage-inspections',
   '/guides/major-building-defect-vs-major-structural-defect-victoria',
   '/guides/pre-slab-inspection-glen-waverley',
-  '/guides/builder-friend-vs-pre-handover-inspector',
+  '/guides/builder-friend-vs-building-inspector',
 ]
 
 function run(command, args) {

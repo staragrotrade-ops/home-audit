@@ -127,23 +127,23 @@ export const GUIDES: readonly Guide[] = [
     ],
   },
   {
-    slug: 'builder-friend-vs-pre-handover-inspector',
-    path: '/guides/builder-friend-vs-pre-handover-inspector',
+    slug: 'builder-friend-vs-building-inspector',
+    path: '/guides/builder-friend-vs-building-inspector',
     title:
       'Can I ask a builder friend to inspect my new home instead of hiring a building inspector?',
     shortTitle: 'Builder friend or inspector?',
     description:
-      'Thinking of asking a builder friend to check your new home? Why an independent pre-handover inspection and a written defect report matter in Victoria.',
+      'Asking a builder friend to check your new home build? Why independent stage inspections and written reports matter in Victoria.',
     excerpt:
-      'A builder friend can spot problems. An independent inspection also gives you a dated, written record of what was found before you move in.',
+      'A builder friend can spot problems. An independent inspection at each stage also gives you a dated, written record of what was found.',
     category: 'Building a new home',
     datePublished: '2026-10-08T23:30:00+11:00',
     dateModified: '2026-10-08T23:30:00+11:00',
     displayDate: '8 October 2026',
     readingTime: '8 min read',
-    homepageEyebrow: 'New-home guide · Before handover',
+    homepageEyebrow: 'New-home guide · Stage inspections',
     homepageHighlights: [
-      { label: 'Stage', value: 'Before handover' },
+      { label: 'Stage', value: 'Any build stage' },
       { label: 'Key point', value: 'A written record' },
       { label: 'Applies to', value: 'New homes · Victoria' },
     ],

@@ -128,9 +128,9 @@ export default function NewHomeInspectionsPage() {
             </p>
 
             <p>
-              <Link className="text-link" href="/guides/builder-friend-vs-pre-handover-inspector">
-                Can a builder friend replace an independent pre-handover
-                inspection? <span aria-hidden="true">→</span>
+              <Link className="text-link" href="/guides/builder-friend-vs-building-inspector">
+                Can a builder friend replace an independent building
+                inspector? <span aria-hidden="true">→</span>
               </Link>
             </p>
 

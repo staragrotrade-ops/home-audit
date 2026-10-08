@@ -7,7 +7,7 @@ import { SITE_URL } from '@/lib/site'
 const guide = BUILDER_FRIEND_GUIDE
 
 export const metadata = pageMetadata({
-  title: 'Builder Friend vs Building Inspector Before Handover',
+  title: 'Builder Friend vs Independent Building Inspector',
   description: guide.description,
   path: guide.path,
   openGraphType: 'article',
@@ -45,7 +45,8 @@ const typicalFindings = [
   'poor falls and surface drainage;',
   'signs of moisture getting in, or questionable waterproofing details;',
   'roof flashing, gutter or downpipe problems;',
-  'support or structural connections that look wrong;',
+  'slab set-out, reinforcement and preparation before the concrete pour;',
+  'frame bracing, tie-downs and connections before the walls are lined;',
   'stair, balustrade and handrail defects;',
   'windows and doors that are badly installed;',
   'unfinished or poor-quality finishes; and',
@@ -72,9 +73,9 @@ const faqs = [
       'It may be relevant in a building dispute, but whether and how it can be used depends on the case and any directions about evidence. A routine pre-handover report is not automatically an expert witness report. Get advice on your own case if it comes to that.',
   },
   {
-    question: 'Is a pre-handover inspection worth it if my builder has already fixed defects?',
+    question: 'Is an independent inspection worth it if my builder has already fixed defects?',
     answer:
-      'It can be. A builder who fixes what has been raised is a good sign, but an independent inspection may find things nobody has raised yet and records the condition of the house before you move in.',
+      'It can be. A builder who fixes what has been raised is a good sign, but an independent inspection may find things nobody has raised yet and records the condition of the work at that stage.',
   },
   {
     question: 'Does a building inspector know more than a builder?',
@@ -82,9 +83,9 @@ const faqs = [
       'Not necessarily. The two jobs overlap but are different. Look for real inspection experience, knowledge of the building requirements, a consistent method and reports that explain findings clearly.',
   },
   {
-    question: 'Will a pre-handover inspection find every defect?',
+    question: 'Will an inspection find every defect?',
     answer:
-      'No. Most are visual and non-invasive, so hidden problems cannot be guaranteed to show up. A good report says what was inspected, what could not be reached and what the limits were.',
+      'No. Most stage and pre-handover inspections are visual and non-invasive, so hidden problems cannot be guaranteed to show up. A good report says what was inspected, what could not be reached and what the limits were.',
   },
 ]
 
@@ -112,14 +113,14 @@ const structuredData = {
       datePublished: guide.datePublished,
       dateModified: guide.dateModified,
       inLanguage: 'en-AU',
-      articleSection: 'New home and pre-handover inspections',
+      articleSection: 'New home stage inspections',
       author: { '@id': `${SITE_URL}/credentials#inspector` },
       publisher: { '@id': `${SITE_URL}/#organization` },
       mainEntityOfPage: { '@id': `${SITE_URL}${guide.path}` },
       isPartOf: { '@id': `${SITE_URL}/#website` },
       about: [
+        { '@type': 'Thing', name: 'New home stage inspection' },
         { '@type': 'Thing', name: 'Pre-handover inspection' },
-        { '@type': 'Thing', name: 'Practical completion inspection' },
         { '@type': 'Place', name: 'Victoria, Australia' },
       ],
       citation: sources.map((source) => source.href),
@@ -162,12 +163,12 @@ export default function BuilderFriendGuide() {
 
             <div className="guide-hero-grid">
               <div>
-                <p className="eyebrow">New-home guide · Before handover</p>
+                <p className="eyebrow">New-home guide · Stage inspections</p>
                 <h1>{guide.title}</h1>
                 <p className="guide-deck">
                   Your builder has been fixing things as you go, and you have a
-                  friend who is a builder. Is it still worth paying for an
-                  independent inspection before handover?
+                  friend who is a builder. Is it still worth paying for
+                  independent inspections while the house is being built?
                 </p>
                 <div className="guide-byline">
                   <span>
@@ -186,8 +187,8 @@ export default function BuilderFriendGuide() {
                   you a dated, written record of what was found.
                 </strong>
                 <span>
-                  Many owners do both: bring the friend along and book an
-                  inspection.
+                  Many owners do both: bring the friend along and book
+                  inspections at the key stages.
                 </span>
               </aside>
             </div>
@@ -204,7 +205,7 @@ export default function BuilderFriendGuide() {
               <a href="#method">A set method</a>
               <a href="#accountability">Who is responsible</a>
               <a href="#tracking">Tracking repairs</a>
-              <a href="#timing">Before you move in</a>
+              <a href="#timing">Timing at each stage</a>
               <a href="#responsive-builder">If your builder is responsive</a>
               <a href="#questions">Questions</a>
               <a href="#sources">Sources</a>
@@ -270,8 +271,8 @@ export default function BuilderFriendGuide() {
                 <SourceRef n={2} />
               </p>
               <p>
-                A report written before you move in records the condition of the
-                house at that point. Photos, measurements and clear descriptions
+                A report written at the time records the condition of the work
+                at that stage, before it is covered up or before you move in. Photos, measurements and clear descriptions
                 also make your emails to the builder more precise.
               </p>
               <p>
@@ -315,9 +316,9 @@ export default function BuilderFriendGuide() {
               <h2>An inspection follows a set method</h2>
               <p>
                 A friend will quickly see a crooked door, a damaged finish or an
-                obvious leak. A pre-handover inspector should work through an
-                agreed scope and check each accessible part of the house in
-                turn, rather than noting whatever stands out.
+                obvious leak. An inspector should work through an agreed scope
+                for that stage and check each accessible part in turn, rather
+                than noting whatever stands out.
               </p>
               <p>Things an inspection may pick up include:</p>
               <ul>
@@ -377,13 +378,26 @@ export default function BuilderFriendGuide() {
             </section>
 
             <section id="timing">
-              <h2>Before you move in is a good time to record the house</h2>
+              <h2>Each stage has its own window</h2>
               <p>
-                Before furniture and belongings go in, more of the house can be
-                seen and its condition at handover can be recorded.
+                A lot of the work in a new home is only visible for a short
+                time. Slab reinforcement disappears under concrete, and frame
+                connections disappear behind plasterboard. Once that happens,
+                problems are much harder to check, and a friend who drops by
+                now and then may not be there at the right moment.
               </p>
               <p>
-                Once you are living there, everyday use, changes and later damage
+                An inspection booked at each key stage, such as before the slab
+                pour, at frame, at lock-up, at fixing and before handover,
+                records the work while it can still be seen. For what happens
+                at each stage, see our{' '}
+                <Link href="/new-home-inspections">new-home inspections</Link>{' '}
+                page.
+              </p>
+              <p>
+                Handover is the last of these windows. Before furniture and
+                belongings go in, more of the house can be seen. Once you are
+                living there, everyday use, changes and later damage
                 can make it harder to show what was there from the start. That
                 does not mean the builder stops being responsible for defects
                 after handover. The statutory warranties on domestic building
@@ -391,7 +405,7 @@ export default function BuilderFriendGuide() {
                 <SourceRef n={3} />
               </p>
               <p>
-                For what a practical completion inspection covers, see our{' '}
+                For the final stage, see our{' '}
                 <Link href="/practical-completion-inspection">
                   practical completion inspection
                 </Link>{' '}
@@ -423,13 +437,13 @@ export default function BuilderFriendGuide() {
               <h2>So, the friend or the inspector?</h2>
               <p>
                 Consider both. Bring your friend for a practical second opinion,
-                and book an independent inspector if you want a systematic check
-                and a written report.
+                and book an independent inspector at the stages that matter to
+                you if you want a systematic check and a written report.
               </p>
               <p>
-                Read the inspection scope before you book. Most pre-handover
-                inspections are visual and non-invasive and cannot find every
-                hidden or future defect.
+                Read the inspection scope before you book. Most stage and
+                pre-handover inspections are visual and non-invasive and cannot find
+                every hidden or future defect.
               </p>
               <p>
                 The point is not to start an argument with the builder. It is to
@@ -440,7 +454,7 @@ export default function BuilderFriendGuide() {
 
             <section className="guide-faq" id="questions" aria-labelledby="guide-faq-heading">
               <p className="eyebrow">Frequently asked questions</p>
-              <h2 id="guide-faq-heading">Builder friends and pre-handover inspections</h2>
+              <h2 id="guide-faq-heading">Builder friends and independent inspections</h2>
               <div className="faq-list">
                 {faqs.map((faq) => (
                   <details key={faq.question}>
@@ -471,9 +485,9 @@ export default function BuilderFriendGuide() {
 
             <aside className="guide-cta">
               <p className="eyebrow">Building in Melbourne?</p>
-              <h2>Book an independent pre-handover inspection.</h2>
+              <h2>Book independent inspections for your build.</h2>
               <p>
-                Home Audit provides independent new-home and pre-handover
+                Home Audit provides independent new-home stage and pre-handover
                 inspections across Melbourne, with a written report covering
                 what was found and what could not be inspected.
               </p>

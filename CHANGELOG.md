@@ -2,10 +2,10 @@
 
 ## 0.6.5 — 2026-10-08
 
-- Added a sixth guide, `/guides/builder-friend-vs-pre-handover-inspector`:
-  whether a builder friend can replace an independent pre-handover inspection,
-  covering written records, disputes, method, accountability, tracking repairs
-  and timing, with FAQ and Article / Breadcrumb / FAQ data.
+- Added a sixth guide, `/guides/builder-friend-vs-building-inspector`:
+  whether a builder friend can replace independent inspections at any build
+  stage (pre-slab to handover), covering written records, disputes, method,
+  accountability, tracking repairs and the inspection window at each stage, with FAQ and Article / Breadcrumb / FAQ data.
 - Changes from the supplied brief: rewritten in plainer language; the
   dispute and handover statements now cite the specific Consumer Affairs
   Victoria and Building and Plumbing Commission pages (checked
