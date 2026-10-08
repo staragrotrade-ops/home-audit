@@ -114,7 +114,7 @@ const structuredData = {
       dateModified: guide.dateModified,
       inLanguage: 'en-AU',
       articleSection: 'New home stage inspections',
-      author: { '@id': `${SITE_URL}/credentials#inspector` },
+      author: { '@type': 'Organization', name: 'Home Audit', '@id': `${SITE_URL}/#organization` },
       publisher: { '@id': `${SITE_URL}/#organization` },
       mainEntityOfPage: { '@id': `${SITE_URL}${guide.path}` },
       isPartOf: { '@id': `${SITE_URL}/#website` },
@@ -172,9 +172,8 @@ export default function BuilderFriendGuide() {
                 </p>
                 <div className="guide-byline">
                   <span>
-                    By <Link href="/credentials">Xiaoqiong Yang</Link>
+                    By <Link href="/about">Home Audit Inspector</Link>
                   </span>
-                  <span>Founder and Building Inspector</span>
                   <time dateTime={guide.datePublished}>Published {guide.displayDate}</time>
                   <span>{guide.readingTime}</span>
                 </div>
