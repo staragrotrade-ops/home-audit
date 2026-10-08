@@ -20,6 +20,7 @@ const coreIndexableRoutes = [
   '/guides/building-inspection-buyers-market',
   '/guides/independent-new-home-stage-inspections',
   '/guides/major-building-defect-vs-major-structural-defect-victoria',
+  '/guides/pre-slab-inspection-glen-waverley',
 ]
 
 function run(command, args) {

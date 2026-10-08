@@ -105,6 +105,27 @@ export const GUIDES: readonly Guide[] = [
       { label: 'Applies to', value: 'Established homes · Victoria' },
     ],
   },
+  {
+    slug: 'pre-slab-inspection-glen-waverley',
+    path: '/guides/pre-slab-inspection-glen-waverley',
+    title: 'Why a pre-slab inspection matters: one Glen Waverley site lesson',
+    shortTitle: 'Pre-slab inspection in Glen Waverley',
+    description:
+      'A Glen Waverley slab inspection found reinforcement too close to a drainage pipe before the pour. Why approved drawings alone are not enough.',
+    excerpt:
+      'A drainage pipe, the reinforcement next to it and a builder with 30 years behind him: what one Glen Waverley inspection shows about checking a slab before the concrete pour.',
+    category: 'Building a new home',
+    datePublished: '2026-10-08T20:30:00+11:00',
+    dateModified: '2026-10-08T20:30:00+11:00',
+    displayDate: '8 October 2026',
+    readingTime: '10 min read',
+    homepageEyebrow: 'New-home case study · Glen Waverley',
+    homepageHighlights: [
+      { label: 'Stage', value: 'Before the slab pour' },
+      { label: 'Found', value: 'Steel too close to a drain' },
+      { label: 'Location', value: 'Glen Waverley · Victoria' },
+    ],
+  },
 ] as const
 
 export const FEATURED_GUIDE = GUIDES[0]
@@ -112,3 +133,4 @@ export const AGENT_PRESSURE_GUIDE = GUIDES[0]
 export const BUYERS_MARKET_GUIDE = GUIDES[1]
 export const NEW_HOME_STAGE_GUIDE = GUIDES[2]
 export const DEFECT_CLAUSE_GUIDE = GUIDES[3]
+export const PRE_SLAB_GUIDE = GUIDES[4]

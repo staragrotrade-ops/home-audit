@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.6.4 — 2026-10-08
+
+- Added a fifth guide, `/guides/pre-slab-inspection-glen-waverley`: a
+  Glen Waverley pre-slab case study (reinforcement too close to a PVC drainage
+  pipe), why drawings are not the only applicable rules, what mandatory
+  inspections do and do not show, a pre-pour checklist, FAQ, and Article /
+  Breadcrumb / FAQ data.
+- Changes from the supplied brief:
+  - Signed by Xiaoqiong Yang, but the site story and the building-surveying
+    account are not hers (owner confirmed), so they are told as "our
+    inspector" and as the same unnamed team-member account used in the other
+    guides ("more than ten" inspections a day). The brief's request to change
+    the other guides to "more than 15" in Xiaoqiong's name was not applied.
+  - Rewritten in plainer language, consistent with the owner's earlier edits.
+  - The AS 2870 catalogue link is listed without a URL because the page could
+    not be opened to confirm it; all other sources were checked on
+    8 October 2026.
+- Linked from `/new-home-inspections`, the new-home stage guide and the Guides
+  hub; added to the sitemap (26 URLs), tests and release gate.
+
 ## 0.6.3 — 2026-10-07
 
 Deployed to production on 7 October 2026.
