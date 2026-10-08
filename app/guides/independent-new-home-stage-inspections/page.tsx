@@ -845,6 +845,13 @@ export default function IndependentNewHomeStageInspectionsGuide() {
                 </Link>{' '}
                 page.
               </p>
+              <p>
+                <Link href="/guides/pre-slab-inspection-glen-waverley">
+                  See why one visible pipe-and-reinforcement detail mattered
+                  before a Glen Waverley slab pour
+                </Link>
+                .
+              </p>
             </section>
 
             <section className="guide-faq" id="questions" aria-labelledby="guide-faq-heading">

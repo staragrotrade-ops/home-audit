@@ -121,6 +121,13 @@ export default function NewHomeInspectionsPage() {
             </div>
 
             <p>
+              <Link className="text-link" href="/guides/pre-slab-inspection-glen-waverley">
+                Read a real Glen Waverley pre-slab inspection case study{' '}
+                <span aria-hidden="true">→</span>
+              </Link>
+            </p>
+
+            <p>
               Nearing handover? Read the dedicated{' '}
               <Link className="text-link" href="/practical-completion-inspection">
                 practical completion inspection guide

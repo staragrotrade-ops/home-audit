@@ -201,3 +201,29 @@ test('the defect-clause guide keeps its attribution, sources and legal boundarie
   assert.match(prePurchase, slug)
   assert.match(buildingAndPest, slug)
 })
+
+test('the pre-slab case study keeps its attribution, hedging and links', async () => {
+  const article = await source('app/guides/pre-slab-inspection-glen-waverley/page.tsx')
+  const guides = await source('lib/guides.ts')
+  const newHome = await source('app/new-home-inspections/page.tsx')
+  const stageGuide = await source(
+    'app/guides/independent-new-home-stage-inspections/page.tsx',
+  )
+  const slug = /guides\/pre-slab-inspection-glen-waverley/
+
+  assert.match(guides, slug)
+  assert.match(article, /'@type': 'Article'/)
+  assert.match(article, /'@type': 'BreadcrumbList'/)
+  assert.match(article, /By <Link href="\/credentials">Xiaoqiong Yang<\/Link>/)
+  assert.doesNotMatch(article, /Alan/)
+  assert.doesNotMatch(article, /Reviewed by/)
+  // The site experiences described are not the author's own, so the article
+  // must not narrate them in the first person.
+  assert.doesNotMatch(article, /\bI (raised|produced|saw|worked|was expected)\b/)
+  assert.match(article, /A member of the Home Audit team previously worked/)
+  assert.match(article, /That does not mean it will fail/)
+  assert.match(article, /not Victorian law/)
+  assert.match(article, /quote\?service=new-home/)
+  assert.match(newHome, slug)
+  assert.match(stageGuide, slug)
+})
