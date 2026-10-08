@@ -128,6 +128,13 @@ export default function NewHomeInspectionsPage() {
             </p>
 
             <p>
+              <Link className="text-link" href="/guides/builder-friend-vs-pre-handover-inspector">
+                Can a builder friend replace an independent pre-handover
+                inspection? <span aria-hidden="true">→</span>
+              </Link>
+            </p>
+
+            <p>
               Nearing handover? Read the dedicated{' '}
               <Link className="text-link" href="/practical-completion-inspection">
                 practical completion inspection guide
