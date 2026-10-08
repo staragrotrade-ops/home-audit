@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.6 — 2026-10-08
+
+- The builder-friend guide is now signed "By Home Audit Inspector" (linking to
+  `/about`), with Home Audit as the Article author in structured data. Other
+  guides keep the Xiaoqiong Yang byline.
+
 ## 0.6.5 — 2026-10-08
 
 - Added a sixth guide, `/guides/builder-friend-vs-building-inspector`:

@@ -241,6 +241,8 @@ test('the builder-friend guide stays brand-neutral and links both ways', async (
   assert.match(article, /'@type': 'BreadcrumbList'/)
   assert.doesNotMatch(article, /Sherridon/i)
   assert.doesNotMatch(article, /Alan/)
+  assert.match(article, /By <Link href="\/about">Home Audit Inspector<\/Link>/)
+  assert.doesNotMatch(article, /Xiaoqiong/)
   assert.match(article, /A report does not win a dispute for you/)
   assert.match(article, /does not mean the builder stops being responsible/)
   assert.match(article, /cannot find\s+every hidden or future defect/)
