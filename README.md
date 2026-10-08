@@ -59,6 +59,20 @@ checks. `npm run lint` is a TypeScript check only; no ESLint is configured.
 With a local server running, `npm run smoke` checks the public routes. Set
 `SMOKE_BASE_URL` to test a preview or production deployment.
 
+## Deployment
+
+Source lives in the private GitHub repository `staragrotrade-ops/home-audit`,
+which is connected to the Vercel project `home-audit`.
+
+1. Changes are pushed to a branch and opened as a pull request.
+2. GitHub Actions runs `npm run verify:release` (`.github/workflows/verify.yml`)
+   and Vercel builds a preview deployment for the branch.
+3. The owner reviews the preview and merges the pull request.
+4. Merging to `main` deploys to production at `homeaudit.com.au`.
+
+Do not deploy with `vercel deploy --prod` from a local folder any more: it
+would publish code that is not in the repository.
+
 ## Database setup
 
 The initial migration is in
