@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.6.5 — 2026-10-08
+
+- Added a sixth guide, `/guides/builder-friend-vs-building-inspector`:
+  whether a builder friend can replace independent inspections at any build
+  stage (pre-slab to handover), covering written records, disputes, method,
+  accountability, tracking repairs and the inspection window at each stage, with FAQ and Article / Breadcrumb / FAQ data.
+- Changes from the supplied brief: rewritten in plainer language; the
+  dispute and handover statements now cite the specific Consumer Affairs
+  Victoria and Building and Plumbing Commission pages (checked
+  8 October 2026) instead of agency homepages; the SEO title was shortened so
+  it fits with the site name; signed by Xiaoqiong Yang like the other guides.
+  The article does not name any builder.
+- Linked from `/new-home-inspections`; links to the PCI page and the new-home
+  stage guide; added to the Guides hub, sitemap (27 URLs), tests and release
+  gate.
+
 ## 0.6.4 — 2026-10-08
 
 - Added a fifth guide, `/guides/pre-slab-inspection-glen-waverley`: a

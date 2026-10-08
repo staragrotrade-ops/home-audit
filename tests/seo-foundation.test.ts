@@ -227,3 +227,23 @@ test('the pre-slab case study keeps its attribution, hedging and links', async (
   assert.match(newHome, slug)
   assert.match(stageGuide, slug)
 })
+
+test('the builder-friend guide stays brand-neutral and links both ways', async () => {
+  const article = await source(
+    'app/guides/builder-friend-vs-building-inspector/page.tsx',
+  )
+  const guides = await source('lib/guides.ts')
+  const newHome = await source('app/new-home-inspections/page.tsx')
+  const slug = /guides\/builder-friend-vs-building-inspector/
+
+  assert.match(guides, slug)
+  assert.match(article, /'@type': 'Article'/)
+  assert.match(article, /'@type': 'BreadcrumbList'/)
+  assert.doesNotMatch(article, /Sherridon/i)
+  assert.doesNotMatch(article, /Alan/)
+  assert.match(article, /A report does not win a dispute for you/)
+  assert.match(article, /does not mean the builder stops being responsible/)
+  assert.match(article, /cannot find\s+every hidden or future defect/)
+  assert.match(article, /href="\/new-home-inspections"/)
+  assert.match(newHome, slug)
+})
