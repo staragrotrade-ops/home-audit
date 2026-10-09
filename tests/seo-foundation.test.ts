@@ -249,3 +249,11 @@ test('the builder-friend guide stays brand-neutral and links both ways', async (
   assert.match(article, /href="\/new-home-inspections"/)
   assert.match(newHome, slug)
 })
+
+test('Vercel Web Analytics loads from this origin on production only', async () => {
+  const analytics = await source('components/analytics.tsx')
+
+  assert.match(analytics, /src="\/_vercel\/insights\/script\.js"/)
+  assert.match(analytics, /process\.env\.VERCEL_ENV === 'production'/)
+  assert.match(analytics, /isVercelProduction \? <VercelWebAnalytics \/> : null/)
+})
