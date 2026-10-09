@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.7 — 2026-10-09
+
+- Turned on Vercel Web Analytics (page views, visitors, referrers, countries,
+  devices; no cookies). The script is served from this origin and is added to
+  production builds only. No new npm dependency. Google Analytics remains off
+  unless a measurement ID is configured.
+
 ## 0.6.6 — 2026-10-08
 
 - The builder-friend guide is now signed "By Home Audit Inspector" (linking to
