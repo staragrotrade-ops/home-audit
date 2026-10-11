@@ -131,13 +131,12 @@ test('editorial doctrine requires a suburb in every published case', async () =>
   assert.match(principles, /street number, street name, client\s+name/)
 })
 
-test('sample admin pipeline is gated and a contact email is published', async () => {
+test('admin is switched off until configured and a contact email is published', async () => {
   const admin = await source('app/admin/page.tsx')
   const site = await source('lib/site.ts')
   const footer = await source('components/site-footer.tsx')
 
-  assert.match(admin, /ADMIN_PREVIEW_ENABLED/)
-  assert.match(admin, /notFound\(\)/)
+  assert.match(admin, /isAdminConfigured\(\)\) notFound\(\)/)
   assert.match(site, /CONTACT_EMAIL = 'info@homeaudit\.com\.au'/)
   assert.match(footer, /mailto:/)
 })

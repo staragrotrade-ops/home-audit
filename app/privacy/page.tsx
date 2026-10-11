@@ -29,6 +29,11 @@ export default function PrivacyPage() {
           website, such as the referring site or campaign link.
         </p>
         <p>
+          If the quote form opens your email app instead of sending the request
+          directly, we also keep a copy of the details you entered in the form,
+          so we can follow up even if the email is not sent.
+        </p>
+        <p>
           You can browse this website without giving us any personal
           information. If you choose not to provide the details we ask for, we
           may not be able to prepare a quote or carry out an inspection. If you
@@ -66,10 +71,18 @@ export default function PrivacyPage() {
 
         <h2>Website statistics</h2>
         <p>
-          We may measure how the website is used in aggregate, such as which
-          pages are visited and which sites visitors arrive from. These
-          statistics are not used to identify you and are never combined with
-          the names, addresses or contact details entered in the quote form.
+          We measure how the website is used: which pages are viewed, for how
+          long, which site or link a visit came from, the type of device and
+          the country. A visit is counted with a random number kept in your
+          browser for that visit only. We do not use advertising cookies and we
+          do not store your IP address. To stop misuse of the quote form we
+          keep a scrambled code made from it, which cannot be turned back into
+          the address, for up to two hours.
+        </p>
+        <p>
+          If you send a quote request, we link it to the pages viewed during
+          that visit. This helps us see which information was useful and
+          where our enquiries come from. We do not use it for anything else.
         </p>
 
         <h2>Storage and retention</h2>
@@ -105,7 +118,7 @@ export default function PrivacyPage() {
           version is always published on this page.
         </p>
 
-        <p className="credential-note">Last updated: 6 October 2026.</p>
+        <p className="credential-note">Last updated: 11 October 2026.</p>
       </div>
     </main>
   )

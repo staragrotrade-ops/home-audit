@@ -170,6 +170,13 @@ try {
   const admin = await request('/admin')
   assert.equal(admin.response.statusCode, 404, '/admin must not be publicly available')
 
+  const adminLogin = await request('/admin/login')
+  assert.equal(adminLogin.response.statusCode, 404, '/admin/login must stay off until configured')
+
+  const appAccount = await request('/api/app/account')
+  assert.ok(appAccount.response.statusCode >= 400, '/api/app/account must refuse unauthenticated calls')
+  assert.match(appAccount.body, /"ok":false/, '/api/app/account must return an error body')
+
   const about = await request('/about')
   assert.match(about.body, /<title>About Home Audit<\/title>/, '/about: title must not repeat the brand')
   assert.match(about.body, /max-image-preview/, '/about: Googlebot preview directives must be present')

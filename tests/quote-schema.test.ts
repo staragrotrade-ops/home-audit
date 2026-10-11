@@ -92,3 +92,31 @@ test('rejects a request without privacy consent', () => {
 
   assert.equal(result.success, false)
 })
+
+test('defaults to an online submission and accepts the email-handoff copy', () => {
+  const plain = quoteRequestSchema.safeParse({
+    ...base,
+    service_family: 'existing_home',
+    inspection_type: 'building_only',
+  })
+  assert.equal(plain.success, true)
+  assert.equal(plain.success && plain.data.intake_mode, 'submit')
+  assert.equal(plain.success && plain.data.analytics_session_id, '')
+
+  const handoff = quoteRequestSchema.safeParse({
+    ...base,
+    service_family: 'existing_home',
+    inspection_type: 'building_only',
+    intake_mode: 'email_handoff',
+    analytics_session_id: '0b6f7c1e-3c1a-4d8e-9b8a-2f4c6d8e0a1b',
+  })
+  assert.equal(handoff.success, true)
+
+  const badSession = quoteRequestSchema.safeParse({
+    ...base,
+    service_family: 'existing_home',
+    inspection_type: 'building_only',
+    analytics_session_id: 'not-a-uuid',
+  })
+  assert.equal(badSession.success, false)
+})
