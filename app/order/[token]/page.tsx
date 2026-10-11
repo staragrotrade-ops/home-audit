@@ -99,7 +99,7 @@ export default async function OrderPage({
               you the confirmed date. The report is sent by email after the inspection.
             </p>
             {isPayable(job) && <PayButton token={token} label={`Pay ${formatAud(total)}`} />}
-            {sessionId && (
+            {pending && (
               <p className="order-hint">
                 If you have just paid, the payment may take a minute to show. Refresh this page shortly.
               </p>
