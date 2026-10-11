@@ -84,6 +84,7 @@ export const quoteRequestSchema = z
     // email-app handoff used while online submission is switched off.
     intake_mode: z.enum(['submit', 'email_handoff']).default('submit'),
     analytics_session_id: z.union([z.literal(''), z.uuid()]).default(''),
+    turnstile_token: z.string().max(2048).default(''),
   })
   .superRefine((value, context) => {
     if (value.service_family === 'existing_home' && !value.inspection_type) {

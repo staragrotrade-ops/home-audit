@@ -50,8 +50,8 @@ Never paste these values into chat or commit them to GitHub.
 - To sign out every device at once (for example after losing a phone),
   change `ADMIN_SESSION_SECRET` in Vercel and redeploy. This also resets the
   "Stop counting this device" setting, so press it again afterwards.
-- Before switching on `QUOTE_SUBMISSION_ENABLED`, add a bot check such as
-  Cloudflare Turnstile to the quote form.
+- The online quote form only opens once Cloudflare Turnstile is set up
+  (step 9). Until then it keeps using the email handoff.
 
 # Instant quotes and payment (0.8.0)
 
@@ -84,7 +84,9 @@ SQL Editor → run `20261012100000_instant_quotes_and_booking.sql` once.
 
 ## 7. Email (Resend, GoDaddy DNS)
 
-1. resend.com → Domains → add `homeaudit.com.au`.
+1. resend.com → Domains → add `homeaudit.com.au`. The free plan allows one
+   domain per team, so if 137B's domain is already in your Resend team,
+   create a second team (free) for Home Audit and add the domain there.
 2. GoDaddy → homeaudit.com.au → DNS: add the records Resend shows (they sit
    on a `send` sub-domain and `resend._domainkey`, so existing email at
    info@homeaudit.com.au is not affected). Wait for "Verified".
@@ -96,7 +98,15 @@ SQL Editor → run `20261012100000_instant_quotes_and_booking.sql` once.
 Google Business Profile → "Ask for reviews" → copy the link → Vercel
 `GOOGLE_REVIEW_URL`.
 
-## 9. Switch on
+## 9. Bot check (Cloudflare Turnstile, free)
+
+1. dash.cloudflare.com (a free account is enough; the domain can stay at
+   GoDaddy) → Turnstile → Add widget → hostname `homeaudit.com.au`, mode
+   "Managed".
+2. Vercel: `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (site key) and
+   `TURNSTILE_SECRET_KEY` (secret key).
+
+## 10. Switch on
 
 Vercel: `QUOTE_SUBMISSION_ENABLED` = `true`, then redeploy. Test with your own
 details from a browser marked "Stop counting this device" (the job is marked

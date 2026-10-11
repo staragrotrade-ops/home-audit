@@ -8,6 +8,7 @@ import { quoteRequestSchema } from '@/lib/quote-schema'
 import { clientHash, globalHash, isSameOriginMutation } from '@/lib/request-guard'
 import { SITE_URL } from '@/lib/site'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { turnstileConfigured, verifyTurnstile } from '@/lib/turnstile'
 import { destinationAddress, driveMinutesFromBase } from '@/lib/travel'
 
 export const runtime = 'nodejs'
@@ -98,7 +99,12 @@ export async function POST(request: Request) {
     )
   }
 
-  const { intake_mode: intakeMode, analytics_session_id: sessionId, ...fields } = parsed.data
+  const {
+    intake_mode: intakeMode,
+    analytics_session_id: sessionId,
+    turnstile_token: turnstileToken,
+    ...fields
+  } = parsed.data
 
   // Online submission is switched on separately. The email handoff only keeps
   // a copy for the admin dashboard, so it is accepted whenever the database is
@@ -126,6 +132,24 @@ export async function POST(request: Request) {
   // Quietly accept bot-filled honeypot submissions without creating a record.
   if (fields.website) {
     return NextResponse.json({ ok: true, reference: null }, { status: 201 })
+  }
+
+  // Online submissions create a quote, look up the driving time and send
+  // emails, so they need a passed bot check. Without Turnstile configured the
+  // online form stays closed.
+  if (intakeMode === 'submit') {
+    if (!turnstileConfigured()) {
+      return NextResponse.json(
+        { error: 'Online quote submissions are not enabled yet.' },
+        { status: 503 },
+      )
+    }
+    if (!(await verifyTurnstile(turnstileToken, request))) {
+      return NextResponse.json(
+        { error: 'Please complete the security check and try again.' },
+        { status: 400 },
+      )
+    }
   }
 
   // Keep only the fields that belong to the chosen service family.

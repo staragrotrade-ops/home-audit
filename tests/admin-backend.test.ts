@@ -167,3 +167,15 @@ test('order links are private and the buyer situation stays out of agent texts',
   const booking = emails.slice(emails.indexOf('export function bookingConfirmedEmail'))
   assert.doesNotMatch(booking.slice(0, booking.indexOf('\n}\n')), /hour|minute|timeStyle/)
 })
+
+test('the online quote form needs a passed Turnstile check', async () => {
+  const route = await source('app/api/quote/route.ts')
+  assert.match(route, /if \(!turnstileConfigured\(\)\)/)
+  assert.match(route, /await verifyTurnstile\(turnstileToken, request\)/)
+
+  const config = await source('next.config.ts')
+  assert.match(config, /https:\/\/challenges\.cloudflare\.com/)
+
+  const flow = await source('components/quote-flow.tsx')
+  assert.match(flow, /disabled=\{submitting \|\| \(needsTurnstile && !turnstileToken\)\}/)
+})

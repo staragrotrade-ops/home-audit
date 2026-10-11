@@ -3201,3 +3201,8 @@ button:focus-visible {
 .order-summary {
   padding-left: 18px;
 }
+
+.quote-turnstile {
+  margin: 18px 0 4px;
+  min-height: 65px;
+}

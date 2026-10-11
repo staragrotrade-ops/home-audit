@@ -25,6 +25,13 @@ Instant quotes, online payment and the booking workflow.
 - Shared Stripe account: sessions carry `site_key=home_audit`, so the 137B
   webhook ignores them and this site ignores 137B's.
 - Migration `20261012100000_instant_quotes_and_booking.sql`.
+- Online quote form requires a Cloudflare Turnstile check (free); without
+  Turnstile keys it stays on the email handoff.
+- Payment safeguards: only one open Stripe payment page per job; the private
+  order link is never sent to Stripe (customers return through
+  `/order/return`); a second payment or a wrong amount is not applied and the
+  owner is emailed to refund or check it; an instant price lapses if the date
+  gets closer than 3 business days before payment.
 
 ## 0.7.0 — 2026-10-11
 

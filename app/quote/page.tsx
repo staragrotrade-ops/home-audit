@@ -41,6 +41,7 @@ export default async function QuotePage({ searchParams }: QuotePageProps) {
         <QuoteFlow
           initialService={initialService}
           submissionEnabled={process.env.QUOTE_SUBMISSION_ENABLED === 'true'}
+          turnstileSiteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
         />
       </div>
     </main>

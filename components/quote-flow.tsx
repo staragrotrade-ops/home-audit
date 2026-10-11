@@ -6,11 +6,12 @@ import { PRICE_GUIDE_BANDS } from '@/lib/booking-options'
 import { earliestInstantDate } from '@/lib/pricing'
 import { CONTACT_EMAIL } from '@/lib/site'
 import { currentVisitId, trackVisitorEvent } from '@/lib/visitor-analytics'
+import { Turnstile } from '@/components/turnstile'
 
 type ServiceFamily = QuoteRequest['service_family'] | ''
 type Draft = Omit<
   QuoteRequest,
-  'service_family' | 'privacy_consent' | 'intake_mode' | 'analytics_session_id'
+  'service_family' | 'privacy_consent' | 'intake_mode' | 'analytics_session_id' | 'turnstile_token'
 > & {
   service_family: ServiceFamily
   privacy_consent: boolean
@@ -145,7 +146,7 @@ function track(event: keyof typeof VISITOR_EVENTS, params: { service_family: str
   }
 }
 
-function requestBody(draft: Draft, intakeMode: 'submit' | 'email_handoff') {
+function requestBody(draft: Draft, intakeMode: 'submit' | 'email_handoff', turnstileToken = '') {
   return JSON.stringify({
     ...draft,
     email: draft.email.trim(),
@@ -154,6 +155,7 @@ function requestBody(draft: Draft, intakeMode: 'submit' | 'email_handoff') {
     agent_email: (draft.agent_email || '').trim(),
     intake_mode: intakeMode,
     analytics_session_id: currentVisitId(),
+    turnstile_token: turnstileToken,
   })
 }
 
@@ -261,10 +263,15 @@ function buildEmailHref(draft: Draft, stageLabels: string) {
 export function QuoteFlow({
   initialService,
   submissionEnabled,
+  turnstileSiteKey = '',
 }: {
   initialService: ServiceFamily
   submissionEnabled: boolean
+  turnstileSiteKey?: string
 }) {
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const [turnstileReset, setTurnstileReset] = useState(0)
+  const needsTurnstile = submissionEnabled && Boolean(turnstileSiteKey)
   const [step, setStep] = useState(0)
   const [draft, setDraft] = useState<Draft>({
     ...emptyDraft,
@@ -453,7 +460,7 @@ export function QuoteFlow({
       const response = await fetch('/api/quote', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: requestBody(draft, 'submit'),
+        body: requestBody(draft, 'submit', turnstileToken),
       })
       const result = (await response.json().catch(() => ({}))) as {
         error?: string
@@ -464,6 +471,8 @@ export function QuoteFlow({
       }
 
       if (!response.ok) {
+        // A Turnstile token works once: get a new one before trying again.
+        if (needsTurnstile) setTurnstileReset((value) => value + 1)
         const fields = Object.keys(result.issues || {})
         if (fields.length > 0) {
           const firstStep = Math.min(...fields.map((field) => fieldInfo[field]?.step ?? 3))
@@ -968,6 +977,10 @@ export function QuoteFlow({
           </div>
         )}
 
+        {step === 3 && needsTurnstile && (
+          <Turnstile siteKey={turnstileSiteKey} onToken={setTurnstileToken} resetKey={turnstileReset} />
+        )}
+
         <div className="quote-actions">
           {step > 0 ? (
             <button className="back-button" type="button" onClick={() => setStep((current) => current - 1)}>
@@ -983,7 +996,12 @@ export function QuoteFlow({
               Continue
             </button>
           ) : (
-            <button className="button" type="button" onClick={submit} disabled={submitting}>
+            <button
+              className="button"
+              type="button"
+              onClick={submit}
+              disabled={submitting || (needsTurnstile && !turnstileToken)}
+            >
               {submitting
                 ? 'Checking…'
                 : submissionEnabled
