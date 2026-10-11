@@ -99,9 +99,31 @@ export function reviewRequestSms(firstName: string, reviewUrl: string) {
 }
 
 // The buyer's situation is never included: it is private to the buyer.
-export function agentSms(input: { agentName: string; address: string; dateHint: string }) {
+export function agentSms(input: { agentName: string; address: string; dateHint: string; service: string }) {
   const greeting = input.agentName ? `Hi ${input.agentName.split(' ')[0]}` : 'Hi'
-  return `${greeting}, this is Home Audit. We have been engaged to do a building and pest inspection at ${input.address}. Could you let us know a time that suits for access${input.dateHint ? `, ideally ${input.dateHint}` : ''}? Thank you.`
+  return `${greeting}, this is Home Audit. We have been engaged to do a ${input.service.toLowerCase()} at ${input.address}. Could you let us know a time that suits for access${input.dateHint ? `, ideally ${input.dateHint}` : ''}? Thank you.`
+}
+
+export function ownerPaymentProblemEmail(input: {
+  to: string
+  reference: string
+  problem: 'duplicate' | 'mismatch'
+  amountCents: number
+  sessionId: string
+}): EmailMessage {
+  return {
+    to: input.to,
+    subject: `Check payment – ${input.reference}`,
+    text: `${input.reference}
+
+${
+  input.problem === 'duplicate'
+    ? `This job was already paid, and a second payment of ${formatAud(input.amountCents)} came in. Refund it in Stripe.`
+    : `A payment of ${formatAud(input.amountCents)} does not match the current price of this job. The job was not marked paid. Check it in Stripe and in the dashboard.`
+}
+
+Stripe Checkout session: ${input.sessionId}`,
+  }
 }
 
 export function ownerNewRequestEmail(input: {

@@ -10,6 +10,7 @@ type Props = {
   paid: boolean
   quoteStatus: string
   address: string
+  service: string
   dateHint: string
   customerFirstName: string
   customerMobile: string
@@ -93,7 +94,12 @@ export function JobWorkflow(props: Props) {
     )
   }
 
-  const agentText = agentSms({ agentName: props.agent.name, address: props.address, dateHint: props.dateHint })
+  const agentText = agentSms({
+    agentName: props.agent.name,
+    address: props.address,
+    dateHint: props.dateHint,
+    service: props.service,
+  })
   const reviewText = props.reviewUrl ? reviewRequestSms(props.customerFirstName, props.reviewUrl) : ''
 
   return (

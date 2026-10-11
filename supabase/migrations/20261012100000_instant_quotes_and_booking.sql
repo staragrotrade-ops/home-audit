@@ -11,6 +11,7 @@ alter table public.jobs
   add column if not exists pricing_decision text,
   add column if not exists pricing_reasons text[] not null default '{}',
   add column if not exists paid_at timestamptz,
+  add column if not exists paid_notified_at timestamptz,
   add column if not exists buyer_situation text,
   add column if not exists access_choice text,
   add column if not exists access_other_name text,
@@ -79,22 +80,33 @@ create table public.stripe_events (
 alter table public.stripe_events enable row level security;
 revoke all on table public.stripe_events from anon, authenticated;
 
--- Marks a job paid from a verified Stripe Checkout session. Returns true only
--- the first time, so emails are sent once.
+-- Records a verified, paid Stripe Checkout session. Returns:
+--   'paid'      the job is now paid (first payment)
+--   'already'   this session was recorded before (Stripe retry)
+--   'duplicate' the job was already paid by another session: refund it
+--   'mismatch'  the amount differs from the job's current price: check it
+-- Only 'paid' changes the job. Money received in the other cases is kept on
+-- the payment row and in the audit log (Payment amount mismatch / duplicate)
+-- for the owner to resolve.
 create or replace function public.mark_job_paid(
   p_job_id uuid,
   p_session_id text,
   p_amount_cents integer,
   p_payment_intent_id text default null
 )
-returns boolean
+returns text
 language plpgsql
 security definer
 set search_path = ''
 as $$
 declare
   v_payment public.payments%rowtype;
+  v_job public.jobs%rowtype;
+  v_outcome text;
 begin
+  select * into v_job from public.jobs where id = p_job_id for update;
+  if not found then raise exception 'Job not found.'; end if;
+
   select * into v_payment
   from public.payments
   where checkout_session_id = p_session_id
@@ -102,33 +114,51 @@ begin
 
   if not found then raise exception 'Payment record not found.'; end if;
   if v_payment.job_id <> p_job_id then raise exception 'Payment job mismatch.'; end if;
-  if v_payment.amount_cents is distinct from p_amount_cents then
-    raise exception 'Payment amount mismatch.';
+  if v_payment.status in ('paid', 'paid_duplicate', 'paid_mismatch') then return 'already'; end if;
+
+  if v_job.payment_status = 'paid' then
+    v_outcome := 'duplicate';
+  elsif v_payment.amount_cents is distinct from p_amount_cents
+    or round(coalesce(v_job.quote_total, 0) * 100)::integer <> p_amount_cents then
+    v_outcome := 'mismatch';
+  else
+    v_outcome := 'paid';
   end if;
-  if v_payment.status = 'paid' then return false; end if;
 
   update public.payments set
-    status = 'paid',
+    status = case v_outcome
+      when 'paid' then 'paid'
+      when 'duplicate' then 'paid_duplicate'
+      else 'paid_mismatch'
+    end,
     provider_payment_id = coalesce(p_payment_intent_id, provider_payment_id)
   where id = v_payment.id;
 
-  update public.jobs set
-    payment_status = 'paid',
-    paid_at = coalesce(paid_at, now()),
-    quote_status = 'accepted',
-    status = case
-      when status in ('quote_received', 'awaiting_customer', 'awaiting_payment') then 'scheduling'
-      else status
-    end
-  where id = p_job_id;
+  if v_outcome = 'paid' then
+    update public.jobs set
+      payment_status = 'paid',
+      paid_at = coalesce(paid_at, now()),
+      quote_status = 'accepted',
+      status = case
+        when status in ('quote_received', 'awaiting_customer', 'awaiting_payment') then 'scheduling'
+        else status
+      end
+    where id = p_job_id;
+  end if;
 
   insert into public.audit_events (job_id, event_type, actor_type, event_data)
   values (
-    p_job_id, 'payment_received', 'stripe',
+    p_job_id,
+    case v_outcome
+      when 'paid' then 'payment_received'
+      when 'duplicate' then 'duplicate_payment'
+      else 'payment_amount_mismatch'
+    end,
+    'stripe',
     jsonb_build_object('session_id', p_session_id, 'amount_cents', p_amount_cents)
   );
 
-  return true;
+  return v_outcome;
 end;
 $$;
 

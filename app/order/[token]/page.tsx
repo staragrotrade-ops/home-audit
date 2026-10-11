@@ -5,10 +5,9 @@ import { jobIdForToken } from '@/lib/access-tokens'
 import { INSPECTION_TYPE_LABELS, STAGE_LABELS } from '@/lib/admin-format'
 import { ACCESS_CHOICE_LABELS, BUYER_SITUATION_LABELS, type AccessChoice, type BuyerSituation } from '@/lib/booking-options'
 import { inspectionDateLabel } from '@/lib/order-emails'
-import { addressOf, centsOf, isPayable, loadOrder, settleCheckoutSession, type OrderJob } from '@/lib/orders'
+import { addressOf, centsOf, instantPriceExpired, isPayable, loadOrder, type OrderJob } from '@/lib/orders'
 import { formatAud } from '@/lib/pricing'
 import { CONTACT_EMAIL } from '@/lib/site'
-import { getStripe } from '@/lib/stripe-server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export const dynamic = 'force-dynamic'
@@ -45,32 +44,16 @@ export default async function OrderPage({
   searchParams,
 }: {
   params: Promise<{ token: string }>
-  searchParams: Promise<{ session_id?: string }>
+  searchParams: Promise<{ pending?: string }>
 }) {
   const { token } = await params
-  const { session_id: sessionId } = await searchParams
+  const { pending } = await searchParams
   const supabase = getSupabaseAdmin()
   if (!supabase) return <Expired />
 
   const jobId = await jobIdForToken(supabase, token)
-  let job = jobId ? await loadOrder(supabase, jobId) : null
+  const job = jobId ? await loadOrder(supabase, jobId) : null
   if (!job) return <Expired />
-
-  // Returning from Stripe: confirm the payment straight away instead of
-  // waiting for the webhook. The session must belong to this job.
-  if (sessionId && job.payment_status !== 'paid' && /^cs_[A-Za-z0-9_]+$/.test(sessionId)) {
-    try {
-      const session = await getStripe().checkout.sessions.retrieve(sessionId)
-      if (session.metadata?.job_id === job.id) {
-        await settleCheckoutSession(supabase, session)
-        job = (await loadOrder(supabase, job.id)) || job
-      }
-    } catch (error) {
-      console.error('order_session_check_failed', {
-        message: error instanceof Error ? error.message : 'unknown',
-      })
-    }
-  }
 
   const customer = job.customer_snapshot || {}
   const paid = job.payment_status === 'paid'

@@ -761,6 +761,7 @@ export default async function AdminPage({
                       paid={job.payment_status === 'paid'}
                       quoteStatus={job.quote_status}
                       address={[property.address, property.suburb].filter(Boolean).join(', ')}
+                      service={`${serviceLabel(job)} inspection`.replace(/ inspection inspection$/, ' inspection')}
                       dateHint={[job.preferred_date_1, job.preferred_date_2]
                         .filter((value): value is string => Boolean(value))
                         .map(formatDate)

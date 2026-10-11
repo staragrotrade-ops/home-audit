@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server'
 import { jobIdForToken } from '@/lib/access-tokens'
 import { INSPECTION_TYPE_LABELS } from '@/lib/admin-format'
-import { addressOf, centsOf, isPayable, loadOrder } from '@/lib/orders'
+import {
+  addressOf,
+  centsOf,
+  expireOpenSessions,
+  instantPriceExpired,
+  isPayable,
+  loadOrder,
+} from '@/lib/orders'
 import { isSameOriginMutation } from '@/lib/request-guard'
 import { getStripe, STRIPE_SITE_KEY } from '@/lib/stripe-server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
@@ -21,11 +28,28 @@ export async function POST(request: Request, context: { params: Promise<{ token:
     const jobId = await jobIdForToken(supabase, token)
     const job = jobId ? await loadOrder(supabase, jobId) : null
     if (!job) return NextResponse.json({ error: 'This link has expired.' }, { status: 404 })
+    // The instant price lapses once the date is less than 3 business days away.
+    if (instantPriceExpired(job) && job.payment_status !== 'paid') {
+      await supabase
+        .from('jobs')
+        .update({
+          quote_status: 'manual_review',
+          pricing_decision: 'manual',
+          pricing_reasons: [...(job.pricing_reasons || []), 'Date now within 3 business days'],
+        })
+        .eq('id', job.id)
+      return NextResponse.json(
+        { error: 'The date is now too close for the online price. We will check availability and email you.' },
+        { status: 409 },
+      )
+    }
     if (!isPayable(job)) {
       return NextResponse.json({ error: 'This order cannot be paid online.' }, { status: 409 })
     }
 
     const stripe = getStripe()
+    // Only one payment page may be open per job.
+    await expireOpenSessions(supabase, stripe, job.id)
     const amount = centsOf(job.quote_total)
     const origin = new URL(request.url).origin
     const service =
@@ -57,8 +81,9 @@ export async function POST(request: Request, context: { params: Promise<{ token:
         description: `Home Audit ${job.public_reference}`,
         statement_descriptor_suffix: 'HOME AUDIT',
       },
-      success_url: `${origin}/order/${token}?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/order/${token}`,
+      // The private order link is kept out of Stripe (the account is shared).
+      success_url: `${origin}/order/return?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/order/cancelled`,
     })
 
     const { error } = await supabase.from('payments').insert({
