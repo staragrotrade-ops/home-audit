@@ -160,6 +160,24 @@ export function JobWorkflow(props: Props) {
               Open listing
             </a>
           )}
+          <button
+            className="admin-button"
+            type="button"
+            onClick={() => {
+              const prompt = [
+                `Find the sale listing for ${props.address}${props.agent.listingUrl ? ` (listing: ${props.agent.listingUrl})` : ''} on realestate.com.au.`,
+                'Tell me: the selling agent name, agency, mobile number and email,',
+                'and the price guide. In Victoria also check the Statement of Information for the indicative selling price.',
+                'Say if the price guide is over $1.5 million.',
+              ].join(' ')
+              void navigator.clipboard.writeText(prompt).then(
+                () => setMessage('AI instruction copied. Paste it into Claude in your browser.'),
+                () => setMessage('Could not copy.'),
+              )
+            }}
+          >
+            Copy AI listing check
+          </button>
           {props.agent.phone && (
             <a
               className="admin-button primary"
