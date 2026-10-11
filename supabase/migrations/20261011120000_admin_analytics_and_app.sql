@@ -48,6 +48,9 @@ create table private.rate_limits (
   primary key (bucket, client_hash, window_start)
 );
 
+-- Not reachable through the API (private schema); RLS is an extra guard.
+alter table private.rate_limits enable row level security;
+
 create or replace function public.consume_rate_limit(
   p_bucket text,
   p_client_hash text,
