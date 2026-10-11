@@ -72,6 +72,10 @@ export const quoteRequestSchema = z
       error: 'Please confirm you have read the privacy notice.',
     }),
     website: z.string().max(200).default(''),
+    // How the visitor finished the form: the online submission, or the
+    // email-app handoff used while online submission is switched off.
+    intake_mode: z.enum(['submit', 'email_handoff']).default('submit'),
+    analytics_session_id: z.union([z.literal(''), z.uuid()]).default(''),
   })
   .superRefine((value, context) => {
     if (value.service_family === 'existing_home' && !value.inspection_type) {

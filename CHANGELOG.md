@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.7.0 — 2026-10-11
+
+Backend for the admin dashboard, first-party visitor statistics and the
+future inspector app, modelled on the 137B site but without the 137B scope
+and pricing logic.
+
+- **Admin** (`/admin`): shared password with an HMAC-signed cookie (12 hours,
+  or 90 days on a trusted device), login rate limit, noindex. Stays 404 until
+  `ADMIN_DASHBOARD_PASSWORD` and `ADMIN_SESSION_SECRET` are set.
+  - Visitors: visits, page views, time on site, quote starts and requests,
+    phone/email taps, daily chart, sources (Google, ChatGPT, Facebook…),
+    top pages, devices, countries, recent visits with the pages viewed.
+  - Quotes & jobs: open / closed / archived lists, search, customer and
+    property details, status, inspector assignment, booking time, internal
+    notes, archive and test flags, issued reports, and the pages a customer
+    viewed before asking.
+  - Inspectors: create app logins, reset passwords, disable.
+  - "Stop counting this device" for the owner's own browsers.
+- **Visitor statistics**: `VisitorTracker` sends page views and active time
+  (visible and focused) to `/api/analytics/*`. No cookie, no IP address;
+  bots, previews and the owner's devices are skipped.
+- **Quote form**: while online submission stays off, the email-app handoff
+  also saves a copy of the request for the dashboard. The memory-only rate
+  limit is backed by a shared database limit.
+- **Inspector app API** (`/api/app/*`, see `docs/APP_API.md`): Supabase Auth
+  bearer tokens, assigned-jobs feed, progress updates, private PDF report
+  upload with SHA-256 and versioning.
+- **Database**: migration `20261011120000_admin_analytics_and_app.sql`
+  (analytics tables and summary function, staff, assignments, RLS, report
+  storage). Tested against PostgreSQL 16 with Supabase-style roles.
+- Privacy notice updated for the statistics and the saved form copy.
+- Setup steps: `docs/BACKEND_SETUP.md`.
+
 ## 0.6.7 — 2026-10-09
 
 - Turned on Vercel Web Analytics (page views, visitors, referrers, countries,

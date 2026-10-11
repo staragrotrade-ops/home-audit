@@ -3,9 +3,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { QuoteRequest } from '@/lib/quote-schema'
 import { CONTACT_EMAIL } from '@/lib/site'
+import { currentVisitId, trackVisitorEvent } from '@/lib/visitor-analytics'
 
 type ServiceFamily = QuoteRequest['service_family'] | ''
-type Draft = Omit<QuoteRequest, 'service_family' | 'privacy_consent'> & {
+type Draft = Omit<
+  QuoteRequest,
+  'service_family' | 'privacy_consent' | 'intake_mode' | 'analytics_session_id'
+> & {
   service_family: ServiceFamily
   privacy_consent: boolean
 }
@@ -118,12 +122,33 @@ const fieldInfo: Record<string, { label: string; step: number }> = {
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const mobilePattern = /^[0-9+() -]{8,40}$/
 
-function track(event: string, params: Record<string, unknown> = {}) {
+const VISITOR_EVENTS = {
+  quote_start: 'quote_started',
+  quote_email_handoff: 'quote_email_handoff',
+  quote_submit: 'quote_submitted',
+} as const
+
+function track(event: keyof typeof VISITOR_EVENTS, params: { service_family: string }) {
   try {
     window.gtag?.('event', event, params)
+    trackVisitorEvent(VISITOR_EVENTS[event], {
+      metadata: { service_family: params.service_family },
+    })
   } catch {
     // Analytics must never interrupt the form.
   }
+}
+
+function requestBody(draft: Draft, intakeMode: 'submit' | 'email_handoff') {
+  return JSON.stringify({
+    ...draft,
+    email: draft.email.trim(),
+    mobile: draft.mobile.trim(),
+    conveyancer_email: (draft.conveyancer_email || '').trim(),
+    agent_email: (draft.agent_email || '').trim(),
+    intake_mode: intakeMode,
+    analytics_session_id: currentVisitId(),
+  })
 }
 
 function captureAttribution(): Attribution {
@@ -380,6 +405,13 @@ export function QuoteFlow({
 
     if (!submissionEnabled) {
       track('quote_email_handoff', { service_family: draft.service_family })
+      // Keep a copy for the admin dashboard in case the email is never sent.
+      void fetch('/api/quote', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: requestBody(draft, 'email_handoff'),
+        keepalive: true,
+      }).catch(() => undefined)
       window.location.href = buildEmailHref(draft, stageLabels)
       setStatus({
         type: 'info',
@@ -394,13 +426,7 @@ export function QuoteFlow({
       const response = await fetch('/api/quote', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          ...draft,
-          email: draft.email.trim(),
-          mobile: draft.mobile.trim(),
-          conveyancer_email: (draft.conveyancer_email || '').trim(),
-          agent_email: (draft.agent_email || '').trim(),
-        }),
+        body: requestBody(draft, 'submit'),
       })
       const result = (await response.json().catch(() => ({}))) as {
         error?: string

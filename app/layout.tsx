@@ -3,6 +3,7 @@ import { Analytics } from '@/components/analytics'
 import { JsonLd } from '@/components/json-ld'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
+import { VisitorTracker } from '@/components/visitor-tracker'
 import {
   COMPANY_ACN,
   COMPANY_NAME,
@@ -129,6 +130,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteFooter />
         <JsonLd data={structuredData} />
         <Analytics />
+        <VisitorTracker />
       </body>
     </html>
   )
