@@ -78,24 +78,47 @@ export function addressOf(job: OrderJob) {
   return [property.address, property.suburb, property.postcode].filter(Boolean).join(', ')
 }
 
-// Expires any unpaid Checkout sessions for a job, so an old payment page
-// cannot be completed after a new one is opened or the price changes.
-export async function expireOpenSessions(supabase: SupabaseClient, stripe: Stripe, jobId: string) {
+// Closes every payment page still open for a job, so an old page cannot be
+// paid after a new one is opened or the price changes. Returns 'paid' or
+// 'processing' when an open page has in fact already been paid (the webhook
+// has not arrived yet): no new payment may be started then.
+export async function expireOpenSessions(
+  supabase: SupabaseClient,
+  stripe: Stripe,
+  jobId: string,
+): Promise<'clear' | 'paid' | 'processing'> {
   const { data } = await supabase
     .from('payments')
-    .select('id,checkout_session_id')
+    .select('id,checkout_session_id,created_at')
     .eq('job_id', jobId)
     .eq('status', 'pending')
-    .not('checkout_session_id', 'is', null)
+  let result: 'clear' | 'paid' | 'processing' = 'clear'
   for (const payment of data || []) {
-    try {
-      await stripe.checkout.sessions.expire(payment.checkout_session_id as string)
-    } catch {
-      // Already completed or expired: the webhook decides what happened.
-      continue
+    const sessionId = payment.checkout_session_id as string | null
+    // A row without a session that is less than two minutes old is another
+    // request still opening its page: leave it, and the new insert is refused.
+    if (!sessionId && Date.now() - new Date(payment.created_at as string).getTime() < 120_000) continue
+    if (sessionId) {
+      try {
+        await stripe.checkout.sessions.expire(sessionId)
+      } catch {
+        // Expiring fails when the page was completed: find out how.
+        const session = await stripe.checkout.sessions.retrieve(sessionId)
+        if (session.payment_status === 'paid') {
+          await settleCheckoutSession(supabase, session)
+          result = 'paid'
+          continue
+        }
+        if (session.status === 'complete') {
+          // Paid by a method that clears later; the webhook will finish it.
+          result = result === 'paid' ? 'paid' : 'processing'
+          continue
+        }
+      }
     }
-    await supabase.from('payments').update({ status: 'expired' }).eq('id', payment.id)
+    await supabase.from('payments').update({ status: 'expired' }).eq('id', payment.id).eq('status', 'pending')
   }
+  return result
 }
 
 // Sends the "paid" emails once per job. The claim happens after the link is
@@ -157,6 +180,7 @@ export async function settleCheckoutSession(supabase: SupabaseClient, session: S
     p_session_id: session.id,
     p_amount_cents: session.amount_total,
     p_payment_intent_id: typeof session.payment_intent === 'string' ? session.payment_intent : null,
+    p_payment_id: /^[0-9a-f-]{36}$/.test(session.metadata?.payment_id || '') ? session.metadata!.payment_id : null,
   })
   if (error) throw new Error(error.message)
 

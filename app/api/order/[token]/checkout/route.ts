@@ -9,7 +9,11 @@ import {
   isPayable,
   loadOrder,
 } from '@/lib/orders'
+import { ownerEmail, sendEmail } from '@/lib/email'
+import { ownerNewRequestEmail } from '@/lib/order-emails'
+import { ORDER_RETURN_COOKIE, orderReturnCookieOptions, orderReturnCookieValue } from '@/lib/order-return'
 import { isSameOriginMutation } from '@/lib/request-guard'
+import { SITE_URL } from '@/lib/site'
 import { getStripe, STRIPE_SITE_KEY } from '@/lib/stripe-server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
@@ -30,14 +34,29 @@ export async function POST(request: Request, context: { params: Promise<{ token:
     if (!job) return NextResponse.json({ error: 'This link has expired.' }, { status: 404 })
     // The instant price lapses once the date is less than 3 business days away.
     if (instantPriceExpired(job) && job.payment_status !== 'paid') {
+      const reasons = [...(job.pricing_reasons || []), 'Date now within 3 business days']
       await supabase
         .from('jobs')
         .update({
           quote_status: 'manual_review',
           pricing_decision: 'manual',
-          pricing_reasons: [...(job.pricing_reasons || []), 'Date now within 3 business days'],
+          pricing_reasons: reasons,
+          status: job.status === 'awaiting_payment' ? 'quote_received' : job.status,
         })
         .eq('id', job.id)
+      if (!job.is_test) {
+        await sendEmail(
+          ownerNewRequestEmail({
+            to: ownerEmail(),
+            reference: job.public_reference,
+            address: addressOf(job),
+            decision: 'manual',
+            reasons,
+            adminUrl: `${SITE_URL}/admin?q=${encodeURIComponent(job.public_reference)}#jobs`,
+          }),
+          { supabase, jobId: job.id, templateKey: 'owner_review_needed' },
+        )
+      }
       return NextResponse.json(
         { error: 'The date is now too close for the online price. We will check availability and email you.' },
         { status: 409 },
@@ -48,17 +67,57 @@ export async function POST(request: Request, context: { params: Promise<{ token:
     }
 
     const stripe = getStripe()
-    // Only one payment page may be open per job.
-    await expireOpenSessions(supabase, stripe, job.id)
+    // Only one payment page may be open per job. If an open page turns out to
+    // be paid already, never start a second payment.
+    const previous = await expireOpenSessions(supabase, stripe, job.id)
+    if (previous !== 'clear') {
+      return NextResponse.json(
+        {
+          error:
+            previous === 'paid'
+              ? 'This order is already paid. Refresh the page.'
+              : 'A payment for this order is still being processed. Please check again shortly.',
+        },
+        { status: 409 },
+      )
+    }
     const amount = centsOf(job.quote_total)
+
+    // Record the payment first; the unique index allows one pending payment
+    // per job, so a second click at the same moment is refused.
+    const { data: payment, error: paymentError } = await supabase
+      .from('payments')
+      .insert({
+        job_id: job.id,
+        provider: 'stripe',
+        status: 'pending',
+        amount: amount / 100,
+        amount_cents: amount,
+        currency: 'aud',
+      })
+      .select('id')
+      .single()
+    if (paymentError || !payment) {
+      return NextResponse.json(
+        { error: 'A payment page is already being opened. Please wait a moment and try again.' },
+        { status: 409 },
+      )
+    }
     const origin = new URL(request.url).origin
     const service =
       job.service_family === 'new_home'
         ? 'New home inspection'
         : `${INSPECTION_TYPE_LABELS[job.inspection_type || ''] || 'Building'} inspection`
-    const metadata = { site_key: STRIPE_SITE_KEY, job_id: job.id, reference: job.public_reference }
+    const metadata = {
+      site_key: STRIPE_SITE_KEY,
+      job_id: job.id,
+      payment_id: payment.id as string,
+      reference: job.public_reference,
+    }
 
-    const session = await stripe.checkout.sessions.create({
+    let session: Awaited<ReturnType<typeof stripe.checkout.sessions.create>>
+    try {
+      session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: [
         {
@@ -84,21 +143,19 @@ export async function POST(request: Request, context: { params: Promise<{ token:
       // The private order link is kept out of Stripe (the account is shared).
       success_url: `${origin}/order/return?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/order/cancelled`,
-    })
+      }, { idempotencyKey: `home-audit-${payment.id}` })
+    } catch (error) {
+      await supabase.from('payments').update({ status: 'failed' }).eq('id', payment.id)
+      throw error
+    }
 
-    const { error } = await supabase.from('payments').insert({
-      job_id: job.id,
-      provider: 'stripe',
-      status: 'pending',
-      amount: amount / 100,
-      amount_cents: amount,
-      currency: 'aud',
-      checkout_session_id: session.id,
-    })
-    if (error) throw new Error(error.message)
+    // If this save fails, the webhook still finds the row by payment_id.
+    await supabase.from('payments').update({ checkout_session_id: session.id }).eq('id', payment.id)
     if (!session.url) throw new Error('Stripe did not return a payment page.')
 
-    return NextResponse.json({ url: session.url })
+    const response = NextResponse.json({ url: session.url })
+    response.cookies.set(ORDER_RETURN_COOKIE, orderReturnCookieValue(job.id), orderReturnCookieOptions)
+    return response
   } catch (error) {
     console.error('checkout_failed', { message: error instanceof Error ? error.message : 'unknown' })
     return NextResponse.json(

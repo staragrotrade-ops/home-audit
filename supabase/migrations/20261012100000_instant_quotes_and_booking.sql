@@ -71,6 +71,12 @@ alter table public.payments
   add column if not exists checkout_session_id text unique,
   add column if not exists amount_cents integer;
 
+-- At most one payment page in progress per job: the row is created before
+-- the Stripe session, so two quick clicks cannot open two pages.
+create unique index payments_one_pending_per_job
+  on public.payments (job_id)
+  where status = 'pending';
+
 create table public.stripe_events (
   event_id text primary key,
   event_type text not null,
@@ -92,7 +98,8 @@ create or replace function public.mark_job_paid(
   p_job_id uuid,
   p_session_id text,
   p_amount_cents integer,
-  p_payment_intent_id text default null
+  p_payment_intent_id text default null,
+  p_payment_id uuid default null
 )
 returns text
 language plpgsql
@@ -111,6 +118,18 @@ begin
   from public.payments
   where checkout_session_id = p_session_id
   for update;
+
+  -- The session id is saved just after Stripe creates the session. If that
+  -- save failed, find the row from the payment id carried in the metadata.
+  if not found and p_payment_id is not null then
+    select * into v_payment
+    from public.payments
+    where id = p_payment_id and job_id = p_job_id and checkout_session_id is null
+    for update;
+    if found then
+      update public.payments set checkout_session_id = p_session_id where id = v_payment.id;
+    end if;
+  end if;
 
   if not found then raise exception 'Payment record not found.'; end if;
   if v_payment.job_id <> p_job_id then raise exception 'Payment job mismatch.'; end if;
@@ -162,8 +181,8 @@ begin
 end;
 $$;
 
-revoke all on function public.mark_job_paid(uuid, text, integer, text) from public, anon, authenticated;
-grant execute on function public.mark_job_paid(uuid, text, integer, text) to service_role;
+revoke all on function public.mark_job_paid(uuid, text, integer, text, uuid) from public, anon, authenticated;
+grant execute on function public.mark_job_paid(uuid, text, integer, text, uuid) to service_role;
 
 -- 4. Inspector app feed: booking details the inspector needs ----------------
 

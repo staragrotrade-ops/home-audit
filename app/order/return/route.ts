@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { issueOrderToken } from '@/lib/access-tokens'
+import { isOrderReturnFor } from '@/lib/order-return'
 import { settleCheckoutSession } from '@/lib/orders'
 import { getStripe, STRIPE_SITE_KEY } from '@/lib/stripe-server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
@@ -29,6 +30,14 @@ export async function GET(request: Request) {
       return NextResponse.redirect(expired, 303)
     }
     const outcome = await settleCheckoutSession(supabase, session)
+    // Only the browser that opened this payment page gets the private order
+    // link. Anyone else holding the session id sees a plain confirmation.
+    if (!isOrderReturnFor(request, jobId)) {
+      return NextResponse.redirect(
+        new URL(`/order/cancelled?${outcome === 'paid' ? 'paid=1' : 'expired=1'}`, url.origin),
+        303,
+      )
+    }
     const token = await issueOrderToken(supabase, jobId)
     const next = new URL(`/order/${token}`, url.origin)
     if (outcome === 'pending') next.searchParams.set('pending', '1')

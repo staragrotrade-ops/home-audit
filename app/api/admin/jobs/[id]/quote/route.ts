@@ -4,7 +4,9 @@ import { adminError, adminJson, requireAdmin } from '@/lib/admin-api'
 import { audit, jobAddress, loadJobContact } from '@/lib/admin-jobs'
 import { sendEmail } from '@/lib/email'
 import { quoteReadyEmail } from '@/lib/order-emails'
+import { expireOpenSessions } from '@/lib/orders'
 import { gstFor } from '@/lib/pricing'
+import { getStripe } from '@/lib/stripe-server'
 import { readJsonBody } from '@/lib/request-guard'
 
 export const runtime = 'nodejs'
@@ -26,6 +28,16 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     const job = await loadJobContact(supabase, id)
     if (job.payment_status === 'paid') throw new Error('This job is already paid.')
 
+    // Close any payment page still open at the old price first.
+    const previous = await expireOpenSessions(supabase, getStripe(), id)
+    if (previous !== 'clear') {
+      throw new Error(
+        previous === 'paid'
+          ? 'The customer has just paid the earlier price. Refresh the page.'
+          : 'A payment at the earlier price is still processing. Check Stripe before changing the price.',
+      )
+    }
+
     const subtotalCents = Math.round(input.priceExGst * 100)
     const gstCents = gstFor(subtotalCents)
     const totalCents = subtotalCents + gstCents
@@ -39,6 +51,8 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
         quote_status: 'quoted',
         status: 'awaiting_payment',
         pricing_rule_version: 'manual',
+        // A reviewed price is not re-checked against the 3-business-day rule.
+        pricing_decision: 'manual',
       })
       .eq('id', id)
     if (error) throw new Error(error.message)

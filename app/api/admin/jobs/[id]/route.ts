@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { adminError, adminJson, requireAdmin } from '@/lib/admin-api'
+import { sendBookingDateEmail } from '@/lib/booking-notify'
 import { JOB_STATUSES } from '@/lib/job-status'
 import { readJsonBody } from '@/lib/request-guard'
 
@@ -34,6 +35,12 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     const { id } = await context.params
     z.uuid().parse(id)
     const input = schema.parse(await readJsonBody(request, 10_000))
+
+    const { data: before } = await supabase
+      .from('jobs')
+      .select('confirmed_start,payment_status')
+      .eq('id', id)
+      .maybeSingle()
 
     const update: Record<string, unknown> = {}
     if (input.status) update.status = input.status
@@ -77,7 +84,27 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       event_data: input,
     })
 
-    return adminJson({ ok: true })
+    // A new or changed booking date is emailed to a paid customer straight
+    // away (date only). A change of time on the same day is not re-sent.
+    let bookingEmail: 'sent' | 'not_sent' | 'unchanged' = 'unchanged'
+    let bookingEmailError = ''
+    if (input.confirmedStart && before?.payment_status === 'paid') {
+      const day = (iso: string | null) =>
+        iso
+          ? new Intl.DateTimeFormat('en-CA', { timeZone: 'Australia/Melbourne' }).format(new Date(iso))
+          : ''
+      if (day(input.confirmedStart) !== day(before.confirmed_start)) {
+        try {
+          await sendBookingDateEmail(supabase, id)
+          bookingEmail = 'sent'
+        } catch (error) {
+          bookingEmail = 'not_sent'
+          bookingEmailError = error instanceof Error ? error.message : 'Email failed.'
+        }
+      }
+    }
+
+    return adminJson({ ok: true, bookingEmail, bookingEmailError })
   } catch (error) {
     return adminError(error, 'Unable to update the job.')
   }

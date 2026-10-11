@@ -179,3 +179,27 @@ test('the online quote form needs a passed Turnstile check', async () => {
   const flow = await source('components/quote-flow.tsx')
   assert.match(flow, /disabled=\{submitting \|\| \(needsTurnstile && !turnstileToken\)\}/)
 })
+
+test('payments cannot be doubled and order links stay private', async () => {
+  const sql = await source('supabase/migrations/20261012100000_instant_quotes_and_booking.sql')
+  assert.match(sql, /create unique index payments_one_pending_per_job/)
+  assert.match(sql, /p_payment_id uuid default null/)
+
+  const checkout = await source('app/api/order/[token]/checkout/route.ts')
+  assert.match(checkout, /if \(previous !== 'clear'\)/)
+  assert.match(checkout, /orderReturnCookieValue\(job\.id\)/)
+  assert.match(checkout, /idempotencyKey: `home-audit-\$\{payment\.id\}`/)
+
+  const back = await source('app/order/return/route.ts')
+  assert.match(back, /if \(!isOrderReturnFor\(request, jobId\)\)/)
+
+  const manual = await source('app/api/admin/jobs/[id]/quote/route.ts')
+  assert.match(manual, /expireOpenSessions\(supabase, getStripe\(\), id\)/)
+  assert.match(manual, /pricing_decision: 'manual'/)
+
+  const ga = await source('components/analytics.tsx')
+  assert.match(ga, /\(order\|admin\)/)
+
+  const patch = await source('app/api/admin/jobs/[id]/route.ts')
+  assert.match(patch, /sendBookingDateEmail\(supabase, id\)/)
+})

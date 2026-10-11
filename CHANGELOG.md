@@ -32,6 +32,14 @@ Instant quotes, online payment and the booking workflow.
   `/order/return`); a second payment or a wrong amount is not applied and the
   owner is emailed to refund or check it; an instant price lapses if the date
   gets closer than 3 business days before payment.
+- Second review fixes: a payment row is created before the Stripe page, with
+  one pending payment per job, so double clicks or a closed tab cannot charge
+  twice; an already-paid page is detected before a new one opens; the owner's
+  new price closes any page still open at the old price and is never reset
+  by the 3-day rule; only the browser that paid is taken back to the private
+  order page; Google Analytics never sees order links; the booked date is
+  emailed automatically when saved; the owner is told when an instant price
+  lapses into review.
 
 ## 0.7.0 — 2026-10-11
 

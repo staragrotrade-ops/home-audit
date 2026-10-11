@@ -47,8 +47,11 @@ function GoogleAnalytics() {
         {`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 window.gtag = gtag;
-gtag('js', new Date());
-gtag('config', '${measurementId}');`}
+// Private order links and admin pages are never sent to Google.
+if (!/^\/(order|admin)(\/|$)/.test(location.pathname)) {
+  gtag('js', new Date());
+  gtag('config', '${measurementId}');
+}`}
       </Script>
     </>
   )

@@ -44,13 +44,21 @@ export function JobEditor({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     }).catch(() => null)
-    const result = (await response?.json().catch(() => ({}))) as { error?: string } | undefined
+    const result = (await response?.json().catch(() => ({}))) as
+      | { error?: string; bookingEmail?: string; bookingEmailError?: string }
+      | undefined
     setBusy(false)
     if (!response?.ok) {
       setMessage(result?.error || 'Could not save.')
       return
     }
-    setMessage('Saved')
+    setMessage(
+      result?.bookingEmail === 'sent'
+        ? 'Saved. The date was emailed to the customer.'
+        : result?.bookingEmail === 'not_sent'
+          ? `Saved, but the date email was not sent: ${result.bookingEmailError}`
+          : 'Saved',
+    )
     router.refresh()
   }
 

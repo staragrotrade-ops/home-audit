@@ -9,9 +9,25 @@ export const metadata: Metadata = {
 export default async function OrderCancelledPage({
   searchParams,
 }: {
-  searchParams: Promise<{ expired?: string }>
+  searchParams: Promise<{ expired?: string; paid?: string }>
 }) {
-  const { expired } = await searchParams
+  const { expired, paid } = await searchParams
+  if (paid) {
+    return (
+      <main id="main-content" className="quote-page">
+        <div className="container order-page">
+          <h1>Payment received</h1>
+          <p>
+            Thank you. We have emailed you a link to your order, where you can tell us who to contact
+            for access.
+          </p>
+          <p>
+            Questions? Email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+          </p>
+        </div>
+      </main>
+    )
+  }
   return (
     <main id="main-content" className="quote-page">
       <div className="container order-page">

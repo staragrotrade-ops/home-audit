@@ -104,16 +104,16 @@ export function JobWorkflow(props: Props) {
 
   return (
     <div className="admin-workflow">
-      {!props.paid && props.quoteStatus !== 'quoted' && (
+      {!props.paid && (
         <form className="admin-step" onSubmit={sendQuote}>
-          <h4>1. Price review</h4>
+          <h4>{props.quoteStatus === 'quoted' ? '1. Change the price' : '1. Price review'}</h4>
           <div className="admin-actions">
             <label className="admin-inline">
               Price ex GST $
               <input name="price" type="number" min={50} max={20000} step={1} defaultValue={500} required />
             </label>
             <button className="admin-button primary" type="submit" disabled={busy}>
-              Send quote to customer
+              {props.quoteStatus === 'quoted' ? 'Send new price to customer' : 'Send quote to customer'}
             </button>
           </div>
         </form>
@@ -175,9 +175,10 @@ export function JobWorkflow(props: Props) {
 
       {props.paid && (
         <div className="admin-step">
-          <h4>3. Tell the customer the date</h4>
+          <h4>3. Booked date</h4>
           <p className="admin-muted">
-            Save the booked date and time below first. The email shows the date only, not the time.
+            Enter the booked date and time below and press Save: the customer is emailed the date
+            automatically (not the time). Use this button only to send it again.
           </p>
           <div className="admin-actions">
             <button
@@ -186,7 +187,7 @@ export function JobWorkflow(props: Props) {
               disabled={busy || !props.confirmedStart}
               onClick={() => void run(() => call(`${base}/booking-email`, 'POST'), 'Date emailed to the customer.')}
             >
-              {props.bookingNotifiedAt ? 'Email the date again' : 'Email customer the date'}
+              Email the date again
             </button>
             {props.bookingNotifiedAt && <span className="admin-inline-message">Customer emailed</span>}
           </div>
