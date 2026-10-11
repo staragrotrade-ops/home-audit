@@ -30,6 +30,11 @@ and pricing logic.
 - **Database**: migration `20261011120000_admin_analytics_and_app.sql`
   (analytics tables and summary function, staff, assignments, RLS, report
   storage). Tested against PostgreSQL 16 with Supabase-style roles.
+- Review fixes before release: the email-handoff copy needs a same-site
+  Origin and is never written from previews; a site-wide hourly cap on quote
+  copies; rate-limit hashes are keyed with a server secret and kept for at
+  most two hours; report registration accepts only the exact upload path and
+  checks the stored size; logout needs a same-site Origin.
 - Privacy notice updated for the statistics and the saved form copy.
 - Setup steps: `docs/BACKEND_SETUP.md`.
 

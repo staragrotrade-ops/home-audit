@@ -119,3 +119,17 @@ test('online quote submission still needs its own switch', async () => {
   const flow = await source('components/quote-flow.tsx')
   assert.match(flow, /requestBody\(draft, 'email_handoff'\)/)
 })
+
+test('quote copies and rate-limit hashes are protected', async () => {
+  const route = await source('app/api/quote/route.ts')
+  assert.match(route, /intakeMode === 'email_handoff' && !isSameOriginMutation\(request\)/)
+  assert.match(route, /VERCEL_ENV !== 'production'/)
+  assert.match(route, /p_bucket: 'quote_all'/)
+
+  const guard = await source('lib/request-guard.ts')
+  assert.match(guard, /createHmac\('sha256', key\)/)
+  assert.doesNotMatch(guard, /createHash\(/)
+
+  const complete = await source('app/api/app/jobs/[id]/report-complete/route.ts')
+  assert.match(complete, /storedSize !== input\.sizeBytes/)
+})

@@ -45,5 +45,10 @@ Never paste these values into chat or commit them to GitHub.
   admin dashboard.
 - Supabase pauses a free project after 7 days without any requests. Normal
   website traffic keeps it active.
-- Visitor statistics are only recorded on the production site, not on preview
-  deployments.
+- Visitor statistics and quote copies are only recorded on the production
+  site, not on preview deployments.
+- To sign out every device at once (for example after losing a phone),
+  change `ADMIN_SESSION_SECRET` in Vercel and redeploy. This also resets the
+  "Stop counting this device" setting, so press it again afterwards.
+- Before switching on `QUOTE_SUBMISSION_ENABLED`, add a bot check such as
+  Cloudflare Turnstile to the quote form.

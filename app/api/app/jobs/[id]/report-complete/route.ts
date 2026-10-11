@@ -22,16 +22,28 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     const { id } = await context.params
     z.uuid().parse(id)
     const input = schema.parse(await readJsonBody(request, 4_000))
-    if (!input.storagePath.startsWith(`${id}/`) || !input.storagePath.endsWith('.pdf')) {
+    // Only the exact path handed out by report-upload for this job and kind.
+    const fileName = input.storagePath.slice(id.length + 1)
+    const expected = new RegExp(
+      `^${input.reportKind}-\\d{13}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.pdf$`,
+    )
+    if (!input.storagePath.startsWith(`${id}/`) || !expected.test(fileName)) {
       throw new Error('The report path does not belong to this job.')
     }
 
     const admin = getSupabaseAdmin()
     if (!admin) throw new Error('The app service is not configured.')
-    const { data: exists, error: existsError } = await admin.storage
+
+    // Check the stored file is really there and has the size the app reported.
+    const { data: listed, error: listError } = await admin.storage
       .from(REPORT_BUCKET)
-      .exists(input.storagePath)
-    if (existsError || !exists) throw new Error('The uploaded PDF was not found.')
+      .list(id, { search: fileName, limit: 1 })
+    const stored = listed?.find((item) => item.name === fileName)
+    if (listError || !stored) throw new Error('The uploaded PDF was not found.')
+    const storedSize = Number((stored.metadata as { size?: number } | null)?.size)
+    if (Number.isFinite(storedSize) && storedSize !== input.sizeBytes) {
+      throw new Error('The uploaded PDF size does not match.')
+    }
 
     const { data, error } = await admin.rpc('register_inspection_report', {
       p_actor_user_id: user.id,

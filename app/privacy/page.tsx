@@ -75,7 +75,9 @@ export default function PrivacyPage() {
           long, which site or link a visit came from, the type of device and
           the country. A visit is counted with a random number kept in your
           browser for that visit only. We do not use advertising cookies and we
-          do not store your IP address.
+          do not store your IP address. To stop misuse of the quote form we
+          keep a scrambled code made from it, which cannot be turned back into
+          the address, for up to two hours.
         </p>
         <p>
           If you send a quote request, we link it to the pages viewed during

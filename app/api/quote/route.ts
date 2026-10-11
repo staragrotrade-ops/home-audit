@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { isExcludedRequest } from '@/lib/analytics-exclusion'
 import { quoteRequestSchema } from '@/lib/quote-schema'
-import { clientHash } from '@/lib/request-guard'
+import { clientHash, globalHash, isSameOriginMutation } from '@/lib/request-guard'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export const runtime = 'nodejs'
@@ -104,6 +104,19 @@ export async function POST(request: Request) {
     )
   }
 
+  // The email-handoff copy is sent by our own page with fetch(), which always
+  // carries an Origin header; requests without one are not from the form.
+  if (intakeMode === 'email_handoff' && !isSameOriginMutation(request)) {
+    return NextResponse.json({ error: 'Invalid request.' }, { status: 403 })
+  }
+
+  // Preview deployments share the database: never create jobs from them.
+  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') {
+    return intakeMode === 'email_handoff'
+      ? NextResponse.json({ ok: true, reference: null }, { status: 201 })
+      : NextResponse.json({ error: 'Quotes cannot be sent from a preview site.' }, { status: 503 })
+  }
+
   // Quietly accept bot-filled honeypot submissions without creating a record.
   if (fields.website) {
     return NextResponse.json({ ok: true, reference: null }, { status: 201 })
@@ -134,7 +147,14 @@ export async function POST(request: Request) {
     p_window_seconds: 3600,
     p_max_hits: 8,
   })
-  if (!limitError && allowed === false) {
+  // A site-wide ceiling as well, so a flood from many addresses is capped.
+  const { data: allowedOverall, error: overallError } = await supabase.rpc('consume_rate_limit', {
+    p_bucket: 'quote_all',
+    p_client_hash: globalHash('quote_all'),
+    p_window_seconds: 3600,
+    p_max_hits: 40,
+  })
+  if ((!limitError && allowed === false) || (!overallError && allowedOverall === false)) {
     return NextResponse.json(
       { error: 'Too many requests. Please try again later.' },
       { status: 429 },

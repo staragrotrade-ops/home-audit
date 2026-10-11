@@ -56,7 +56,8 @@ Prices, payment ids and the owner's internal notes are never sent to the app.
 2. `PUT` the PDF to `signedUrl` (Supabase Storage signed upload, content type
    `application/pdf`). Check the URL host is the project's Supabase host.
 3. `POST report-complete` with the returned `path`, the size and the SHA-256
-   of the file. A new version of the same kind marks the previous one
+   of the file. The server checks the file exists at that exact path and that
+   its size matches; the SHA-256 is recorded as reported by the app. A new version of the same kind marks the previous one
    `superseded`; old versions are never overwritten.
 
 ## Who can see what

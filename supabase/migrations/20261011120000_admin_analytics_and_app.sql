@@ -76,7 +76,8 @@ begin
   returning hits into v_hits;
 
   -- Old windows are only useful for the current check.
-  delete from private.rate_limits where window_start < now() - interval '2 days';
+  delete from private.rate_limits
+  where window_start < now() - make_interval(secs => greatest(p_window_seconds, 3600) * 2);
 
   return v_hits <= p_max_hits;
 end;

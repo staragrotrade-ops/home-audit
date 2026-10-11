@@ -1,5 +1,5 @@
 // Server-only helpers shared by public and admin API routes.
-import { createHash } from 'node:crypto'
+import { createHmac } from 'node:crypto'
 
 // Mutations must come from this site. A missing Origin header is rejected.
 export function isSameOriginMutation(request: Request) {
@@ -25,15 +25,24 @@ export function isAllowedBeaconOrigin(request: Request) {
   }
 }
 
+// A keyed hash of the caller's network address, used only for rate limits.
+// Without the server secret it cannot be turned back into an IP address.
 export function clientHash(request: Request, purpose: string) {
   const ip =
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     request.headers.get('x-real-ip') ||
     ''
   const agent = request.headers.get('user-agent') || ''
-  return createHash('sha256')
-    .update(`home-audit-v1|${purpose}|${ip || agent}`)
-    .digest('hex')
+  const key =
+    process.env.RATE_LIMIT_SECRET ||
+    process.env.SUPABASE_SECRET_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    'home-audit-unconfigured'
+  return createHmac('sha256', key).update(`${purpose}|${ip || agent}`).digest('hex')
+}
+
+export function globalHash(purpose: string) {
+  return createHmac('sha256', 'home-audit-global').update(purpose).digest('hex')
 }
 
 const BOT_PATTERN =
