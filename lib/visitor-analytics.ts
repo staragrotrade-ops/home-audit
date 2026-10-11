@@ -21,7 +21,7 @@ type Attribution = {
 
 const SESSION_KEY = 'ha_visit_v1'
 export const EXCLUSION_KEY = 'ha_analytics_excluded_v1'
-export const EXCLUDED_PATH_PREFIXES = ['/admin', '/api']
+export const EXCLUDED_PATH_PREFIXES = ['/admin', '/api', '/order']
 
 export function isExcludedPath(pathname: string) {
   return EXCLUDED_PATH_PREFIXES.some(

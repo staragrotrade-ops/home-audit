@@ -173,6 +173,11 @@ try {
   const adminLogin = await request('/admin/login')
   assert.equal(adminLogin.response.statusCode, 404, '/admin/login must stay off until configured')
 
+  const orderPage = await request('/order/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+  assert.equal(orderPage.response.statusCode, 200, '/order/<token> must render')
+  assert.match(orderPage.body, /noindex/, '/order pages must be noindex')
+  assert.match(orderPage.body, /This link has expired/, 'Unknown order links must show the expired message')
+
   const appAccount = await request('/api/app/account')
   assert.ok(appAccount.response.statusCode >= 400, '/api/app/account must refuse unauthenticated calls')
   assert.match(appAccount.body, /"ok":false/, '/api/app/account must return an error body')

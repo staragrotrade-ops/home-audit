@@ -1,0 +1,144 @@
+// Plain-text emails for the quote, payment and booking steps.
+import type { EmailMessage } from '@/lib/email'
+import { formatAud } from '@/lib/pricing'
+import { CONTACT_EMAIL, SITE_URL } from '@/lib/site'
+
+const SIGN_OFF = `Home Audit\n${CONTACT_EMAIL}\n${SITE_URL}`
+
+export function inspectionDateLabel(iso: string) {
+  return new Intl.DateTimeFormat('en-AU', {
+    timeZone: 'Australia/Melbourne',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(iso))
+}
+
+export function quoteReadyEmail(input: {
+  to: string
+  firstName: string
+  address: string
+  totalCents: number
+  url: string
+}): EmailMessage {
+  return {
+    to: input.to,
+    subject: `Your inspection quote for ${input.address}`,
+    text: `Hi ${input.firstName},
+
+Thanks for your request. The price for the inspection at ${input.address} is ${formatAud(input.totalCents)} including GST.
+
+You can review the details and pay here:
+${input.url}
+
+Once payment is made, you can tell us who to contact to arrange access.
+
+${SIGN_OFF}`,
+  }
+}
+
+export function paymentReceivedEmail(input: {
+  to: string
+  firstName: string
+  address: string
+  reference: string
+  totalCents: number
+  url: string
+}): EmailMessage {
+  return {
+    to: input.to,
+    subject: `Payment received – ${input.address}`,
+    text: `Hi ${input.firstName},
+
+We have received your payment of ${formatAud(input.totalCents)} for the inspection at ${input.address} (reference ${input.reference}).
+
+If you have not done so already, please tell us your situation and who we should contact to arrange access:
+${input.url}
+
+We will email you once the inspection date is confirmed.
+
+${SIGN_OFF}`,
+  }
+}
+
+export function bookingConfirmedEmail(input: {
+  to: string
+  firstName: string
+  address: string
+  dateIso: string
+}): EmailMessage {
+  return {
+    to: input.to,
+    subject: `Inspection date confirmed – ${input.address}`,
+    text: `Hi ${input.firstName},
+
+The inspection at ${input.address} is booked for ${inspectionDateLabel(input.dateIso)}.
+
+We will send the report by email after the inspection. If anything changes with access, reply to this email.
+
+${SIGN_OFF}`,
+  }
+}
+
+export function reviewRequestEmail(input: { to: string; firstName: string; reviewUrl: string }): EmailMessage {
+  return {
+    to: input.to,
+    subject: 'Thanks for choosing Home Audit',
+    text: `Hi ${input.firstName},
+
+Thank you for choosing Home Audit for your inspection. If you have a minute, a Google review would help other buyers find us:
+${input.reviewUrl}
+
+${SIGN_OFF}`,
+  }
+}
+
+export function reviewRequestSms(firstName: string, reviewUrl: string) {
+  return `Hi ${firstName}, thank you for choosing Home Audit for your inspection. If you have a minute, we would really appreciate a Google review: ${reviewUrl}`
+}
+
+// The buyer's situation is never included: it is private to the buyer.
+export function agentSms(input: { agentName: string; address: string; dateHint: string }) {
+  const greeting = input.agentName ? `Hi ${input.agentName.split(' ')[0]}` : 'Hi'
+  return `${greeting}, this is Home Audit. We have been engaged to do a building and pest inspection at ${input.address}. Could you let us know a time that suits for access${input.dateHint ? `, ideally ${input.dateHint}` : ''}? Thank you.`
+}
+
+export function ownerNewRequestEmail(input: {
+  to: string
+  reference: string
+  address: string
+  decision: 'instant' | 'manual'
+  reasons: string[]
+  adminUrl: string
+}): EmailMessage {
+  return {
+    to: input.to,
+    subject: `${input.decision === 'manual' ? 'Price review needed' : 'New instant quote'} – ${input.address}`,
+    text: `${input.reference}
+${input.address}
+
+${input.decision === 'manual' ? `Needs a price review:\n- ${input.reasons.join('\n- ')}` : 'Quoted automatically. Waiting for payment.'}
+
+${input.adminUrl}`,
+  }
+}
+
+export function ownerPaidEmail(input: {
+  to: string
+  reference: string
+  address: string
+  totalCents: number
+  adminUrl: string
+}): EmailMessage {
+  return {
+    to: input.to,
+    subject: `Paid ${formatAud(input.totalCents)} – ${input.address}`,
+    text: `${input.reference}
+${input.address}
+
+Payment received. Next: check the listing, find the agent and arrange a time.
+
+${input.adminUrl}`,
+  }
+}

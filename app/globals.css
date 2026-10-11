@@ -3128,3 +3128,76 @@ button:focus-visible {
   font-weight: 700;
   text-decoration: underline;
 }
+
+/* Customer order page */
+.order-page {
+  max-width: 760px;
+  padding-block: 40px 64px;
+}
+
+.order-page h1 {
+  margin: 4px 0;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  line-height: 1.2;
+}
+
+.order-page .quote-panel {
+  margin-top: 20px;
+}
+
+.order-service {
+  color: var(--muted);
+  margin: 0;
+}
+
+.order-price {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 16px;
+  max-width: 320px;
+}
+
+.order-price dt {
+  color: var(--muted);
+}
+
+.order-price dd {
+  margin: 0;
+  text-align: right;
+}
+
+.order-pay {
+  margin: 16px 0;
+}
+
+.order-hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.order-hint a,
+.order-page p a {
+  text-decoration: underline;
+}
+
+.order-details {
+  display: grid;
+  gap: 18px;
+}
+
+.order-details fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.order-details legend {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.order-summary {
+  padding-left: 18px;
+}

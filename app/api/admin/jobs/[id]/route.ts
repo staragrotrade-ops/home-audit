@@ -15,6 +15,14 @@ const schema = z
     internalNotes: z.string().max(4000).optional(),
     confirmedStart: z.union([z.iso.datetime({ offset: true }), z.literal('')]).optional(),
     confirmedEnd: z.union([z.iso.datetime({ offset: true }), z.literal('')]).optional(),
+    agentName: z.string().trim().max(120).optional(),
+    agentAgency: z.string().trim().max(160).optional(),
+    agentPhone: z.string().trim().max(40).regex(/^[0-9+() -]*$/).optional(),
+    agentEmail: z.union([z.literal(''), z.email().max(180)]).optional(),
+    listingUrl: z.union([z.literal(''), z.string().trim().max(500).regex(/^https?:\/\/\S+$/)]).optional(),
+    listingPriceGuide: z.string().trim().max(160).optional(),
+    listingChecked: z.boolean().optional(),
+    agentTexted: z.literal(true).optional(),
   })
   .strict()
 
@@ -34,6 +42,16 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     if (input.internalNotes !== undefined) update.internal_notes = input.internalNotes.trim() || null
     if (input.confirmedStart !== undefined) update.confirmed_start = input.confirmedStart || null
     if (input.confirmedEnd !== undefined) update.confirmed_end = input.confirmedEnd || null
+    if (input.agentName !== undefined) update.agent_name = input.agentName || null
+    if (input.agentAgency !== undefined) update.agent_agency = input.agentAgency || null
+    if (input.agentPhone !== undefined) update.agent_phone = input.agentPhone || null
+    if (input.agentEmail !== undefined) update.agent_email = input.agentEmail || null
+    if (input.listingUrl !== undefined) update.listing_url = input.listingUrl || null
+    if (input.listingPriceGuide !== undefined) update.listing_price_guide = input.listingPriceGuide || null
+    if (input.listingChecked !== undefined) {
+      update.listing_checked_at = input.listingChecked ? new Date().toISOString() : null
+    }
+    if (input.agentTexted) update.agent_texted_at = new Date().toISOString()
 
     if (Object.keys(update).length > 0) {
       const { error } = await supabase.from('jobs').update(update).eq('id', id)

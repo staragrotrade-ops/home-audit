@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { ExclusionToggle } from '@/components/admin/exclusion-toggle'
 import { JobEditor } from '@/components/admin/job-editor'
+import { JobWorkflow } from '@/components/admin/job-workflow'
 import { StaffManager } from '@/components/admin/staff-manager'
 import {
   CHANNEL_LABELS,
@@ -16,7 +17,15 @@ import {
   percent,
 } from '@/lib/admin-format'
 import { ADMIN_COOKIE, isAdminConfigured, verifyAdminSessionToken } from '@/lib/admin-session'
+import {
+  ACCESS_CHOICE_LABELS,
+  BUYER_SITUATION_LABELS,
+  PRICE_GUIDE_LABELS,
+  type AccessChoice,
+  type BuyerSituation,
+} from '@/lib/booking-options'
 import { CLOSED_STATUSES, JOB_STATUS_LABELS, type JobStatus } from '@/lib/job-status'
+import { formatAud } from '@/lib/pricing'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export const dynamic = 'force-dynamic'
@@ -99,6 +108,28 @@ type JobRow = {
   created_at: string
   customer_snapshot: Record<string, string | null>
   property_snapshot: Record<string, string | null>
+  quote_status: string
+  quote_total: number | null
+  price_guide_band: string
+  listing_url: string | null
+  travel_minutes: number | null
+  pricing_decision: string | null
+  pricing_reasons: string[] | null
+  paid_at: string | null
+  buyer_situation: string | null
+  access_choice: string | null
+  access_other_name: string | null
+  access_other_phone: string | null
+  details_submitted_at: string | null
+  agent_name: string | null
+  agent_agency: string | null
+  agent_phone: string | null
+  agent_email: string | null
+  listing_price_guide: string | null
+  listing_checked_at: string | null
+  agent_texted_at: string | null
+  booking_notified_at: string | null
+  review_requested_at: string | null
   job_assignments: { staff_id: string }[] | null
   job_attribution:
     | { first_referrer: string | null; utm_source: string | null; normalized_source: string | null }
@@ -258,7 +289,7 @@ export default async function AdminPage({
   let jobsQuery = supabase
     .from('jobs')
     .select(
-      'id,public_reference,service_family,inspection_type,new_home_stages,status,payment_status,intake_channel,is_test,archived_at,inspection_status,report_status,confirmed_start,preferred_date_1,preferred_date_2,deadline,flexible_booking,builder_name,expected_ready_date,access_contact,access_notes,source_self_reported,internal_notes,analytics_session_id,created_at,customer_snapshot,property_snapshot,job_assignments(staff_id),job_attribution(first_referrer,utm_source,normalized_source),inspection_reports(id,report_kind,version_label,status,issued_at)',
+      'id,public_reference,service_family,inspection_type,new_home_stages,status,payment_status,intake_channel,is_test,archived_at,inspection_status,report_status,confirmed_start,preferred_date_1,preferred_date_2,deadline,flexible_booking,builder_name,expected_ready_date,access_contact,access_notes,source_self_reported,internal_notes,analytics_session_id,created_at,customer_snapshot,property_snapshot,quote_status,quote_total,price_guide_band,listing_url,travel_minutes,pricing_decision,pricing_reasons,paid_at,buyer_situation,access_choice,access_other_name,access_other_phone,details_submitted_at,agent_name,agent_agency,agent_phone,agent_email,listing_price_guide,listing_checked_at,agent_texted_at,booking_notified_at,review_requested_at,job_assignments(staff_id),job_attribution(first_referrer,utm_source,normalized_source),inspection_reports(id,report_kind,version_label,status,issued_at)',
     )
     .order('created_at', { ascending: false })
     .limit(60)
@@ -578,6 +609,9 @@ export default async function AdminPage({
                     </span>
                     <span className="admin-badges">
                       <em className={`status-${job.status}`}>{JOB_STATUS_LABELS[job.status] || job.status}</em>
+                      {job.payment_status === 'paid' && <em className="good">Paid</em>}
+                      {job.quote_status === 'manual_review' && <em className="warn">Price review</em>}
+                      {job.payment_status === 'paid' && !job.agent_name && <em className="warn">Find agent</em>}
                       {job.intake_channel === 'email_handoff' && <em>Via email app</em>}
                       {assigned && <em>{staffName.get(assigned) || 'Assigned'}</em>}
                       {job.is_test && <em className="warn">Test</em>}
@@ -617,6 +651,40 @@ export default async function AdminPage({
                             .filter(Boolean)
                             .join(' · ')}
                         </dd>
+                        <dt>Price</dt>
+                        <dd>
+                          {job.quote_total ? formatAud(Math.round(Number(job.quote_total) * 100)) : 'Not priced'}
+                          {job.pricing_decision === 'instant' ? ' · instant' : ''}
+                          {job.pricing_decision === 'manual' && job.pricing_reasons?.length
+                            ? ` · review: ${job.pricing_reasons.join('; ')}`
+                            : ''}
+                          <br />
+                          {job.price_guide_band ? `Customer said: ${PRICE_GUIDE_LABELS[job.price_guide_band] || job.price_guide_band}` : ''}
+                          {job.travel_minutes ? ` · ${job.travel_minutes} min drive` : ''}
+                          {job.paid_at ? ` · paid ${formatDateTime(job.paid_at)}` : ''}
+                        </dd>
+                        {job.details_submitted_at && (
+                          <>
+                            <dt>Buyer</dt>
+                            <dd>
+                              {job.buyer_situation
+                                ? BUYER_SITUATION_LABELS[job.buyer_situation as BuyerSituation]
+                                : '—'}
+                              <br />
+                              Contact for access:{' '}
+                              {job.access_choice ? ACCESS_CHOICE_LABELS[job.access_choice as AccessChoice] : '—'}
+                              {job.access_choice === 'other' && (
+                                <>
+                                  {' '}
+                                  · {job.access_other_name}{' '}
+                                  {job.access_other_phone && (
+                                    <a href={`tel:${job.access_other_phone}`}>{job.access_other_phone}</a>
+                                  )}
+                                </>
+                              )}
+                            </dd>
+                          </>
+                        )}
                         <dt>Service</dt>
                         <dd>
                           {serviceLabel(job)}
@@ -687,6 +755,33 @@ export default async function AdminPage({
                         <Journey rows={journey} />
                       </details>
                     )}
+
+                    <JobWorkflow
+                      jobId={job.id}
+                      paid={job.payment_status === 'paid'}
+                      quoteStatus={job.quote_status}
+                      address={[property.address, property.suburb].filter(Boolean).join(', ')}
+                      dateHint={[job.preferred_date_1, job.preferred_date_2]
+                        .filter((value): value is string => Boolean(value))
+                        .map(formatDate)
+                        .join(' or ')}
+                      customerFirstName={customer.first_name || ''}
+                      customerMobile={customer.mobile || ''}
+                      confirmedStart={job.confirmed_start}
+                      bookingNotifiedAt={job.booking_notified_at}
+                      reviewRequestedAt={job.review_requested_at}
+                      agentTextedAt={job.agent_texted_at}
+                      reviewUrl={process.env.GOOGLE_REVIEW_URL || ''}
+                      agent={{
+                        name: job.agent_name || '',
+                        agency: job.agent_agency || '',
+                        phone: job.agent_phone || '',
+                        email: job.agent_email || '',
+                        listingUrl: job.listing_url || '',
+                        priceGuide: job.listing_price_guide || '',
+                        checked: Boolean(job.listing_checked_at),
+                      }}
+                    />
 
                     <JobEditor
                       jobId={job.id}

@@ -98,7 +98,7 @@ test('admin and app routes check who is calling', async () => {
 
 test('visitor tracking skips admin pages, bots, previews and the owner', async () => {
   const client = await source('lib/visitor-analytics.ts')
-  assert.match(client, /EXCLUDED_PATH_PREFIXES = \['\/admin', '\/api'\]/)
+  assert.match(client, /EXCLUDED_PATH_PREFIXES = \['\/admin', '\/api', '\/order'\]/)
   assert.match(client, /sessionStorage/)
   assert.doesNotMatch(client, /document\.cookie/)
 
@@ -132,4 +132,38 @@ test('quote copies and rate-limit hashes are protected', async () => {
 
   const complete = await source('app/api/app/jobs/[id]/report-complete/route.ts')
   assert.match(complete, /storedSize !== input\.sizeBytes/)
+})
+
+test('payments are only marked from verified, paid Home Audit sessions', async () => {
+  const orders = await source('lib/orders.ts')
+  assert.match(orders, /session\.metadata\?\.site_key !== STRIPE_SITE_KEY/)
+  assert.match(orders, /session\.payment_status !== 'paid'/)
+  assert.match(orders, /rpc\('mark_job_paid'/)
+
+  const webhook = await source('app/api/stripe/webhook/route.ts')
+  assert.match(webhook, /webhooks\.constructEvent\(/)
+
+  const sql = await source('supabase/migrations/20261012100000_instant_quotes_and_booking.sql')
+  assert.match(sql, /Payment amount mismatch/)
+  assert.match(sql, /revoke all on table public\.job_access_tokens from anon, authenticated/)
+  assert.match(sql, /revoke all on table public\.stripe_events from anon, authenticated/)
+
+  const stripe = await source('lib/stripe-server.ts')
+  assert.match(stripe, /environment === 'production' && mode !== 'live'/)
+})
+
+test('order links are private and the buyer situation stays out of agent texts', async () => {
+  const tokens = await source('lib/access-tokens.ts')
+  assert.match(tokens, /hashToken\(token\)/)
+  assert.doesNotMatch(tokens, /insert\(\{ token:/)
+
+  const page = await source('app/order/[token]/page.tsx')
+  assert.match(page, /robots: \{ index: false, follow: false \}/)
+
+  const emails = await source('lib/order-emails.ts')
+  const agentText = emails.slice(emails.indexOf('export function agentSms'))
+  assert.doesNotMatch(agentText.slice(0, agentText.indexOf('\n}')), /situation/i)
+
+  const booking = emails.slice(emails.indexOf('export function bookingConfirmedEmail'))
+  assert.doesNotMatch(booking.slice(0, booking.indexOf('\n}\n')), /hour|minute|timeStyle/)
 })
