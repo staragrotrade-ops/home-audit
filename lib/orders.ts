@@ -2,7 +2,7 @@
 import type Stripe from 'stripe'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { issueOrderToken, orderUrl } from '@/lib/access-tokens'
-import { ownerEmail, sendEmail } from '@/lib/email'
+import { ownerEmail, sendEmail, markTest } from '@/lib/email'
 import { ownerPaidEmail, ownerPaymentProblemEmail, paymentReceivedEmail } from '@/lib/order-emails'
 import { earliestInstantDate } from '@/lib/pricing'
 import { SITE_URL } from '@/lib/site'
@@ -152,8 +152,8 @@ async function notifyPaid(supabase: SupabaseClient, jobId: string, amountCents: 
       { supabase, jobId, templateKey: 'payment_received' },
     )
   }
-  if (!job.is_test) {
-    await sendEmail(
+  await sendEmail(
+    markTest(
       ownerPaidEmail({
         to: ownerEmail(),
         reference: job.public_reference,
@@ -161,9 +161,10 @@ async function notifyPaid(supabase: SupabaseClient, jobId: string, amountCents: 
         totalCents: amountCents,
         adminUrl: `${SITE_URL}/admin?q=${encodeURIComponent(job.public_reference)}#jobs`,
       }),
-      { supabase, jobId, templateKey: 'owner_paid' },
-    )
-  }
+      job.is_test,
+    ),
+    { supabase, jobId, templateKey: 'owner_paid' },
+  )
 }
 
 // Applies a Checkout session from Stripe. Only a Home Audit session whose
