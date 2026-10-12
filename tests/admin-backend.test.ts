@@ -203,3 +203,14 @@ test('payments cannot be doubled and order links stay private', async () => {
   const patch = await source('app/api/admin/jobs/[id]/route.ts')
   assert.match(patch, /sendBookingDateEmail\(supabase, id\)/)
 })
+
+test('customers get their quote link by email and test orders still notify the owner', async () => {
+  const route = await source('app/api/quote/route.ts')
+  assert.match(route, /quoteReadyEmail\(\{/)
+  assert.match(route, /requestReceivedEmail\(\{/)
+  assert.doesNotMatch(route, /if \(!isTest\)/)
+  assert.match(route, /markTest\(/)
+
+  const orders = await source('lib/orders.ts')
+  assert.doesNotMatch(orders, /if \(!job\.is_test\)/)
+})

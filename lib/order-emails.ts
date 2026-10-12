@@ -38,6 +38,26 @@ ${SIGN_OFF}`,
   }
 }
 
+export function requestReceivedEmail(input: {
+  to: string
+  firstName: string
+  address: string
+  url: string
+}): EmailMessage {
+  return {
+    to: input.to,
+    subject: `We have your inspection request for ${input.address}`,
+    text: `Hi ${input.firstName},
+
+Thanks for your request for ${input.address}. We need to check a few details before we can give you a price. We will email you the price and a link to pay.
+
+You can see your request here:
+${input.url}
+
+${SIGN_OFF}`,
+  }
+}
+
 export function paymentReceivedEmail(input: {
   to: string
   firstName: string

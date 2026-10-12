@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { issueOrderToken, orderUrl } from '@/lib/access-tokens'
 import { isExcludedRequest } from '@/lib/analytics-exclusion'
-import { ownerEmail, sendEmail } from '@/lib/email'
-import { ownerNewRequestEmail } from '@/lib/order-emails'
+import { markTest, ownerEmail, sendEmail } from '@/lib/email'
+import { ownerNewRequestEmail, quoteReadyEmail, requestReceivedEmail } from '@/lib/order-emails'
 import { PRICING_VERSION, priceQuote } from '@/lib/pricing'
 import { quoteRequestSchema } from '@/lib/quote-schema'
 import { clientHash, globalHash, isSameOriginMutation } from '@/lib/request-guard'
@@ -276,8 +276,35 @@ export async function POST(request: Request) {
     })
   }
 
-  if (!isTest) {
+  // The customer always gets the link by email, so an unpaid quote is not
+  // lost if the page is closed.
+  if (orderLink) {
+    const address = [fields.property_address, fields.suburb].filter(Boolean).join(', ')
     await sendEmail(
+      pricing.decision === 'instant'
+        ? quoteReadyEmail({
+            to: fields.email,
+            firstName: fields.first_name,
+            address,
+            totalCents: pricing.totalCents,
+            url: orderLink,
+          })
+        : requestReceivedEmail({
+            to: fields.email,
+            firstName: fields.first_name,
+            address,
+            url: orderLink,
+          }),
+      {
+        supabase,
+        jobId,
+        templateKey: pricing.decision === 'instant' ? 'quote_ready' : 'request_received',
+      },
+    )
+  }
+
+  await sendEmail(
+    markTest(
       ownerNewRequestEmail({
         to: ownerEmail(),
         reference: reference || jobId,
@@ -286,9 +313,10 @@ export async function POST(request: Request) {
         reasons: pricing.reasons,
         adminUrl: `${SITE_URL}/admin?q=${encodeURIComponent(reference || '')}#jobs`,
       }),
-      { supabase, jobId, templateKey: 'owner_new_request' },
-    )
-  }
+      isTest,
+    ),
+    { supabase, jobId, templateKey: 'owner_new_request' },
+  )
 
   return NextResponse.json(
     {

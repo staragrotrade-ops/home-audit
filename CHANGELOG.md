@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.1 — 2026-10-12
+
+- The customer is emailed straight after asking for a quote: the price and
+  payment link for an instant quote, or a "request received" note with their
+  order link when the price needs a review. Previously no email went out
+  until payment, so a closed page lost the link.
+- Owner notifications are also sent for test orders, marked "[Test]" in the
+  subject, so the emails can be checked end to end.
+
 ## 0.8.0 — 2026-10-12
 
 Instant quotes, online payment and the booking workflow.

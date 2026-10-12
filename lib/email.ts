@@ -10,6 +10,12 @@ export type EmailMessage = {
   replyTo?: string
 }
 
+// Owner notifications for test orders still go out, marked in the subject,
+// so the owner can check the emails work.
+export function markTest(message: EmailMessage, isTest: boolean): EmailMessage {
+  return isTest ? { ...message, subject: `[Test] ${message.subject}` } : message
+}
+
 export function emailConfigured() {
   return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM)
 }

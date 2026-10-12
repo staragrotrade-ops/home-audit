@@ -9,7 +9,7 @@ import {
   isPayable,
   loadOrder,
 } from '@/lib/orders'
-import { ownerEmail, sendEmail } from '@/lib/email'
+import { markTest, ownerEmail, sendEmail } from '@/lib/email'
 import { ownerNewRequestEmail } from '@/lib/order-emails'
 import { ORDER_RETURN_COOKIE, orderReturnCookieOptions, orderReturnCookieValue } from '@/lib/order-return'
 import { isSameOriginMutation } from '@/lib/request-guard'
@@ -44,8 +44,8 @@ export async function POST(request: Request, context: { params: Promise<{ token:
           status: job.status === 'awaiting_payment' ? 'quote_received' : job.status,
         })
         .eq('id', job.id)
-      if (!job.is_test) {
-        await sendEmail(
+      await sendEmail(
+        markTest(
           ownerNewRequestEmail({
             to: ownerEmail(),
             reference: job.public_reference,
@@ -54,9 +54,10 @@ export async function POST(request: Request, context: { params: Promise<{ token:
             reasons,
             adminUrl: `${SITE_URL}/admin?q=${encodeURIComponent(job.public_reference)}#jobs`,
           }),
-          { supabase, jobId: job.id, templateKey: 'owner_review_needed' },
-        )
-      }
+          job.is_test,
+        ),
+        { supabase, jobId: job.id, templateKey: 'owner_review_needed' },
+      )
       return NextResponse.json(
         { error: 'The date is now too close for the online price. We will check availability and email you.' },
         { status: 409 },
