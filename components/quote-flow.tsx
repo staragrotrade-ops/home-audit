@@ -2,13 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import type { QuoteRequest } from '@/lib/quote-schema'
+import { PRICE_GUIDE_BANDS } from '@/lib/booking-options'
+import { earliestInstantDate } from '@/lib/pricing'
 import { CONTACT_EMAIL } from '@/lib/site'
 import { currentVisitId, trackVisitorEvent } from '@/lib/visitor-analytics'
+import { Turnstile } from '@/components/turnstile'
 
 type ServiceFamily = QuoteRequest['service_family'] | ''
 type Draft = Omit<
   QuoteRequest,
-  'service_family' | 'privacy_consent' | 'intake_mode' | 'analytics_session_id'
+  'service_family' | 'privacy_consent' | 'intake_mode' | 'analytics_session_id' | 'turnstile_token'
 > & {
   service_family: ServiceFamily
   privacy_consent: boolean
@@ -56,6 +59,8 @@ const emptyDraft: Draft = {
   storeys: '',
   bedrooms: '',
   bathrooms: '',
+  price_guide_band: '',
+  listing_url: '',
   builder_name: '',
   expected_ready_date: '',
   first_name: '',
@@ -103,6 +108,8 @@ const fieldInfo: Record<string, { label: string; step: number }> = {
   storeys: { label: 'Storeys', step: 1 },
   bedrooms: { label: 'Bedrooms', step: 1 },
   bathrooms: { label: 'Bathrooms', step: 1 },
+  price_guide_band: { label: 'Price guide', step: 1 },
+  listing_url: { label: 'Listing link', step: 1 },
   builder_name: { label: 'Builder', step: 1 },
   expected_ready_date: { label: 'Expected inspection-ready date', step: 1 },
   first_name: { label: 'First name', step: 2 },
@@ -139,7 +146,7 @@ function track(event: keyof typeof VISITOR_EVENTS, params: { service_family: str
   }
 }
 
-function requestBody(draft: Draft, intakeMode: 'submit' | 'email_handoff') {
+function requestBody(draft: Draft, intakeMode: 'submit' | 'email_handoff', turnstileToken = '') {
   return JSON.stringify({
     ...draft,
     email: draft.email.trim(),
@@ -148,6 +155,7 @@ function requestBody(draft: Draft, intakeMode: 'submit' | 'email_handoff') {
     agent_email: (draft.agent_email || '').trim(),
     intake_mode: intakeMode,
     analytics_session_id: currentVisitId(),
+    turnstile_token: turnstileToken,
   })
 }
 
@@ -200,6 +208,15 @@ function readSavedDraft(): Partial<Draft> | null {
   return null
 }
 
+function formatShortDate(isoDate: string) {
+  return new Intl.DateTimeFormat('en-AU', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+  }).format(new Date(`${isoDate}T12:00:00Z`))
+}
+
 function buildEmailHref(draft: Draft, stageLabels: string) {
   const inspection =
     draft.service_family === 'new_home'
@@ -213,6 +230,9 @@ function buildEmailHref(draft: Draft, stageLabels: string) {
     `Inspection: ${inspection}`,
     `Property: ${[draft.property_address, draft.suburb, draft.postcode].filter(Boolean).join(', ')}`,
     draft.property_type && `Property type: ${draft.property_type.replace('_', ' / ')}`,
+    draft.price_guide_band &&
+      `Price guide: ${PRICE_GUIDE_BANDS.find(([value]) => value === draft.price_guide_band)?.[1] || ''}`,
+    draft.listing_url && `Listing: ${draft.listing_url}`,
     draft.storeys && `Storeys: ${draft.storeys.replace('_plus', '+')}`,
     draft.bedrooms && `Bedrooms: ${draft.bedrooms}`,
     draft.bathrooms && `Bathrooms: ${draft.bathrooms}`,
@@ -243,10 +263,15 @@ function buildEmailHref(draft: Draft, stageLabels: string) {
 export function QuoteFlow({
   initialService,
   submissionEnabled,
+  turnstileSiteKey = '',
 }: {
   initialService: ServiceFamily
   submissionEnabled: boolean
+  turnstileSiteKey?: string
 }) {
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const [turnstileReset, setTurnstileReset] = useState(0)
+  const needsTurnstile = submissionEnabled && Boolean(turnstileSiteKey)
   const [step, setStep] = useState(0)
   const [draft, setDraft] = useState<Draft>({
     ...emptyDraft,
@@ -256,6 +281,9 @@ export function QuoteFlow({
   const [status, setStatus] = useState<Status | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  // Worked out in the browser: the page itself is pre-rendered at build time.
+  const [earliestDate, setEarliestDate] = useState('')
+  useEffect(() => setEarliestDate(earliestInstantDate()), [])
 
   useEffect(() => {
     const saved = readSavedDraft()
@@ -340,6 +368,12 @@ export function QuoteFlow({
         errors.push('Enter the property address.')
       if (draft.postcode && !/^\d{4}$/.test(draft.postcode))
         errors.push('Postcode must be four digits, or left blank.')
+      if (draft.service_family === 'existing_home') {
+        if (!draft.suburb.trim()) errors.push('Enter the suburb.')
+        if (!draft.price_guide_band) errors.push('Choose the price guide shown on the listing.')
+        if (draft.listing_url && !/^https?:\/\/\S+$/.test(draft.listing_url.trim()))
+          errors.push('Paste the full listing link, starting with https://, or leave it blank.')
+      }
     }
 
     if (target === 2) {
@@ -426,15 +460,19 @@ export function QuoteFlow({
       const response = await fetch('/api/quote', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: requestBody(draft, 'submit'),
+        body: requestBody(draft, 'submit', turnstileToken),
       })
       const result = (await response.json().catch(() => ({}))) as {
         error?: string
         reference?: string | null
+        decision?: 'instant' | 'manual'
+        orderUrl?: string | null
         issues?: Record<string, string[] | undefined>
       }
 
       if (!response.ok) {
+        // A Turnstile token works once: get a new one before trying again.
+        if (needsTurnstile) setTurnstileReset((value) => value + 1)
         const fields = Object.keys(result.issues || {})
         if (fields.length > 0) {
           const firstStep = Math.min(...fields.map((field) => fieldInfo[field]?.step ?? 3))
@@ -454,13 +492,18 @@ export function QuoteFlow({
       }
 
       window.localStorage.removeItem(DRAFT_KEY)
-      setSubmitted(true)
       track('quote_submit', { service_family: draft.service_family })
+      // An instant price goes straight to the order page to pay.
+      if (result.decision === 'instant' && result.orderUrl) {
+        window.location.href = result.orderUrl
+        return
+      }
+      setSubmitted(true)
       setStatus({
         type: 'success',
         message: result.reference
           ? `Request received. Your reference is ${result.reference}.`
-          : 'Request received. We will review the details and contact you.',
+          : 'Request received.',
       })
     } catch (error) {
       setStatus({
@@ -479,15 +522,15 @@ export function QuoteFlow({
     return (
       <div className="quote-shell">
         <div className="quote-panel quote-success">
-          <h2>Thank you — your request is with us.</h2>
+          <h2>Thank you. Your request is with us.</h2>
           {status && (
             <div className="quote-status" data-type="success" role="status">
               {status.message}
             </div>
           )}
           <p>
-            We will review the details and reply by email or phone. Questions in
-            the meantime? <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+            We will check the details and email you a price, with a link to pay
+            online. Questions in the meantime? <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
           </p>
           <button className="button button-secondary" type="button" onClick={clearDraft}>
             Start another request
@@ -680,6 +723,39 @@ export function QuoteFlow({
                 />
               </div>
 
+              {draft.service_family === 'existing_home' && (
+                <>
+                  <div className="field">
+                    <label htmlFor="price_guide_band">Price guide on the listing *</label>
+                    <select
+                      id="price_guide_band"
+                      value={draft.price_guide_band}
+                      onChange={(event) =>
+                        update('price_guide_band', event.target.value as Draft['price_guide_band'])
+                      }
+                    >
+                      <option value="">Choose</option>
+                      {PRICE_GUIDE_BANDS.map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label htmlFor="listing_url">Listing link</label>
+                    <input
+                      id="listing_url"
+                      type="url"
+                      inputMode="url"
+                      placeholder="https://www.realestate.com.au/…"
+                      value={draft.listing_url}
+                      onChange={(event) => update('listing_url', event.target.value)}
+                    />
+                  </div>
+                </>
+              )}
+
               {draft.service_family === 'new_home' && (
                 <>
                   <div className="field">
@@ -790,7 +866,11 @@ export function QuoteFlow({
           <>
             <div className="quote-panel-heading">
               <h2>Timing and access</h2>
-              <p>Dates are preferences until the appointment is confirmed.</p>
+              <p>
+                Dates are preferences until the appointment is confirmed.
+                {earliestDate &&
+                  ` The online price applies to inspections from ${formatShortDate(earliestDate)} onwards. For anything sooner, send the request and we will check availability and price.`}
+              </p>
             </div>
             <div className="field-grid">
               <div className="field">
@@ -897,6 +977,10 @@ export function QuoteFlow({
           </div>
         )}
 
+        {step === 3 && needsTurnstile && (
+          <Turnstile siteKey={turnstileSiteKey} onToken={setTurnstileToken} resetKey={turnstileReset} />
+        )}
+
         <div className="quote-actions">
           {step > 0 ? (
             <button className="back-button" type="button" onClick={() => setStep((current) => current - 1)}>
@@ -912,11 +996,16 @@ export function QuoteFlow({
               Continue
             </button>
           ) : (
-            <button className="button" type="button" onClick={submit} disabled={submitting}>
+            <button
+              className="button"
+              type="button"
+              onClick={submit}
+              disabled={submitting || (needsTurnstile && !turnstileToken)}
+            >
               {submitting
-                ? 'Sending…'
+                ? 'Checking…'
                 : submissionEnabled
-                  ? 'Submit for quote'
+                  ? 'Get my price'
                   : 'Email this request'}
             </button>
           )}

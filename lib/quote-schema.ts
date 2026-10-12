@@ -27,6 +27,14 @@ export const quoteRequestSchema = z
     storeys: z.enum(['', '1', '2', '3_plus']).default(''),
     bedrooms: optionalSmallCount.default(''),
     bathrooms: optionalSmallCount.default(''),
+    // Existing homes: the price guide shown on the listing, and the listing link.
+    price_guide_band: z.enum(['', 'up_to_1_5m', 'over_1_5m', 'unknown']).default(''),
+    listing_url: z
+      .string()
+      .trim()
+      .max(500)
+      .regex(/^(https?:\/\/\S+)?$/, 'Paste the full listing link, starting with https://')
+      .default(''),
     builder_name: z.string().trim().max(160).default(''),
     expected_ready_date: optionalDate.default(''),
     first_name: z.string().trim().min(1).max(80),
@@ -76,6 +84,7 @@ export const quoteRequestSchema = z
     // email-app handoff used while online submission is switched off.
     intake_mode: z.enum(['submit', 'email_handoff']).default('submit'),
     analytics_session_id: z.union([z.literal(''), z.uuid()]).default(''),
+    turnstile_token: z.string().max(2048).default(''),
   })
   .superRefine((value, context) => {
     if (value.service_family === 'existing_home' && !value.inspection_type) {

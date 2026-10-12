@@ -10,6 +10,8 @@ const scriptSources = [
   "'self'",
   "'unsafe-inline'",
   'https://www.googletagmanager.com',
+  // Cloudflare Turnstile bot check on the quote form.
+  'https://challenges.cloudflare.com',
   ...(isDevelopment ? ["'unsafe-eval'"] : []),
   ...(isVercelPreview ? ['https://vercel.live'] : []),
 ]
@@ -21,7 +23,7 @@ const contentSecurityPolicy = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
   `connect-src 'self' https:${isDevelopment ? ' ws:' : ''}`,
-  `frame-src 'self'${isVercelPreview ? ' https://vercel.live' : ''}`,
+  `frame-src 'self' https://challenges.cloudflare.com${isVercelPreview ? ' https://vercel.live' : ''}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

@@ -50,5 +50,64 @@ Never paste these values into chat or commit them to GitHub.
 - To sign out every device at once (for example after losing a phone),
   change `ADMIN_SESSION_SECRET` in Vercel and redeploy. This also resets the
   "Stop counting this device" setting, so press it again afterwards.
-- Before switching on `QUOTE_SUBMISSION_ENABLED`, add a bot check such as
-  Cloudflare Turnstile to the quote form.
+- The online quote form only opens once Cloudflare Turnstile is set up
+  (step 9). Until then it keeps using the email handoff.
+
+# Instant quotes and payment (0.8.0)
+
+Do this after the steps above work.
+
+## 4. Database
+
+SQL Editor → run `20261012100000_instant_quotes_and_booking.sql` once.
+
+## 5. Stripe (shared with 137B)
+
+1. Stripe Dashboard (live mode) → Developers → API keys: use the same secret
+   key as 137B, or better, create a restricted key for Home Audit.
+2. Developers → Webhooks → Add endpoint
+   `https://homeaudit.com.au/api/stripe/webhook`, events
+   `checkout.session.completed` and `checkout.session.async_payment_succeeded`.
+   Copy its signing secret.
+3. Vercel (Production): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`.
+   Customers will see the Stripe account's business name on the payment page
+   and card statement, with "HOME AUDIT" added where the card network allows.
+
+## 6. Google driving time
+
+1. Google Cloud → the project used for 137B (or a new one) → enable
+   **Routes API** → Credentials → create an API key restricted to Routes API.
+   The first 10,000 route lookups each month are free.
+2. Vercel: `GOOGLE_MAPS_API_KEY`, and `TRAVEL_BASE_ADDRESS` if the start point
+   is not "Mount Eliza VIC 3930, Australia".
+   Without the key every quote goes to a price review.
+
+## 7. Email (Resend, GoDaddy DNS)
+
+1. resend.com → Domains → add `homeaudit.com.au`. The free plan allows one
+   domain per team, so if 137B's domain is already in your Resend team,
+   create a second team (free) for Home Audit and add the domain there.
+2. GoDaddy → homeaudit.com.au → DNS: add the records Resend shows (they sit
+   on a `send` sub-domain and `resend._domainkey`, so existing email at
+   info@homeaudit.com.au is not affected). Wait for "Verified".
+3. Resend → API Keys → create one with sending access.
+4. Vercel: `RESEND_API_KEY`, `EMAIL_FROM` = `Home Audit <bookings@homeaudit.com.au>`.
+
+## 8. Google review link
+
+Google Business Profile → "Ask for reviews" → copy the link → Vercel
+`GOOGLE_REVIEW_URL`.
+
+## 9. Bot check (Cloudflare Turnstile, free)
+
+1. dash.cloudflare.com (a free account is enough; the domain can stay at
+   GoDaddy) → Turnstile → Add widget → hostname `homeaudit.com.au`, mode
+   "Managed".
+2. Vercel: `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (site key) and
+   `TURNSTILE_SECRET_KEY` (secret key).
+
+## 10. Switch on
+
+Vercel: `QUOTE_SUBMISSION_ENABLED` = `true`, then redeploy. Test with your own
+details from a browser marked "Stop counting this device" (the job is marked
+as a test), pay, then refund the test payment in Stripe.

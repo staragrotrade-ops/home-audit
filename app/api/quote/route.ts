@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server'
+import { issueOrderToken, orderUrl } from '@/lib/access-tokens'
 import { isExcludedRequest } from '@/lib/analytics-exclusion'
+import { ownerEmail, sendEmail } from '@/lib/email'
+import { ownerNewRequestEmail } from '@/lib/order-emails'
+import { PRICING_VERSION, priceQuote } from '@/lib/pricing'
 import { quoteRequestSchema } from '@/lib/quote-schema'
 import { clientHash, globalHash, isSameOriginMutation } from '@/lib/request-guard'
+import { SITE_URL } from '@/lib/site'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { turnstileConfigured, verifyTurnstile } from '@/lib/turnstile'
+import { destinationAddress, driveMinutesFromBase } from '@/lib/travel'
 
 export const runtime = 'nodejs'
 
@@ -92,7 +99,12 @@ export async function POST(request: Request) {
     )
   }
 
-  const { intake_mode: intakeMode, analytics_session_id: sessionId, ...fields } = parsed.data
+  const {
+    intake_mode: intakeMode,
+    analytics_session_id: sessionId,
+    turnstile_token: turnstileToken,
+    ...fields
+  } = parsed.data
 
   // Online submission is switched on separately. The email handoff only keeps
   // a copy for the admin dashboard, so it is accepted whenever the database is
@@ -120,6 +132,24 @@ export async function POST(request: Request) {
   // Quietly accept bot-filled honeypot submissions without creating a record.
   if (fields.website) {
     return NextResponse.json({ ok: true, reference: null }, { status: 201 })
+  }
+
+  // Online submissions create a quote, look up the driving time and send
+  // emails, so they need a passed bot check. Without Turnstile configured the
+  // online form stays closed.
+  if (intakeMode === 'submit') {
+    if (!turnstileConfigured()) {
+      return NextResponse.json(
+        { error: 'Online quote submissions are not enabled yet.' },
+        { status: 503 },
+      )
+    }
+    if (!(await verifyTurnstile(turnstileToken, request))) {
+      return NextResponse.json(
+        { error: 'Please complete the security check and try again.' },
+        { status: 400 },
+      )
+    }
   }
 
   // Keep only the fields that belong to the chosen service family.
@@ -175,23 +205,97 @@ export async function POST(request: Request) {
   }
 
   const result = Array.isArray(data) ? data[0] : data
-
-  if (result?.job_id) {
-    const { error: updateError } = await supabase
-      .from('jobs')
-      .update({
-        intake_channel: intakeMode === 'email_handoff' ? 'email_handoff' : 'web_form',
-        analytics_session_id: sessionId || null,
-        // Requests from the owner's own browser are marked as tests.
-        is_test: isExcludedRequest(request),
-      })
-      .eq('id', result.job_id)
-    if (updateError) console.error('quote_intake_update_failed', { code: updateError.code })
+  const jobId: string | undefined = result?.job_id
+  const reference: string | null = result?.public_reference || null
+  if (!jobId) {
+    return NextResponse.json({ ok: true, reference }, { status: 201 })
   }
+
+  const isTest = isExcludedRequest(request)
+  const update: Record<string, unknown> = {
+    intake_channel: intakeMode === 'email_handoff' ? 'email_handoff' : 'web_form',
+    analytics_session_id: sessionId || null,
+    // Requests from the owner's own browser are marked as tests.
+    is_test: isTest,
+    price_guide_band: fields.price_guide_band,
+    listing_url: fields.listing_url || null,
+  }
+
+  // The email handoff only keeps a copy; pricing happens on real submissions.
+  if (intakeMode === 'email_handoff') {
+    const { error: updateError } = await supabase.from('jobs').update(update).eq('id', jobId)
+    if (updateError) console.error('quote_intake_update_failed', { code: updateError.code })
+    return NextResponse.json({ ok: true, reference }, { status: 201 })
+  }
+
+  const travel =
+    fields.service_family === 'existing_home'
+      ? await driveMinutesFromBase(
+          destinationAddress(fields.property_address, fields.suburb, fields.postcode),
+        )
+      : null
+
+  const pricing = priceQuote({
+    serviceFamily: fields.service_family,
+    inspectionType: payload.inspection_type,
+    priceGuideBand: fields.price_guide_band,
+    preferredDate: fields.preferred_date_1,
+    deadline: fields.deadline,
+    travelMinutes: travel?.minutes ?? null,
+  })
+
+  Object.assign(update, {
+    travel_minutes: travel?.minutes ?? null,
+    travel_distance_m: travel?.distanceMeters ?? null,
+    pricing_decision: pricing.decision,
+    pricing_reasons: pricing.reasons,
+    pricing_rule_version: PRICING_VERSION,
+    ...(pricing.decision === 'instant'
+      ? {
+          quote_status: 'quoted',
+          status: 'awaiting_payment',
+          quote_subtotal: pricing.subtotalCents / 100,
+          gst: pricing.gstCents / 100,
+          quote_total: pricing.totalCents / 100,
+        }
+      : { quote_status: 'manual_review' }),
+  })
+
+  const { error: updateError } = await supabase.from('jobs').update(update).eq('id', jobId)
+  if (updateError) {
+    console.error('quote_pricing_update_failed', { code: updateError.code })
+    return NextResponse.json({ ok: true, reference, decision: 'manual' }, { status: 201 })
+  }
+
+  let orderLink: string | null = null
+  try {
+    orderLink = orderUrl(await issueOrderToken(supabase, jobId))
+  } catch (tokenError) {
+    console.error('order_token_failed', {
+      message: tokenError instanceof Error ? tokenError.message : 'unknown',
+    })
+  }
+
+  if (!isTest) {
+    await sendEmail(
+      ownerNewRequestEmail({
+        to: ownerEmail(),
+        reference: reference || jobId,
+        address: fields.property_address,
+        decision: pricing.decision,
+        reasons: pricing.reasons,
+        adminUrl: `${SITE_URL}/admin?q=${encodeURIComponent(reference || '')}#jobs`,
+      }),
+      { supabase, jobId, templateKey: 'owner_new_request' },
+    )
+  }
+
   return NextResponse.json(
     {
       ok: true,
-      reference: result?.public_reference || null,
+      reference,
+      decision: pricing.decision,
+      orderUrl: orderLink,
     },
     { status: 201 },
   )

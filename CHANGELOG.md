@@ -1,5 +1,46 @@
 # Changelog
 
+## 0.8.0 — 2026-10-12
+
+Instant quotes, online payment and the booking workflow.
+
+- **Pricing** (`lib/pricing.ts`): $500 + GST ($550) for building & pest,
+  building-only and pre-auction inspections when the listing price guide is
+  up to $1.5m, the drive from Mount Eliza is 90 minutes or less (Google
+  Routes) and the preferred date / deadline is at least 3 Victorian business
+  days away. Everything else, and all new homes, goes to a price review.
+- **Quote form**: asks for the price guide and the listing link; an instant
+  price opens the customer's order page.
+- **Order page** (`/order/<private link>`): price, Stripe Checkout payment,
+  then the buyer's situation (5 options) and who to contact for access.
+  Payment is confirmed on return from Stripe and by the webhook; only a
+  "paid" Home Audit session marks a job paid, and the database checks the
+  amount.
+- **Admin**: price review with "send quote", listing and agent details,
+  "Text agent" (opens the phone's messages app, the buyer's situation is never
+  included), "Email customer the date" (date only, no time), Google review
+  request by email or text, and a fresh customer link.
+- **Emails** (Resend, optional): new request and paid alerts to the owner;
+  quote, payment received, booking date and review request to the customer.
+- Shared Stripe account: sessions carry `site_key=home_audit`, so the 137B
+  webhook ignores them and this site ignores 137B's.
+- Migration `20261012100000_instant_quotes_and_booking.sql`.
+- Online quote form requires a Cloudflare Turnstile check (free); without
+  Turnstile keys it stays on the email handoff.
+- Payment safeguards: only one open Stripe payment page per job; the private
+  order link is never sent to Stripe (customers return through
+  `/order/return`); a second payment or a wrong amount is not applied and the
+  owner is emailed to refund or check it; an instant price lapses if the date
+  gets closer than 3 business days before payment.
+- Second review fixes: a payment row is created before the Stripe page, with
+  one pending payment per job, so double clicks or a closed tab cannot charge
+  twice; an already-paid page is detected before a new one opens; the owner's
+  new price closes any page still open at the old price and is never reset
+  by the 3-day rule; only the browser that paid is taken back to the private
+  order page; Google Analytics never sees order links; the booked date is
+  emailed automatically when saved; the owner is told when an instant price
+  lapses into review.
+
 ## 0.7.0 — 2026-10-11
 
 Backend for the admin dashboard, first-party visitor statistics and the

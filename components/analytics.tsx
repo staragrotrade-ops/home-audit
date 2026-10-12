@@ -23,7 +23,11 @@ function VercelWebAnalytics() {
   return (
     <>
       <Script id="vercel-analytics-init" strategy="afterInteractive">
-        {`window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };`}
+        {`window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+window.va('beforeSend', function (event) {
+  // Order links carry a private token: report them without it.
+  return Object.assign({}, event, { url: event.url.replace(/\/order\/[^/?#]+/, '/order/[token]') });
+});`}
       </Script>
       <Script src="/_vercel/insights/script.js" strategy="afterInteractive" />
     </>
@@ -43,8 +47,11 @@ function GoogleAnalytics() {
         {`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 window.gtag = gtag;
-gtag('js', new Date());
-gtag('config', '${measurementId}');`}
+// Private order links and admin pages are never sent to Google.
+if (!/^\/(order|admin)(\/|$)/.test(location.pathname)) {
+  gtag('js', new Date());
+  gtag('config', '${measurementId}');
+}`}
       </Script>
     </>
   )

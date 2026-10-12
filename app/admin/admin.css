@@ -511,3 +511,37 @@ body:has(.admin-shell) .site-footer {
     font-size: 1.3rem;
   }
 }
+
+.admin-workflow {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.admin-step {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.admin-step h4 {
+  font-size: 0.95rem;
+}
+
+.admin-shell .admin-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-shell .admin-inline input {
+  width: 110px;
+}
+
+a.admin-button {
+  display: inline-block;
+  text-decoration: none;
+}
