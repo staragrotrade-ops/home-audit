@@ -160,24 +160,20 @@ export function JobWorkflow(props: Props) {
               Open listing
             </a>
           )}
-          <button
+          {/* Opens Google's AI Mode with the question filled in; it searches the
+              web and answers with the agent's details and sources. */}
+          <a
             className="admin-button"
-            type="button"
-            onClick={() => {
-              const prompt = [
-                `Find the sale listing for ${props.address}${props.agent.listingUrl ? ` (listing: ${props.agent.listingUrl})` : ''} on realestate.com.au.`,
-                'Tell me: the selling agent name, agency, mobile number and email,',
-                'and the price guide. In Victoria also check the Statement of Information for the indicative selling price.',
-                'Say if the price guide is over $1.5 million.',
-              ].join(' ')
-              void navigator.clipboard.writeText(prompt).then(
-                () => setMessage('AI instruction copied. Paste it into Claude in your browser.'),
-                () => setMessage('Could not copy.'),
-              )
-            }}
+            target="_blank"
+            rel="noreferrer"
+            href={`https://www.google.com/search?udm=50&q=${encodeURIComponent(
+              `Who is the selling real estate agent for ${props.address}, Victoria? ` +
+                "Give the agent's name, agency, mobile number and email, and the price guide " +
+                '(check the Statement of Information for the indicative selling price).',
+            )}`}
           >
-            Copy AI listing check
-          </button>
+            Ask Google AI for agent
+          </a>
           {props.agent.phone && (
             <a
               className="admin-button primary"

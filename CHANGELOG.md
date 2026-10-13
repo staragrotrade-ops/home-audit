@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.2 — 2026-10-13
+
+- Admin: "Ask Google AI for agent" opens Google's AI Mode with the property
+  address, asking for the selling agent's name, agency, mobile, email and
+  the price guide. Replaces "Copy AI listing check".
+
 ## 0.8.1 — 2026-10-12
 
 - The customer is emailed straight after asking for a quote: the price and
