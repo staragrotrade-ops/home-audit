@@ -545,3 +545,31 @@ a.admin-button {
   display: inline-block;
   text-decoration: none;
 }
+
+.admin-lookup {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px dashed var(--line);
+  font-size: 0.85rem;
+}
+
+.admin-lookup p {
+  margin: 0 0 4px;
+}
+
+.admin-lookup ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.admin-lookup a {
+  color: var(--eucalyptus);
+  text-decoration: underline;
+}
+
+.admin-xero {
+  margin: 10px 0;
+  font-size: 0.9rem;
+}

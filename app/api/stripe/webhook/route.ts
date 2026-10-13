@@ -5,6 +5,7 @@ import { getStripe } from '@/lib/stripe-server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export const runtime = 'nodejs'
+export const maxDuration = 60
 
 const CHECKOUT_EVENTS = new Set([
   'checkout.session.completed',

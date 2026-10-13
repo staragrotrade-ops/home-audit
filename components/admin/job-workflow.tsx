@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { agentSms, reviewRequestSms } from '@/lib/order-emails'
 import { smsHref } from '@/lib/sms'
 
@@ -50,6 +50,62 @@ export function JobWorkflow(props: Props) {
   const [message, setMessage] = useState('')
   const [link, setLink] = useState('')
   const base = `/api/admin/jobs/${props.jobId}`
+  const agentForm = useRef<HTMLFormElement>(null)
+  const [lookup, setLookup] = useState<null | {
+    confidence: string
+    notes: string
+    sources: { title: string; url: string }[]
+  }>(null)
+
+  // Fills the listing and agent fields from Google AI. Nothing is saved
+  // until the owner checks the details and presses Save.
+  async function findAgent() {
+    setBusy(true)
+    setMessage('Searching… this can take up to 30 seconds.')
+    setLookup(null)
+    const response = await fetch(`${base}/find-agent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}',
+    }).catch(() => null)
+    const data = ((await response?.json().catch(() => ({}))) || {}) as {
+      error?: string
+      result?: {
+        agentName: string
+        agency: string
+        mobile: string
+        email: string
+        priceGuide: string
+        listingUrl: string
+        confidence: string
+        notes: string
+        sources: { title: string; url: string }[]
+      }
+    }
+    setBusy(false)
+    if (!response?.ok || !data.result) {
+      setMessage(data.error || 'The lookup did not work. Try "Ask Google AI for agent" instead.')
+      return
+    }
+    const result = data.result
+    const form = agentForm.current
+    const fill = (name: string, value: string) => {
+      const input = form?.elements.namedItem(name) as HTMLInputElement | null
+      if (input && value) input.value = value
+    }
+    fill('agentName', result.agentName)
+    fill('agentAgency', result.agency)
+    fill('agentPhone', result.mobile)
+    fill('agentEmail', result.email)
+    fill('priceGuide', result.priceGuide)
+    fill('listingUrl', result.listingUrl)
+    setLookup({ confidence: result.confidence, notes: result.notes, sources: result.sources })
+    setMessage(
+      result.agentName || result.mobile
+        ? 'Filled in from Google AI. Check the details, then press Save.'
+        : 'Google AI did not find the agent. Try "Ask Google AI for agent" or the listing.',
+    )
+  }
 
   async function run(action: () => Promise<{ ok: boolean; error?: string }>, done: string) {
     setBusy(true)
@@ -116,10 +172,29 @@ export function JobWorkflow(props: Props) {
               {props.quoteStatus === 'quoted' ? 'Send new price to customer' : 'Send quote to customer'}
             </button>
           </div>
-        </form>
+                {lookup && (
+          <div className="admin-lookup">
+            <p>
+              Confidence: <strong>{lookup.confidence}</strong>
+              {lookup.notes ? ` · ${lookup.notes}` : ''}
+            </p>
+            {lookup.sources.length > 0 && (
+              <ul>
+                {lookup.sources.map((source) => (
+                  <li key={source.url}>
+                    <a href={source.url} target="_blank" rel="noreferrer">
+                      {source.title || 'Source'}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </form>
       )}
 
-      <form className="admin-step" onSubmit={saveAgent}>
+      <form className="admin-step" onSubmit={saveAgent} ref={agentForm}>
         <h4>{props.paid ? '2. Listing and agent' : 'Listing and agent'}</h4>
         <div className="admin-field-row">
           <label>
@@ -155,29 +230,28 @@ export function JobWorkflow(props: Props) {
           <button className="admin-button" type="submit" disabled={busy}>
             Save
           </button>
+          <button className="admin-button primary" type="button" disabled={busy} onClick={() => void findAgent()}>
+            Find agent automatically
+          </button>
           {props.agent.listingUrl && (
             <a className="admin-button" href={props.agent.listingUrl} target="_blank" rel="noreferrer">
               Open listing
             </a>
           )}
-          <button
+          {/* Opens Google's AI Mode with the question filled in; it searches the
+              web and answers with the agent's details and sources. */}
+          <a
             className="admin-button"
-            type="button"
-            onClick={() => {
-              const prompt = [
-                `Find the sale listing for ${props.address}${props.agent.listingUrl ? ` (listing: ${props.agent.listingUrl})` : ''} on realestate.com.au.`,
-                'Tell me: the selling agent name, agency, mobile number and email,',
-                'and the price guide. In Victoria also check the Statement of Information for the indicative selling price.',
-                'Say if the price guide is over $1.5 million.',
-              ].join(' ')
-              void navigator.clipboard.writeText(prompt).then(
-                () => setMessage('AI instruction copied. Paste it into Claude in your browser.'),
-                () => setMessage('Could not copy.'),
-              )
-            }}
+            target="_blank"
+            rel="noreferrer"
+            href={`https://www.google.com/search?udm=50&q=${encodeURIComponent(
+              `Who is the selling real estate agent for ${props.address}, Victoria? ` +
+                "Give the agent's name, agency, mobile number and email, and the price guide " +
+                '(check the Statement of Information for the indicative selling price).',
+            )}`}
           >
-            Copy AI listing check
-          </button>
+            Ask Google AI for agent
+          </a>
           {props.agent.phone && (
             <a
               className="admin-button primary"
