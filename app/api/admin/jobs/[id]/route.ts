@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { adminError, adminJson, requireAdmin } from '@/lib/admin-api'
-import { sendBookingDateEmail } from '@/lib/booking-notify'
+import { saveBookedTime, type BookingEmailResult } from '@/lib/booking-notify'
 import { JOB_STATUSES } from '@/lib/job-status'
 import { readJsonBody } from '@/lib/request-guard'
 
@@ -36,18 +36,11 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     z.uuid().parse(id)
     const input = schema.parse(await readJsonBody(request, 10_000))
 
-    const { data: before } = await supabase
-      .from('jobs')
-      .select('confirmed_start,payment_status')
-      .eq('id', id)
-      .maybeSingle()
-
     const update: Record<string, unknown> = {}
     if (input.status) update.status = input.status
     if (input.archived !== undefined) update.archived_at = input.archived ? new Date().toISOString() : null
     if (input.isTest !== undefined) update.is_test = input.isTest
     if (input.internalNotes !== undefined) update.internal_notes = input.internalNotes.trim() || null
-    if (input.confirmedStart !== undefined) update.confirmed_start = input.confirmedStart || null
     if (input.confirmedEnd !== undefined) update.confirmed_end = input.confirmedEnd || null
     if (input.agentName !== undefined) update.agent_name = input.agentName || null
     if (input.agentAgency !== undefined) update.agent_agency = input.agentAgency || null
@@ -84,27 +77,14 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       event_data: input,
     })
 
-    // A new or changed booking date is emailed to a paid customer straight
-    // away (date only). A change of time on the same day is not re-sent.
-    let bookingEmail: 'sent' | 'not_sent' | 'unchanged' = 'unchanged'
-    let bookingEmailError = ''
-    if (input.confirmedStart && before?.payment_status === 'paid') {
-      const day = (iso: string | null) =>
-        iso
-          ? new Intl.DateTimeFormat('en-CA', { timeZone: 'Australia/Melbourne' }).format(new Date(iso))
-          : ''
-      if (day(input.confirmedStart) !== day(before.confirmed_start)) {
-        try {
-          await sendBookingDateEmail(supabase, id)
-          bookingEmail = 'sent'
-        } catch (error) {
-          bookingEmail = 'not_sent'
-          bookingEmailError = error instanceof Error ? error.message : 'Email failed.'
-        }
-      }
+    // The booked time goes through one helper, which also closes any agent
+    // booking request still open and emails a paid customer a new date.
+    let booking: BookingEmailResult = { bookingEmail: 'unchanged', bookingEmailError: '' }
+    if (input.confirmedStart !== undefined) {
+      booking = await saveBookedTime(supabase, id, input.confirmedStart || null)
     }
 
-    return adminJson({ ok: true, bookingEmail, bookingEmailError })
+    return adminJson({ ok: true, ...booking })
   } catch (error) {
     return adminError(error, 'Unable to update the job.')
   }

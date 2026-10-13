@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.10.0 — 2026-10-14
+
+- New "Arrange a time" step in each paid job. Offer up to three times to the
+  agent (or the customer's access contact) by email or text. The message has
+  a private link; when they press a time, it is saved to the job, the
+  customer is emailed the date (not the time) and the owner is emailed. They
+  can also say none suit and leave a note.
+- The agent sees the buyer's name in the email, the text and the booking
+  page (and in the existing "Text agent" message). The buyer's contact
+  details and situation are not shown.
+- An agreed time can still be entered by hand in the same step. Saving it
+  closes any request still waiting for a reply.
+- The booked time is no longer edited in the job editor, so it cannot be
+  overwritten by saving notes or status.
+- Fixed: the inline Google Analytics and Vercel Analytics setup scripts had
+  broken regular expressions (lost backslashes), so GA never started and
+  private links were not stripped before reaching Vercel Analytics.
+- Booking links are kept out of search engines and analytics.
+- Needs Supabase migration `20261014100000_booking_requests.sql`.
+
+## 0.9.2 — 2026-10-13
+
+- The phone number 03 7047 8366 is now shown on the site: in the header
+  (tap to call on mobile), the footer, the quote page, the order pages and
+  the sign-off of customer emails. It is also added to the Organization
+  structured data.
+
 ## 0.9.1 — 2026-10-13
 
 - Google redirect links (google.com/goto, google.com/url and similar) are no

@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 import { ExclusionToggle } from '@/components/admin/exclusion-toggle'
 import { JobEditor } from '@/components/admin/job-editor'
 import { JobWorkflow } from '@/components/admin/job-workflow'
+import type { BookingRequestSummary } from '@/components/admin/booking-panel'
 import { StaffManager } from '@/components/admin/staff-manager'
 import { XeroSyncButton } from '@/components/admin/xero-sync-button'
 import {
@@ -362,6 +363,22 @@ export default async function AdminPage({
       last_error: string | null
     }[]).map((row) => [row.job_id, row]),
   )
+  // Booking requests per paid job. Read separately so the page still works
+  // before the booking requests migration is applied.
+  const { data: requestRows, error: requestError } = paidIds.length
+    ? await supabase
+        .from('booking_requests')
+        .select(
+          'id,job_id,channel,recipient_name,recipient_email,recipient_phone,status,slots,chosen_start,reply_message,created_at,expires_at',
+        )
+        .in('job_id', paidIds)
+        .order('created_at', { ascending: false })
+    : { data: [], error: null }
+  const bookingTableMissing = Boolean(requestError && /booking_requests/.test(requestError.message))
+  const requestsByJob = new Map<string, BookingRequestSummary[]>()
+  for (const row of (requestRows || []) as (BookingRequestSummary & { job_id: string })[]) {
+    requestsByJob.set(row.job_id, [...(requestsByJob.get(row.job_id) || []), row])
+  }
   const xeroMissing = xeroSetupMissing()
   const xeroOrg = xeroMissing.length ? null : await xeroConnectionName(supabase).catch(() => null)
   const xeroNotice = params.xero || ''
@@ -816,11 +833,19 @@ export default async function AdminPage({
                         .map(formatDate)
                         .join(' or ')}
                       customerFirstName={customer.first_name || ''}
+                      customerName={[customer.first_name, customer.last_name].filter(Boolean).join(' ')}
                       customerMobile={customer.mobile || ''}
                       confirmedStart={job.confirmed_start}
                       bookingNotifiedAt={job.booking_notified_at}
                       reviewRequestedAt={job.review_requested_at}
                       agentTextedAt={job.agent_texted_at}
+                      bookingRequests={requestsByJob.get(job.id) || []}
+                      bookingTableMissing={bookingTableMissing}
+                      accessOther={
+                        job.access_choice === 'other' && job.access_other_name
+                          ? { name: job.access_other_name, phone: job.access_other_phone || '' }
+                          : null
+                      }
                       reviewUrl={process.env.GOOGLE_REVIEW_URL || ''}
                       agent={{
                         name: job.agent_name || '',
@@ -841,7 +866,6 @@ export default async function AdminPage({
                       archived={Boolean(job.archived_at)}
                       isTest={job.is_test}
                       internalNotes={job.internal_notes || ''}
-                      confirmedStart={job.confirmed_start}
                     />
                   </div>
                 </details>

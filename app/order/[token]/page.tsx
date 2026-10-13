@@ -7,7 +7,7 @@ import { ACCESS_CHOICE_LABELS, BUYER_SITUATION_LABELS, type AccessChoice, type B
 import { inspectionDateLabel } from '@/lib/order-emails'
 import { addressOf, centsOf, instantPriceExpired, isPayable, loadOrder, type OrderJob } from '@/lib/orders'
 import { formatAud } from '@/lib/pricing'
-import { CONTACT_EMAIL } from '@/lib/site'
+import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_HREF } from '@/lib/site'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export const dynamic = 'force-dynamic'
@@ -70,7 +70,8 @@ export default async function OrderPage({
           <section className="quote-panel">
             <h2>This order has been cancelled</h2>
             <p>
-              Questions? Email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+              Questions? Call <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a> or email{' '}
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
             </p>
           </section>
         ) : !paid && job.quote_status !== 'quoted' ? (
@@ -159,7 +160,8 @@ export default async function OrderPage({
         )}
 
         <p className="order-hint">
-          Questions? Email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+          Questions? Call <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a> or email{' '}
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
         </p>
       </div>
     </main>

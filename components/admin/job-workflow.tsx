@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
+import { BookingPanel, type BookingRequestSummary } from '@/components/admin/booking-panel'
 import { agentSms, reviewRequestSms } from '@/lib/order-emails'
 import { isRedirectLink } from '@/lib/listing-url'
 import { smsHref } from '@/lib/sms'
@@ -14,11 +15,15 @@ type Props = {
   service: string
   dateHint: string
   customerFirstName: string
+  customerName: string
   customerMobile: string
   confirmedStart: string | null
   bookingNotifiedAt: string | null
   reviewRequestedAt: string | null
   agentTextedAt: string | null
+  bookingRequests: BookingRequestSummary[]
+  bookingTableMissing: boolean
+  accessOther: { name: string; phone: string } | null
   reviewUrl: string
   agent: {
     name: string
@@ -153,6 +158,7 @@ export function JobWorkflow(props: Props) {
 
   const agentText = agentSms({
     agentName: props.agent.name,
+    buyerName: props.customerName,
     address: props.address,
     dateHint: props.dateHint,
     service: props.service,
@@ -273,24 +279,26 @@ export function JobWorkflow(props: Props) {
       </form>
 
       {props.paid && (
-        <div className="admin-step">
-          <h4>3. Booked date</h4>
-          <p className="admin-muted">
-            Enter the booked date and time below and press Save: the customer is emailed the date
-            automatically (not the time). Use this button only to send it again.
-          </p>
-          <div className="admin-actions">
-            <button
-              className="admin-button primary"
-              type="button"
-              disabled={busy || !props.confirmedStart}
-              onClick={() => void run(() => call(`${base}/booking-email`, 'POST'), 'Date emailed to the customer.')}
-            >
-              Email the date again
-            </button>
-            {props.bookingNotifiedAt && <span className="admin-inline-message">Customer emailed</span>}
-          </div>
-        </div>
+        <BookingPanel
+          jobId={props.jobId}
+          service={props.service}
+          confirmedStart={props.confirmedStart}
+          bookingNotifiedAt={props.bookingNotifiedAt}
+          requests={props.bookingRequests}
+          tableMissing={props.bookingTableMissing}
+          contacts={[
+            {
+              key: 'agent',
+              label: 'Agent',
+              name: props.agent.name,
+              email: props.agent.email,
+              phone: props.agent.phone,
+            },
+            ...(props.accessOther
+              ? [{ key: 'other', label: 'Customer’s access contact', name: props.accessOther.name, email: '', phone: props.accessOther.phone }]
+              : []),
+          ]}
+        />
       )}
 
       {props.paid && (

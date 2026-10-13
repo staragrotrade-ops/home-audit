@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { CONTACT_EMAIL } from '@/lib/site'
+import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_HREF } from '@/lib/site'
 
 export const metadata: Metadata = {
   title: { absolute: 'Payment not completed | Home Audit' },
@@ -22,7 +22,8 @@ export default async function OrderCancelledPage({
             for access.
           </p>
           <p>
-            Questions? Email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+            Questions? Call <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a> or email{' '}
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
           </p>
         </div>
       </main>
@@ -38,7 +39,8 @@ export default async function OrderCancelledPage({
             : 'No payment was taken. To pay later, use the link in the email we sent you, or go back to the previous page.'}
         </p>
         <p>
-          Questions? Email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+          Questions? Call <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a> or email{' '}
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
         </p>
       </div>
     </main>

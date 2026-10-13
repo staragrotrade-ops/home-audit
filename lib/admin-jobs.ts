@@ -8,6 +8,7 @@ export type AdminJobContact = {
   payment_status: string
   quote_status: string
   confirmed_start: string | null
+  is_test: boolean
   customer_snapshot: Record<string, string | null>
   property_snapshot: Record<string, string | null>
 }
@@ -15,7 +16,7 @@ export type AdminJobContact = {
 export async function loadJobContact(supabase: SupabaseClient, id: string) {
   const { data, error } = await supabase
     .from('jobs')
-    .select('id,public_reference,status,payment_status,quote_status,confirmed_start,customer_snapshot,property_snapshot')
+    .select('id,public_reference,status,payment_status,quote_status,confirmed_start,is_test,customer_snapshot,property_snapshot')
     .eq('id', id)
     .maybeSingle()
   if (error || !data) throw new Error('Job not found.')

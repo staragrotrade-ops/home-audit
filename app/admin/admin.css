@@ -573,3 +573,35 @@ a.admin-button {
   margin: 10px 0;
   font-size: 0.9rem;
 }
+
+.admin-booking-requests {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  font-size: 0.88rem;
+}
+
+.admin-booking-requests li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line, #e3e7e2);
+}
+
+.admin-booking-requests em {
+  font-style: normal;
+  font-size: 0.8rem;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--sage);
+}
+
+.admin-booking-requests em.good {
+  background: #d8eadf;
+}
+
+.admin-booking-requests em.warn {
+  background: var(--sand-light);
+}
