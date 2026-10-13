@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { PRIMARY_NAV } from '@/lib/site'
+import { CONTACT_PHONE, CONTACT_PHONE_HREF, PRIMARY_NAV } from '@/lib/site'
 
 export function SiteHeader() {
   return (
@@ -23,9 +23,14 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <Link className="button button-small header-cta" href="/quote">
-          Get a quote
-        </Link>
+        <div className="header-actions">
+          <a className="header-phone" href={CONTACT_PHONE_HREF} aria-label={`Call ${CONTACT_PHONE}`}>
+            {CONTACT_PHONE}
+          </a>
+          <Link className="button button-small header-cta" href="/quote">
+            Get a quote
+          </Link>
+        </div>
 
         <details className="mobile-menu">
           <summary aria-label="Open navigation">Menu</summary>

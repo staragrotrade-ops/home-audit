@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.2 — 2026-10-13
+
+- The phone number 03 7047 8366 is now shown on the site: in the header
+  (tap to call on mobile), the footer, the quote page, the order pages and
+  the sign-off of customer emails. It is also added to the Organization
+  structured data.
+
 ## 0.9.1 — 2026-10-13
 
 - Google redirect links (google.com/goto, google.com/url and similar) are no

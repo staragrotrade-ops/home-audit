@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { QuoteRequest } from '@/lib/quote-schema'
 import { PRICE_GUIDE_BANDS } from '@/lib/booking-options'
 import { earliestInstantDate } from '@/lib/pricing'
-import { CONTACT_EMAIL } from '@/lib/site'
+import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_HREF } from '@/lib/site'
 import { currentVisitId, trackVisitorEvent } from '@/lib/visitor-analytics'
 import { Turnstile } from '@/components/turnstile'
 import { isRedirectLink } from '@/lib/listing-url'
@@ -535,7 +535,8 @@ export function QuoteFlow({
           )}
           <p>
             We will check the details and email you a price, with a link to pay
-            online. Questions in the meantime? <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+            online. Questions in the meantime? Call <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a> or email{' '}
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
           </p>
           <button className="button button-secondary" type="button" onClick={clearDraft}>
             Start another request

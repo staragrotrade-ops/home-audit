@@ -171,6 +171,23 @@ h3 {
   text-transform: uppercase;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.header-phone {
+  color: var(--eucalyptus);
+  font-size: 0.95rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.header-phone:hover {
+  text-decoration: underline;
+}
+
 .desktop-nav {
   display: flex;
   justify-content: center;
@@ -2655,8 +2672,13 @@ button:focus-visible {
   }
 
   .header-inner {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr auto auto;
     min-height: 70px;
+    gap: 14px;
+  }
+
+  .header-phone {
+    font-size: 0.86rem;
   }
 
   .desktop-nav,

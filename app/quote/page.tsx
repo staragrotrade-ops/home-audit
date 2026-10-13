@@ -1,6 +1,6 @@
 import { QuoteFlow } from '@/components/quote-flow'
 import { pageMetadata } from '@/lib/metadata'
-import { CONTACT_EMAIL } from '@/lib/site'
+import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_HREF } from '@/lib/site'
 
 export const metadata = pageMetadata({
   title: 'Inspection Quote',
@@ -34,8 +34,8 @@ export default async function QuotePage({ searchParams }: QuotePageProps) {
             Dates remain preferences until confirmed.
           </p>
           <p className="quote-contact">
-            Prefer email? Write to{' '}
-            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+            Prefer to talk? Call <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a> or
+            email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
           </p>
         </div>
         <QuoteFlow

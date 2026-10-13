@@ -7,6 +7,7 @@ import { VisitorTracker } from '@/components/visitor-tracker'
 import {
   COMPANY_ACN,
   COMPANY_NAME,
+  CONTACT_EMAIL,
   INSPECTOR_NAME,
   INSPECTOR_REGISTRATION,
   INSPECTOR_REGISTRATION_CLASS,
@@ -89,6 +90,8 @@ const structuredData = {
       legalName: COMPANY_NAME,
       identifier: `ACN ${COMPANY_ACN}`,
       url: `${SITE_URL}/`,
+      telephone: '+61 3 7047 8366',
+      email: CONTACT_EMAIL,
       areaServed: [
         { '@type': 'City', name: 'Melbourne' },
         { '@type': 'AdministrativeArea', name: 'Victoria' },

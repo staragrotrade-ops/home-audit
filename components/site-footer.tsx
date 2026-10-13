@@ -1,5 +1,11 @@
 import Link from 'next/link'
-import { COMPANY_ACN, COMPANY_NAME, CONTACT_EMAIL } from '@/lib/site'
+import {
+  COMPANY_ACN,
+  COMPANY_NAME,
+  CONTACT_EMAIL,
+  CONTACT_PHONE,
+  CONTACT_PHONE_HREF,
+} from '@/lib/site'
 
 export function SiteFooter() {
   return (
@@ -27,6 +33,7 @@ export function SiteFooter() {
         <div>
           <h2>Information</h2>
           <Link href="/quote">Get a quote</Link>
+          <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a>
           <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
           <Link href="/about">About Home Audit</Link>
           <Link href="/credentials">Credentials &amp; insurance</Link>

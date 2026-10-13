@@ -1,9 +1,9 @@
 // Plain-text emails for the quote, payment and booking steps.
 import type { EmailMessage } from '@/lib/email'
 import { formatAud } from '@/lib/pricing'
-import { CONTACT_EMAIL, SITE_URL } from '@/lib/site'
+import { CONTACT_EMAIL, CONTACT_PHONE, SITE_URL } from '@/lib/site'
 
-const SIGN_OFF = `Home Audit\n${CONTACT_EMAIL}\n${SITE_URL}`
+const SIGN_OFF = `Home Audit\n${CONTACT_PHONE}\n${CONTACT_EMAIL}\n${SITE_URL}`
 
 export function inspectionDateLabel(iso: string) {
   return new Intl.DateTimeFormat('en-AU', {
