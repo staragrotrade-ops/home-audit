@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.10.1 — 2026-10-13
+
+- "Text times" is now "Generate text": the dashboard only prepares the text.
+  It shows the text once (no second copy of the link), its length, an "Open
+  in messages app" button and "Copy text". The request list says "Text
+  generated for", not "Texted"; the same for "Generate text to agent" and
+  "Generate review text".
+- Texts no longer contain "&": some phones cut the message at "&" when it
+  comes through an sms: link (it showed "Building" and stopped). "&", curly
+  quotes, dashes and special spaces are replaced with plain characters in
+  every text.
+- Shorter booking text and a shorter link (24 characters instead of 43):
+  about 230 characters, two standard texts that arrive as one message.
+
 ## 0.10.0 — 2026-10-14
 
 - New "Arrange a time" step in each paid job. Offer up to three times to the

@@ -271,10 +271,10 @@ export function JobWorkflow(props: Props) {
               href={smsHref(props.agent.phone, agentText)}
               onClick={() => void call(base, 'PATCH', { agentTexted: true }).then(() => router.refresh())}
             >
-              Text agent
+              Generate text to agent
             </a>
           )}
-          {props.agentTextedAt && <span className="admin-inline-message">Texted</span>}
+          {props.agentTextedAt && <span className="admin-inline-message">Text generated</span>}
         </div>
       </form>
 
@@ -321,7 +321,7 @@ export function JobWorkflow(props: Props) {
                 href={smsHref(props.customerMobile, reviewText)}
                 onClick={() => void call(`${base}/review-request`, 'POST', { channel: 'sms' }).then(() => router.refresh())}
               >
-                Text review request
+                Generate review text
               </a>
             )}
             {props.reviewRequestedAt && <span className="admin-inline-message">Requested</span>}

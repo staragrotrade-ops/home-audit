@@ -2,7 +2,7 @@
 // (or another access contact) with a private link. The reply updates the job.
 import { randomBytes } from 'node:crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { hashToken, isTokenShape } from '@/lib/access-tokens'
+import { hashToken } from '@/lib/access-tokens'
 import { audit, jobAddress, loadJobContact } from '@/lib/admin-jobs'
 import { saveBookedTime } from '@/lib/booking-notify'
 import { validSlots } from '@/lib/booking-slots'
@@ -29,6 +29,11 @@ export type BookingRequestRow = {
 
 export const BOOKING_REQUEST_FIELDS =
   'id,job_id,slots,channel,service_label,recipient_name,recipient_email,recipient_phone,status,chosen_start,reply_message,created_at,responded_at,expires_at'
+
+// 24 characters; 43 for the first links sent on 13 October 2026.
+export function isBookingTokenShape(token: string) {
+  return /^[A-Za-z0-9_-]{24}$/.test(token) || /^[A-Za-z0-9_-]{43}$/.test(token)
+}
 
 export function bookingRequestUrl(token: string) {
   return `${SITE_URL}/booking/${token}`
@@ -57,7 +62,8 @@ export async function createBookingRequest(
   if (input.channel === 'email' && !input.recipientEmail) throw new Error('Enter the email address first.')
   if (input.channel === 'sms' && !input.recipientPhone) throw new Error('Enter the mobile number first.')
 
-  const token = randomBytes(32).toString('base64url')
+  // 18 random bytes (144 bits) keep the link short enough for a text.
+  const token = randomBytes(18).toString('base64url')
   const { data, error } = await supabase
     .from('booking_requests')
     .insert({
@@ -115,7 +121,7 @@ export async function createBookingRequest(
 }
 
 export async function loadBookingRequest(supabase: SupabaseClient, token: string) {
-  if (!isTokenShape(token)) return null
+  if (!isBookingTokenShape(token)) return null
   const { data } = await supabase
     .from('booking_requests')
     .select(BOOKING_REQUEST_FIELDS)
