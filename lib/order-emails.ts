@@ -2,6 +2,7 @@
 import type { EmailMessage } from '@/lib/email'
 import { formatAud } from '@/lib/pricing'
 import { CONTACT_EMAIL, CONTACT_PHONE, SITE_URL } from '@/lib/site'
+import { smsSafe } from '@/lib/sms'
 
 const SIGN_OFF = `Home Audit\n${CONTACT_PHONE}\n${CONTACT_EMAIL}\n${SITE_URL}`
 
@@ -207,18 +208,23 @@ export function slotLabel(iso: string) {
     .replace(/\b(am|pm)\b/i, (part) => part.toLowerCase())
 }
 
-function shortSlotLabel(iso: string) {
-  return new Intl.DateTimeFormat('en-AU', {
-    timeZone: 'Australia/Melbourne',
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  })
-    .format(new Date(iso))
-    .replace(/\b(am|pm)\b/i, (part) => part.toLowerCase())
+// Short form for texts: "Tue 21 Oct 10am", "Wed 22 Oct 2:30pm".
+export function shortSlotLabel(iso: string) {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-AU', {
+      timeZone: 'Australia/Melbourne',
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    })
+      .formatToParts(new Date(iso))
+      .map((part) => [part.type, part.value]),
+  )
+  const minutes = parts.minute === '00' ? '' : `:${parts.minute}`
+  return `${parts.weekday} ${parts.day} ${parts.month} ${parts.hour}${minutes}${String(parts.dayPeriod || '').toLowerCase()}`
 }
 
 function buyerPhrase(buyerName: string) {
@@ -261,6 +267,7 @@ ${SIGN_OFF}`,
   }
 }
 
+// Kept short and in plain characters (see smsSafe in lib/sms.ts).
 export function bookingRequestSms(input: {
   recipientName: string
   buyerName: string
@@ -273,7 +280,10 @@ export function bookingRequestSms(input: {
   const times = input.slots.map(shortSlotLabel)
   const choice =
     times.length === 1 ? times[0] : `${times.slice(0, -1).join(', ')} or ${times[times.length - 1]}`
-  return `Hi${first ? ` ${first}` : ''}, this is Home Audit. We have been engaged by ${buyerPhrase(input.buyerName)} to do a ${input.service.toLowerCase()} at ${input.address}. Would ${choice} work for access? Tap to confirm or suggest another time: ${input.url}`
+  const buyer = input.buyerName ? ` for buyer ${input.buyerName}` : ''
+  return smsSafe(
+    `Hi${first ? ` ${first}` : ''}, Home Audit here. We are inspecting ${input.address}${buyer}. Can we access ${choice}? Please confirm here: ${input.url}`,
+  )
 }
 
 export function ownerBookingReplyEmail(input: {

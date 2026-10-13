@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
-import { smsHref } from '@/lib/sms'
+import { smsHref, smsParts } from '@/lib/sms'
 
 export type BookingRequestSummary = {
   id: string
@@ -41,7 +41,7 @@ function toLocalInput(value: string | null) {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
 }
 
-const CHANNEL_LABELS = { email: 'Emailed', sms: 'Texted', link: 'Link for' } as const
+const CHANNEL_LABELS = { email: 'Emailed', sms: 'Text generated for', link: 'Link generated for' } as const
 
 export function BookingPanel(props: {
   jobId: string
@@ -57,7 +57,7 @@ export function BookingPanel(props: {
   const form = useRef<HTMLFormElement>(null)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
-  const [link, setLink] = useState<{ url: string; text: string } | null>(null)
+  const [link, setLink] = useState<{ url: string; text: string; phone: string } | null>(null)
   const first = props.contacts[0]
 
   async function call(url: string, method: string, body?: unknown) {
@@ -111,13 +111,15 @@ export function BookingPanel(props: {
       setMessage(result.error || 'Could not create the request.')
       return
     }
-    setLink({ url: result.url, text: result.smsText || '' })
-    if (channel === 'sms' && result.smsText) {
-      setMessage('Your messages app should open with the text ready. If not, copy it below.')
-      window.location.href = smsHref(phone, result.smsText)
-    } else {
-      setMessage(channel === 'email' ? 'Times emailed.' : 'Link created: copy it below.')
-    }
+    // A text is only generated here: the owner sends it from their phone.
+    setLink({ url: result.url, text: result.smsText || '', phone })
+    setMessage(
+      channel === 'email'
+        ? 'Times emailed.'
+        : channel === 'sms'
+          ? 'Text generated. Open it in your messages app or copy it, then send it.'
+          : 'Link generated: copy it below.',
+    )
     router.refresh()
   }
 
@@ -251,16 +253,39 @@ export function BookingPanel(props: {
               Email times
             </button>
             <button className="admin-button primary" type="button" disabled={busy} onClick={() => void sendRequest('sms')}>
-              Text times
+              Generate text
             </button>
             <button className="admin-button" type="button" disabled={busy} onClick={() => void sendRequest('link')}>
-              Just make a link
+              Generate link only
             </button>
           </div>
           {link && (
             <div className="admin-secret">
-              {link.text && <p>{link.text}</p>}
-              <code>{link.url}</code>
+              {link.text ? (
+                <>
+                  <p>{link.text}</p>
+                  <p className="admin-muted">
+                    {link.text.length} characters · {smsParts(link.text)} standard{' '}
+                    {smsParts(link.text) === 1 ? 'text' : 'texts, delivered as one message'}
+                  </p>
+                  <div className="admin-actions">
+                    {link.phone && (
+                      <a className="admin-button primary" href={smsHref(link.phone, link.text)}>
+                        Open in messages app
+                      </a>
+                    )}
+                    <button
+                      className="admin-button"
+                      type="button"
+                      onClick={() => void navigator.clipboard?.writeText(link.text).then(() => setMessage('Text copied.'))}
+                    >
+                      Copy text
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <code>{link.url}</code>
+              )}
             </div>
           )}
         </form>

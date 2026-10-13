@@ -93,3 +93,26 @@ test('inline analytics scripts are valid JavaScript and skip private pages', asy
   assert.ok(skip.test('/booking/abc') && skip.test('/order/abc') && skip.test('/admin'))
   assert.ok(!skip.test('/guides'))
 })
+
+test('texts use plain characters: no "&" (phones cut the text there), no curly quotes', async () => {
+  const { smsSafe, smsParts, smsHref } = await import('../lib/sms.ts')
+  assert.equal(smsSafe('Building & pest “inspection” – 10:00 am'), 'Building and pest "inspection" - 10:00 am')
+  assert.doesNotMatch(decodeURIComponent(smsHref('0412 345 678', 'A & B').split('body=')[1]), /&/)
+  assert.equal(smsParts('x'.repeat(160)), 1)
+  assert.equal(smsParts('x'.repeat(161)), 2)
+  assert.equal(smsParts('x'.repeat(306)), 2)
+
+  const emails = await source('lib/order-emails.ts')
+  assert.match(emails, /return smsSafe\(/)
+  const lib = await source('lib/booking-requests.ts')
+  assert.match(lib, /randomBytes\(18\)/)
+})
+
+test('the dashboard generates texts; it does not claim to send them', async () => {
+  const panel = await source('components/admin/booking-panel.tsx')
+  assert.match(panel, /Generate text/)
+  assert.match(panel, /sms: 'Text generated for'/)
+  assert.doesNotMatch(panel, /window\.location\.href = smsHref/)
+  const workflow = await source('components/admin/job-workflow.tsx')
+  assert.doesNotMatch(workflow, />Texted</)
+})
