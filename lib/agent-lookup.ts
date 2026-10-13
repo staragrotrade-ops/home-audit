@@ -1,3 +1,5 @@
+import { isRedirectLink } from './listing-url.ts'
+
 // Server-only. Asks Gemini, with Google Search grounding, who the selling
 // agent is for an address. The owner checks the answer before saving it.
 const API = 'https://generativelanguage.googleapis.com/v1beta/models'
@@ -42,7 +44,7 @@ export function parseAgentAnswer(answer: string): Omit<AgentLookup, 'sources'> {
     mobile: text(data.mobile, 40).replace(/[^0-9+() -]/g, ''),
     email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text(data.email, 180)) ? text(data.email, 180) : '',
     priceGuide: text(data.priceGuide, 160),
-    listingUrl: /^https?:\/\/\S+$/.test(listingUrl) ? listingUrl : '',
+    listingUrl: /^https?:\/\/\S+$/.test(listingUrl) && !isRedirectLink(listingUrl) ? listingUrl : '',
     confidence: confidence === 'high' || confidence === 'medium' ? confidence : 'low',
     notes: text(data.notes, 400),
   }

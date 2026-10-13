@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.1 — 2026-10-13
+
+- Google redirect links (google.com/goto, google.com/url and similar) are no
+  longer accepted as the listing link in the quote form: the customer is
+  asked to copy the link from realestate.com.au or domain.com.au, or leave
+  it blank. The agent lookup ignores them too, and the dashboard flags an
+  existing one.
+
 ## 0.9.0 — 2026-10-13
 
 - Admin: "Find agent automatically" asks Google AI (Gemini with Google Search)
