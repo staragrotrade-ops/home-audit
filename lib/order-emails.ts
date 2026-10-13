@@ -119,9 +119,15 @@ export function reviewRequestSms(firstName: string, reviewUrl: string) {
 }
 
 // The buyer's situation is never included: it is private to the buyer.
-export function agentSms(input: { agentName: string; address: string; dateHint: string; service: string }) {
+export function agentSms(input: {
+  agentName: string
+  buyerName: string
+  address: string
+  dateHint: string
+  service: string
+}) {
   const greeting = input.agentName ? `Hi ${input.agentName.split(' ')[0]}` : 'Hi'
-  return `${greeting}, this is Home Audit. We have been engaged to do a ${input.service.toLowerCase()} at ${input.address}. Could you let us know a time that suits for access${input.dateHint ? `, ideally ${input.dateHint}` : ''}? Thank you.`
+  return `${greeting}, this is Home Audit. We have been engaged by ${buyerPhrase(input.buyerName)} to do a ${input.service.toLowerCase()} at ${input.address}. Could you let us know a time that suits for access${input.dateHint ? `, ideally ${input.dateHint}` : ''}? Thank you.`
 }
 
 export function ownerPaymentProblemEmail(input: {
@@ -215,15 +221,20 @@ function shortSlotLabel(iso: string) {
     .replace(/\b(am|pm)\b/i, (part) => part.toLowerCase())
 }
 
+function buyerPhrase(buyerName: string) {
+  return buyerName ? `the buyer, ${buyerName}` : 'the buyer'
+}
+
 function firstNameOf(name: string) {
   return name.trim().split(/\s+/)[0] || ''
 }
 
-// The buyer's name and situation are not included: the agent only needs the
-// property and the times.
+// The agent sees the buyer's name, so they know whose inspection it is. The
+// buyer's situation is never included.
 export function bookingRequestEmail(input: {
   to: string
   recipientName: string
+  buyerName: string
   address: string
   service: string
   slots: string[]
@@ -236,7 +247,7 @@ export function bookingRequestEmail(input: {
     subject: `Inspection access – ${input.address}`,
     text: `Hi${first ? ` ${first}` : ''},
 
-Home Audit has been engaged to do a ${input.service.toLowerCase()} at ${input.address} for the buyer.
+Home Audit has been engaged to do a ${input.service.toLowerCase()} at ${input.address} for ${buyerPhrase(input.buyerName)}.
 
 Could one of these times work for access?
 ${times}
@@ -252,6 +263,7 @@ ${SIGN_OFF}`,
 
 export function bookingRequestSms(input: {
   recipientName: string
+  buyerName: string
   address: string
   service: string
   slots: string[]
@@ -261,7 +273,7 @@ export function bookingRequestSms(input: {
   const times = input.slots.map(shortSlotLabel)
   const choice =
     times.length === 1 ? times[0] : `${times.slice(0, -1).join(', ')} or ${times[times.length - 1]}`
-  return `Hi${first ? ` ${first}` : ''}, this is Home Audit. We have been engaged to do a ${input.service.toLowerCase()} at ${input.address}. Would ${choice} work for access? Tap to confirm or suggest another time: ${input.url}`
+  return `Hi${first ? ` ${first}` : ''}, this is Home Audit. We have been engaged by ${buyerPhrase(input.buyerName)} to do a ${input.service.toLowerCase()} at ${input.address}. Would ${choice} work for access? Tap to confirm or suggest another time: ${input.url}`
 }
 
 export function ownerBookingReplyEmail(input: {

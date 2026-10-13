@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { AgentResponse } from '@/components/booking/agent-response'
 import { jobAddress, loadJobContact } from '@/lib/admin-jobs'
-import { loadBookingRequest, requestIsOpen } from '@/lib/booking-requests'
+import { buyerNameOf, loadBookingRequest, requestIsOpen } from '@/lib/booking-requests'
 import { slotLabel } from '@/lib/order-emails'
 import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_HREF } from '@/lib/site'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
@@ -36,7 +36,8 @@ function Closed({ heading, text }: { heading: string; text: string }) {
 }
 
 // The page the agent (or other access contact) opens from our email or text.
-// It shows only the property and the proposed times.
+// It shows the property, the buyer's name and the proposed times; never the
+// buyer's contact details or situation.
 export default async function BookingRequestPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
   const supabase = getSupabaseAdmin()
@@ -50,6 +51,7 @@ export default async function BookingRequestPage({ params }: { params: Promise<{
     return <Closed heading="This request has closed" text="The inspection is no longer needed. Thank you." />
   }
   const address = jobAddress(job)
+  const buyer = buyerNameOf(job.customer_snapshot)
 
   if (request.status === 'confirmed' && request.chosen_start) {
     return (
@@ -79,8 +81,8 @@ export default async function BookingRequestPage({ params }: { params: Promise<{
         {request.service_label && <p className="order-service">{request.service_label}</p>}
         <section className="quote-panel">
           <p>
-            Home Audit has been engaged by the buyer to inspect this property. Please choose a time that
-            works for access.
+            Home Audit has been engaged by the buyer{buyer ? `, ${buyer},` : ''} to inspect this property.
+            Please choose a time that works for access.
           </p>
           <AgentResponse
             token={token}

@@ -45,8 +45,9 @@ test('agent reply: POST from the page only, same-origin and rate limited', async
   const page = await source('app/booking/[token]/page.tsx')
   assert.match(page, /robots: \{ index: false, follow: false \}/)
   assert.match(page, /referrer: 'no-referrer'/)
-  // The agent sees the property and times, not the buyer's details.
-  assert.doesNotMatch(page, /customer_snapshot|first_name|buyer_situation/)
+  // The agent sees the buyer's name, but not their contact details or situation.
+  assert.match(page, /buyerNameOf\(job\.customer_snapshot\)/)
+  assert.doesNotMatch(page, /customer_snapshot\.(email|mobile)|buyer_situation/)
 })
 
 test('a manual booked time closes open requests; the editor no longer sends the time', async () => {
@@ -56,13 +57,17 @@ test('a manual booked time closes open requests; the editor no longer sends the 
   assert.doesNotMatch(editor, /confirmedStart/)
 })
 
-test('agent email and text do not include the buyer', async () => {
+test('agent email and text name the buyer but not their situation or contacts', async () => {
   const emails = await source('lib/order-emails.ts')
   const start = emails.indexOf('export function bookingRequestEmail')
   const end = emails.indexOf('export function ownerBookingReplyEmail')
   const block = emails.slice(start, end)
   assert.ok(start > 0 && end > start)
-  assert.doesNotMatch(block, /\bfirstName\b|customer|situation/)
+  assert.match(block, /buyerPhrase\(input\.buyerName\)/)
+  assert.doesNotMatch(block, /situation|mobile|customer/)
+
+  const lib = await source('lib/booking-requests.ts')
+  assert.match(lib, /\[customer\?\.first_name, customer\?\.last_name\]/)
 })
 
 test('booking links stay out of analytics and search', async () => {

@@ -34,6 +34,10 @@ export function bookingRequestUrl(token: string) {
   return `${SITE_URL}/booking/${token}`
 }
 
+export function buyerNameOf(customer: Record<string, string | null> | null) {
+  return [customer?.first_name, customer?.last_name].filter(Boolean).join(' ').trim()
+}
+
 export async function createBookingRequest(
   supabase: SupabaseClient,
   jobId: string,
@@ -78,7 +82,14 @@ export async function createBookingRequest(
 
   const url = bookingRequestUrl(token)
   const address = jobAddress(job)
-  const details = { recipientName: input.recipientName, address, service: input.service, slots, url }
+  const details = {
+    recipientName: input.recipientName,
+    buyerName: buyerNameOf(job.customer_snapshot),
+    address,
+    service: input.service,
+    slots,
+    url,
+  }
 
   if (input.channel === 'email') {
     const sent = await sendEmail(

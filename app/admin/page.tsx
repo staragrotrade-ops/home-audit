@@ -833,6 +833,7 @@ export default async function AdminPage({
                         .map(formatDate)
                         .join(' or ')}
                       customerFirstName={customer.first_name || ''}
+                      customerName={[customer.first_name, customer.last_name].filter(Boolean).join(' ')}
                       customerMobile={customer.mobile || ''}
                       confirmedStart={job.confirmed_start}
                       bookingNotifiedAt={job.booking_notified_at}

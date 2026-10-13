@@ -15,6 +15,7 @@ type Props = {
   service: string
   dateHint: string
   customerFirstName: string
+  customerName: string
   customerMobile: string
   confirmedStart: string | null
   bookingNotifiedAt: string | null
@@ -157,6 +158,7 @@ export function JobWorkflow(props: Props) {
 
   const agentText = agentSms({
     agentName: props.agent.name,
+    buyerName: props.customerName,
     address: props.address,
     dateHint: props.dateHint,
     service: props.service,

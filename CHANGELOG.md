@@ -7,6 +7,9 @@
   a private link; when they press a time, it is saved to the job, the
   customer is emailed the date (not the time) and the owner is emailed. They
   can also say none suit and leave a note.
+- The agent sees the buyer's name in the email, the text and the booking
+  page (and in the existing "Text agent" message). The buyer's contact
+  details and situation are not shown.
 - An agreed time can still be entered by hand in the same step. Saving it
   closes any request still waiting for a reply.
 - The booked time is no longer edited in the job editor, so it cannot be
