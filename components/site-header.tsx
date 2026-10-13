@@ -25,7 +25,10 @@ export function SiteHeader() {
 
         <div className="header-actions">
           <a className="header-phone" href={CONTACT_PHONE_HREF} aria-label={`Call ${CONTACT_PHONE}`}>
-            {CONTACT_PHONE}
+            <span className="header-phone-full">{CONTACT_PHONE}</span>
+            <span className="header-phone-short" aria-hidden="true">
+              Call
+            </span>
           </a>
           <Link className="button button-small header-cta" href="/quote">
             Get a quote
