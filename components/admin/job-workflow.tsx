@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { agentSms, reviewRequestSms } from '@/lib/order-emails'
+import { isRedirectLink } from '@/lib/listing-url'
 import { smsHref } from '@/lib/sms'
 
 type Props = {
@@ -200,6 +201,12 @@ export function JobWorkflow(props: Props) {
           <label>
             Listing link
             <input name="listingUrl" type="url" defaultValue={props.agent.listingUrl} />
+            {isRedirectLink(props.agent.listingUrl) && (
+              <small className="admin-muted">
+                This is a Google redirect link from the customer, not the listing itself. Press &quot;Find
+                agent automatically&quot; to fill in the real link.
+              </small>
+            )}
           </label>
           <label>
             Price guide on listing

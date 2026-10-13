@@ -45,3 +45,17 @@ test('Xero: one invoice and payment per job, test orders skipped, tokens encrypt
   assert.match(callback, /isAdminRequest\(request\)/)
   assert.match(callback, /state !== readCookie\(request, 'ha_xero_state'\)/)
 })
+
+test('Google redirect links are recognised and not used as the listing link', async () => {
+  const { isRedirectLink } = await import('../lib/listing-url.ts')
+  assert.equal(isRedirectLink('https://www.google.com/goto?url=CAESewHr'), true)
+  assert.equal(isRedirectLink('https://www.google.com.au/url?q=https://www.realestate.com.au/x'), true)
+  assert.equal(isRedirectLink('https://www.realestate.com.au/property-house-vic-deanside-1'), false)
+
+  const { parseAgentAnswer } = await import('../lib/agent-lookup.ts')
+  assert.equal(parseAgentAnswer('{"listingUrl":"https://www.google.com/goto?url=abc"}').listingUrl, '')
+  assert.equal(
+    parseAgentAnswer('{"listingUrl":"https://www.domain.com.au/18-art-deco-drive"}').listingUrl,
+    'https://www.domain.com.au/18-art-deco-drive',
+  )
+})

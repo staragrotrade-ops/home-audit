@@ -7,6 +7,7 @@ import { earliestInstantDate } from '@/lib/pricing'
 import { CONTACT_EMAIL } from '@/lib/site'
 import { currentVisitId, trackVisitorEvent } from '@/lib/visitor-analytics'
 import { Turnstile } from '@/components/turnstile'
+import { isRedirectLink } from '@/lib/listing-url'
 
 type ServiceFamily = QuoteRequest['service_family'] | ''
 type Draft = Omit<
@@ -373,6 +374,10 @@ export function QuoteFlow({
         if (!draft.price_guide_band) errors.push('Choose the price guide shown on the listing.')
         if (draft.listing_url && !/^https?:\/\/\S+$/.test(draft.listing_url.trim()))
           errors.push('Paste the full listing link, starting with https://, or leave it blank.')
+        else if (draft.listing_url && isRedirectLink(draft.listing_url))
+          errors.push(
+            'That is a Google link, not the listing. Open the listing on realestate.com.au or domain.com.au and copy the link from there, or leave it blank.',
+          )
       }
     }
 
