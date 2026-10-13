@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next'
 import { SITE_URL } from '@/lib/site'
 
 export default function robots(): MetadataRoute.Robots {
-  const protectedPaths = ['/admin', '/api/', '/order/']
+  const protectedPaths = ['/admin', '/api/', '/order/', '/booking/']
 
   return {
     rules: [

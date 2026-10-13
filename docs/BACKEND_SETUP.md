@@ -144,3 +144,23 @@ as a test), pay, then refund the test payment in Stripe.
 4. Redeploy, then /admin → Connections → Connect Xero → sign in and choose
    the National Building Inspections organisation.
 5. For a job paid before Xero was connected: open the job → "Send to Xero".
+
+## 13. Arranging a time with the agent (0.10.0)
+
+1. Supabase SQL Editor → run `20261014100000_booking_requests.sql` once,
+   before this version goes live. Running it twice is harmless.
+2. No new Vercel variables.
+
+In a paid job, "3. Arrange a time":
+
+- Enter up to three times and press "Email times" or "Text times" (or "Just
+  make a link" to send it some other way). Send to the agent, or to the
+  customer's access contact if they named one.
+- The agent opens the link and presses the time that suits, or says none of
+  them work and leaves a note. Opening the link alone changes nothing.
+- A confirmed time is saved to the job straight away, the customer is
+  emailed the date (not the time), and you get an email.
+- If you agree a time by phone, enter it under "Already agreed? Booked for"
+  and press "Save booked time". This closes any request still waiting, so a
+  late click on an old link cannot change the booking.
+- Links stop working after 21 days, once answered, or when cancelled.

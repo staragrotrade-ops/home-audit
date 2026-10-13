@@ -98,7 +98,7 @@ test('admin and app routes check who is calling', async () => {
 
 test('visitor tracking skips admin pages, bots, previews and the owner', async () => {
   const client = await source('lib/visitor-analytics.ts')
-  assert.match(client, /EXCLUDED_PATH_PREFIXES = \['\/admin', '\/api', '\/order'\]/)
+  assert.match(client, /EXCLUDED_PATH_PREFIXES = \['\/admin', '\/api', '\/order', '\/booking'\]/)
   assert.match(client, /sessionStorage/)
   assert.doesNotMatch(client, /document\.cookie/)
 
@@ -198,10 +198,12 @@ test('payments cannot be doubled and order links stay private', async () => {
   assert.match(manual, /pricing_decision: 'manual'/)
 
   const ga = await source('components/analytics.tsx')
-  assert.match(ga, /\(order\|admin\)/)
+  assert.match(ga, /\(order\|booking\|admin\)/)
 
   const patch = await source('app/api/admin/jobs/[id]/route.ts')
-  assert.match(patch, /sendBookingDateEmail\(supabase, id\)/)
+  assert.match(patch, /saveBookedTime\(supabase, id, input\.confirmedStart \|\| null\)/)
+  const notify = await source('lib/booking-notify.ts')
+  assert.match(notify, /await sendBookingDateEmail\(supabase, id\)/)
 })
 
 test('customers get their quote link by email and test orders still notify the owner', async () => {

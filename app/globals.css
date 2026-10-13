@@ -3236,6 +3236,41 @@ button:focus-visible {
   padding-left: 18px;
 }
 
+.booking-response {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.booking-slots {
+  display: grid;
+  gap: 10px;
+}
+
+.booking-slots .button,
+.booking-response > .button {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+}
+
+.booking-response textarea {
+  width: 100%;
+  min-height: 110px;
+  padding: 12px 14px;
+  border: 1px solid #b9c6bc;
+  border-radius: 9px;
+  color: var(--ink);
+  background: var(--paper);
+  resize: vertical;
+}
+
+.booking-response label {
+  color: var(--eucalyptus);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
 .quote-turnstile {
   margin: 18px 0 4px;
   min-height: 65px;

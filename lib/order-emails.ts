@@ -184,3 +184,118 @@ Payment received. Next: check the listing, find the agent and arrange a time.
 ${input.adminUrl}`,
   }
 }
+
+// ---- Booking requests to the agent (or other access contact) ---------------
+
+export function slotLabel(iso: string) {
+  return new Intl.DateTimeFormat('en-AU', {
+    timeZone: 'Australia/Melbourne',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
+    .format(new Date(iso))
+    .replace(/\b(am|pm)\b/i, (part) => part.toLowerCase())
+}
+
+function shortSlotLabel(iso: string) {
+  return new Intl.DateTimeFormat('en-AU', {
+    timeZone: 'Australia/Melbourne',
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
+    .format(new Date(iso))
+    .replace(/\b(am|pm)\b/i, (part) => part.toLowerCase())
+}
+
+function firstNameOf(name: string) {
+  return name.trim().split(/\s+/)[0] || ''
+}
+
+// The buyer's name and situation are not included: the agent only needs the
+// property and the times.
+export function bookingRequestEmail(input: {
+  to: string
+  recipientName: string
+  address: string
+  service: string
+  slots: string[]
+  url: string
+}): EmailMessage {
+  const first = firstNameOf(input.recipientName)
+  const times = input.slots.map((slot) => `- ${slotLabel(slot)}`).join('\n')
+  return {
+    to: input.to,
+    subject: `Inspection access – ${input.address}`,
+    text: `Hi${first ? ` ${first}` : ''},
+
+Home Audit has been engaged to do a ${input.service.toLowerCase()} at ${input.address} for the buyer.
+
+Could one of these times work for access?
+${times}
+
+To confirm a time, open this link and press the time that suits:
+${input.url}
+
+If none of them work, you can suggest another time on the same page, or reply to this email.
+
+${SIGN_OFF}`,
+  }
+}
+
+export function bookingRequestSms(input: {
+  recipientName: string
+  address: string
+  service: string
+  slots: string[]
+  url: string
+}) {
+  const first = firstNameOf(input.recipientName)
+  const times = input.slots.map(shortSlotLabel)
+  const choice =
+    times.length === 1 ? times[0] : `${times.slice(0, -1).join(', ')} or ${times[times.length - 1]}`
+  return `Hi${first ? ` ${first}` : ''}, this is Home Audit. We have been engaged to do a ${input.service.toLowerCase()} at ${input.address}. Would ${choice} work for access? Tap to confirm or suggest another time: ${input.url}`
+}
+
+export function ownerBookingReplyEmail(input: {
+  to: string
+  reference: string
+  address: string
+  recipientName: string
+  outcome: 'confirmed' | 'declined'
+  chosenIso?: string
+  message?: string
+  customerEmailed: 'sent' | 'not_sent' | 'unchanged'
+  adminUrl: string
+}): EmailMessage {
+  const who = input.recipientName || 'The agent'
+  const lines =
+    input.outcome === 'confirmed'
+      ? [
+          `${who} confirmed ${slotLabel(input.chosenIso!)}.`,
+          input.customerEmailed === 'sent'
+            ? 'The customer has been emailed the date.'
+            : input.customerEmailed === 'not_sent'
+              ? 'The date email to the customer did NOT go out. Send it from the dashboard.'
+              : 'The customer already had this date.',
+        ]
+      : [`${who} said none of the times suit.`]
+  if (input.message) lines.push('', `Their note: ${input.message}`)
+  return {
+    to: input.to,
+    subject: `${input.outcome === 'confirmed' ? 'Booked' : 'Times not suitable'} – ${input.address}`,
+    text: `${input.reference}
+${input.address}
+
+${lines.join('\n')}
+
+${input.adminUrl}`,
+  }
+}

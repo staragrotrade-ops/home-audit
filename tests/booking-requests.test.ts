@@ -1,0 +1,90 @@
+import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
+import test from 'node:test'
+
+async function source(path: string) {
+  return readFile(new URL(`../${path}`, import.meta.url), 'utf8')
+}
+
+test('booking times: one to three, in the future, sorted, no duplicates', async () => {
+  const { validSlots } = await import('../lib/booking-slots.ts')
+  const now = Date.parse('2026-10-14T00:00:00Z')
+  const a = '2026-10-20T00:00:00.000Z'
+  const b = '2026-10-17T23:00:00.000Z'
+  assert.deepEqual(validSlots([a, b, a], now), [b, a])
+  assert.equal(validSlots([], now), null)
+  assert.equal(validSlots(['2026-10-13T00:00:00Z'], now), null)
+  assert.equal(validSlots(['not a date'], now), null)
+  assert.equal(validSlots(['2028-01-01T00:00:00Z'], now), null)
+  assert.equal(
+    validSlots(['2026-10-15T00:00:00Z', '2026-10-16T00:00:00Z', '2026-10-17T00:00:00Z', '2026-10-18T00:00:00Z'], now),
+    null,
+  )
+})
+
+test('agent link: own table, one reply only, never opens the customer order', async () => {
+  const lib = await source('lib/booking-requests.ts')
+  assert.match(lib, /from\('booking_requests'\)/)
+  assert.doesNotMatch(lib, /job_access_tokens/)
+  assert.match(lib, /\.eq\('status', 'sent'\)\s*\.gt\('expires_at'/)
+  assert.match(lib, /keepRequestId: request\.id/)
+
+  const sql = await source('supabase/migrations/20261014100000_booking_requests.sql')
+  assert.match(sql, /enable row level security/)
+  assert.match(sql, /revoke all on table public\.booking_requests from anon, authenticated/)
+  assert.match(sql, /cardinality\(slots\) between 1 and 3/)
+})
+
+test('agent reply: POST from the page only, same-origin and rate limited', async () => {
+  const route = await source('app/api/booking/[token]/route.ts')
+  assert.match(route, /export async function POST/)
+  assert.doesNotMatch(route, /export async function GET/)
+  assert.match(route, /isSameOriginMutation\(request\)/)
+  assert.match(route, /consume_rate_limit/)
+
+  const page = await source('app/booking/[token]/page.tsx')
+  assert.match(page, /robots: \{ index: false, follow: false \}/)
+  assert.match(page, /referrer: 'no-referrer'/)
+  // The agent sees the property and times, not the buyer's details.
+  assert.doesNotMatch(page, /customer_snapshot|first_name|buyer_situation/)
+})
+
+test('a manual booked time closes open requests; the editor no longer sends the time', async () => {
+  const notify = await source('lib/booking-notify.ts')
+  assert.match(notify, /update\(\{ status: 'cancelled' \}\)/)
+  const editor = await source('components/admin/job-editor.tsx')
+  assert.doesNotMatch(editor, /confirmedStart/)
+})
+
+test('agent email and text do not include the buyer', async () => {
+  const emails = await source('lib/order-emails.ts')
+  const start = emails.indexOf('export function bookingRequestEmail')
+  const end = emails.indexOf('export function ownerBookingReplyEmail')
+  const block = emails.slice(start, end)
+  assert.ok(start > 0 && end > start)
+  assert.doesNotMatch(block, /\bfirstName\b|customer|situation/)
+})
+
+test('booking links stay out of analytics and search', async () => {
+  const visitor = await source('lib/visitor-analytics.ts')
+  assert.match(visitor, /'\/booking'/)
+  const robots = await source('app/robots.ts')
+  assert.match(robots, /'\/booking\/'/)
+})
+
+test('inline analytics scripts are valid JavaScript and skip private pages', async () => {
+  const component = await source('components/analytics.tsx')
+  const blocks = [...component.matchAll(/\{`([\s\S]*?)`\}/g)]
+    .map((match) => match[1].replace('${measurementId}', 'G-TEST1234'))
+    .filter((block) => block.includes('function'))
+  assert.equal(blocks.length, 2)
+  for (const block of blocks) {
+    // Evaluate the template literal the way the component does, then parse it.
+    const code = new Function(`return \`${block}\``)() as string
+    assert.doesNotThrow(() => new Function(code))
+  }
+  const ga = new Function(`return \`${blocks[1]}\``)() as string
+  const skip = new RegExp(/\/\^(.+?)\/\.test/.exec(ga)![1])
+  assert.ok(skip.test('/booking/abc') && skip.test('/order/abc') && skip.test('/admin'))
+  assert.ok(!skip.test('/guides'))
+})

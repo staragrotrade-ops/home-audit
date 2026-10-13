@@ -178,6 +178,11 @@ try {
   assert.match(orderPage.body, /noindex/, '/order pages must be noindex')
   assert.match(orderPage.body, /This link has expired/, 'Unknown order links must show the expired message')
 
+  const bookingPage = await request('/booking/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+  assert.equal(bookingPage.response.statusCode, 200, '/booking/<token> must render')
+  assert.match(bookingPage.body, /noindex/, '/booking pages must be noindex')
+  assert.match(bookingPage.body, /This link has expired/, 'Unknown booking links must show the expired message')
+
   const appAccount = await request('/api/app/account')
   assert.ok(appAccount.response.statusCode >= 400, '/api/app/account must refuse unauthenticated calls')
   assert.match(appAccount.body, /"ok":false/, '/api/app/account must return an error body')

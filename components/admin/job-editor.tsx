@@ -6,13 +6,6 @@ import { JOB_STATUSES, JOB_STATUS_LABELS, type JobStatus } from '@/lib/job-statu
 
 type StaffOption = { id: string; display_name: string; active: boolean }
 
-function toLocalInput(value: string | null) {
-  if (!value) return ''
-  const date = new Date(value)
-  const offset = date.getTimezoneOffset() * 60_000
-  return new Date(date.getTime() - offset).toISOString().slice(0, 16)
-}
-
 export function JobEditor({
   jobId,
   status,
@@ -21,7 +14,6 @@ export function JobEditor({
   archived,
   isTest,
   internalNotes,
-  confirmedStart,
 }: {
   jobId: string
   status: JobStatus
@@ -30,7 +22,6 @@ export function JobEditor({
   archived: boolean
   isTest: boolean
   internalNotes: string
-  confirmedStart: string | null
 }) {
   const router = useRouter()
   const [message, setMessage] = useState('')
@@ -65,12 +56,10 @@ export function JobEditor({
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const form = new FormData(event.currentTarget)
-    const start = String(form.get('confirmedStart') || '')
     void save({
       status: form.get('status'),
       staffId: String(form.get('staffId') || ''),
       internalNotes: String(form.get('internalNotes') || ''),
-      confirmedStart: start ? new Date(start).toISOString() : '',
     })
   }
 
@@ -99,10 +88,6 @@ export function JobEditor({
                 </option>
               ))}
           </select>
-        </label>
-        <label>
-          Booked for
-          <input name="confirmedStart" type="datetime-local" defaultValue={toLocalInput(confirmedStart)} />
         </label>
       </div>
       <label>
