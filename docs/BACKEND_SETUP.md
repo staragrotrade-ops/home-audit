@@ -111,3 +111,36 @@ Google Business Profile → "Ask for reviews" → copy the link → Vercel
 Vercel: `QUOTE_SUBMISSION_ENABLED` = `true`, then redeploy. Test with your own
 details from a browser marked "Stop counting this device" (the job is marked
 as a test), pay, then refund the test payment in Stripe.
+
+# Agent lookup and Xero (0.9.0)
+
+## 11. Automatic agent lookup (Google AI)
+
+1. aistudio.google.com → Get API key → create the key in the Google Cloud
+   project that already has billing (the one used for the Routes API).
+   Searching the web from the API is a paid-tier feature; the cost per
+   lookup is a few cents at most.
+2. Vercel (Production, Sensitive): `GEMINI_API_KEY`. Optional
+   `GEMINI_MODEL` (default `gemini-3.8-flash`).
+
+## 12. Xero
+
+1. Supabase SQL Editor → run `20261013100000_xero_invoices.sql` once.
+2. developer.xero.com → My Apps → New app ("Home Audit website", Web app,
+   company URL https://homeaudit.com.au, redirect URI
+   `https://homeaudit.com.au/api/admin/xero/callback`) → copy the Client ID,
+   generate a Client secret. Use a separate app from 137B: each app keeps
+   its own Xero sign-in, so the two sites cannot sign each other out.
+3. Vercel (Production):
+   - `XERO_CLIENT_ID`, `XERO_CLIENT_SECRET` (Sensitive)
+   - `XERO_REDIRECT_URI` = `https://homeaudit.com.au/api/admin/xero/callback`
+   - `XERO_SALES_ACCOUNT_CODE`, `XERO_PAYMENT_ACCOUNT_CODE`: the same values
+     as in the 137B Vercel project
+   - `XERO_TENANT_ID`: the same value as 137B, if 137B has it
+   - `INTEGRATION_ENCRYPTION_KEY` (Sensitive): run in PowerShell
+     `[Convert]::ToBase64String((1..32 | ForEach-Object { [byte](Get-Random -Maximum 256) }))`
+   - Optional: `XERO_BRANDING_THEME_ID` for a Home Audit invoice layout,
+     `XERO_EMAIL_INVOICES=false` to stop Xero emailing the invoice.
+4. Redeploy, then /admin → Connections → Connect Xero → sign in and choose
+   the National Building Inspections organisation.
+5. For a job paid before Xero was connected: open the job → "Send to Xero".

@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.9.0 — 2026-10-13
+
+- Admin: "Find agent automatically" asks Google AI (Gemini with Google Search)
+  for the selling agent's name, agency, mobile, email, the price guide and
+  listing link, fills the form and lists the sources. Nothing is saved until
+  the owner checks it and presses Save. Needs `GEMINI_API_KEY`.
+- Xero: when a job is paid online, a paid invoice is created in Xero
+  (contact found by email or created; reference = job reference; payment to
+  the Stripe clearing account) and Xero emails it to the customer. Each step
+  is recorded, so retries never add a second invoice or payment. Test orders
+  are skipped. Admin shows the Xero status per paid job with "Send to Xero",
+  and a Connections section with "Connect Xero". Own Xero app and encrypted
+  token storage (migration `20261013100000_xero_invoices.sql`).
+
 ## 0.8.2 — 2026-10-13
 
 - Admin: "Ask Google AI for agent" opens Google's AI Mode with the property

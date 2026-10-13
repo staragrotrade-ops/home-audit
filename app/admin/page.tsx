@@ -5,6 +5,7 @@ import { ExclusionToggle } from '@/components/admin/exclusion-toggle'
 import { JobEditor } from '@/components/admin/job-editor'
 import { JobWorkflow } from '@/components/admin/job-workflow'
 import { StaffManager } from '@/components/admin/staff-manager'
+import { XeroSyncButton } from '@/components/admin/xero-sync-button'
 import {
   CHANNEL_LABELS,
   INSPECTION_TYPE_LABELS,
@@ -27,6 +28,7 @@ import {
 import { CLOSED_STATUSES, JOB_STATUS_LABELS, type JobStatus } from '@/lib/job-status'
 import { formatAud } from '@/lib/pricing'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { xeroConnectionName, xeroSetupMissing } from '@/lib/xero'
 
 export const dynamic = 'force-dynamic'
 
@@ -241,7 +243,7 @@ function SetupNeeded() {
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: Promise<{ period?: string; jobs?: string; q?: string }>
+  searchParams: Promise<{ period?: string; jobs?: string; q?: string; xero?: string }>
 }) {
   if (!isAdminConfigured()) notFound()
   const store = await cookies()
@@ -265,6 +267,7 @@ export default async function AdminPage({
         <a href="#visitors">Visitors</a>
         <a href="#jobs">Quotes &amp; jobs</a>
         <a href="#inspectors">Inspectors</a>
+        <a href="#settings">Connections</a>
       </nav>
       <div className="admin-actions">
         <ExclusionToggle />
@@ -340,6 +343,28 @@ export default async function AdminPage({
   const summary: Summary = { ...emptySummary(), ...((summaryResult.data as Summary | null) || {}) }
   const sessions = (sessionsResult.data || []) as SessionRow[]
   const jobs = (jobsResult.data || []) as unknown as JobRow[]
+
+  // Xero status per paid job, and the connection. Read separately so the
+  // page still works before the Xero migration is applied.
+  const paidIds = jobs.filter((job) => job.payment_status === 'paid').map((job) => job.id)
+  const { data: xeroRows } = paidIds.length
+    ? await supabase
+        .from('xero_records')
+        .select('job_id,invoice_number,synced_at,emailed_at,last_error')
+        .in('job_id', paidIds)
+    : { data: [] }
+  const xeroByJob = new Map(
+    ((xeroRows || []) as {
+      job_id: string
+      invoice_number: string | null
+      synced_at: string | null
+      emailed_at: string | null
+      last_error: string | null
+    }[]).map((row) => [row.job_id, row]),
+  )
+  const xeroMissing = xeroSetupMissing()
+  const xeroOrg = xeroMissing.length ? null : await xeroConnectionName(supabase).catch(() => null)
+  const xeroNotice = params.xero || ''
   const staff = (staffResult.data || []) as StaffRow[]
 
   const journeyIds = [
@@ -756,6 +781,30 @@ export default async function AdminPage({
                       </details>
                     )}
 
+                    {job.payment_status === 'paid' && !job.is_test && (
+                      <div className="admin-xero">
+                        <strong>Xero:</strong>{' '}
+                        {(() => {
+                          const row = xeroByJob.get(job.id)
+                          if (row?.synced_at) {
+                            return (
+                              <>
+                                invoice {row.invoice_number || ''} paid
+                                {row.emailed_at ? ' · emailed to customer' : ''}
+                                {!row.emailed_at && row.last_error ? ` · email problem: ${row.last_error}` : ''}
+                              </>
+                            )
+                          }
+                          return (
+                            <>
+                              {row?.last_error ? `not sent – ${row.last_error} ` : 'not sent yet '}
+                              {xeroOrg && <XeroSyncButton jobId={job.id} label="Send to Xero" />}
+                            </>
+                          )
+                        })()}
+                      </div>
+                    )}
+
                     <JobWorkflow
                       jobId={job.id}
                       paid={job.payment_status === 'paid'}
@@ -800,6 +849,34 @@ export default async function AdminPage({
             })}
           </div>
         )}
+      </section>
+
+      <section className="admin-section" id="settings" aria-labelledby="settings-heading">
+        <div className="admin-section-head">
+          <h2 id="settings-heading">Connections</h2>
+        </div>
+        <div className="admin-card">
+          <h3>Xero</h3>
+          {xeroNotice && (
+            <p className={`admin-message${xeroNotice.startsWith('connected:') ? '' : ' error'}`}>
+              {xeroNotice.startsWith('connected:')
+                ? `Connected to ${xeroNotice.slice('connected:'.length)}.`
+                : xeroNotice}
+            </p>
+          )}
+          {xeroMissing.length > 0 ? (
+            <p className="admin-muted">
+              Not set up yet. Missing in Vercel: {xeroMissing.join(', ')}.
+            </p>
+          ) : (
+            <p>
+              {xeroOrg ? `Connected to ${xeroOrg}. Paid jobs get a paid invoice, emailed by Xero.` : 'Not connected.'}{' '}
+              <a className="admin-button small" href="/api/admin/xero/connect">
+                {xeroOrg ? 'Reconnect Xero' : 'Connect Xero'}
+              </a>
+            </p>
+          )}
+        </div>
       </section>
 
       <section className="admin-section" id="inspectors" aria-labelledby="inspectors-heading">

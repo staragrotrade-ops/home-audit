@@ -6,6 +6,7 @@ import { getStripe, STRIPE_SITE_KEY } from '@/lib/stripe-server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export const runtime = 'nodejs'
+export const maxDuration = 60
 export const dynamic = 'force-dynamic'
 
 const MAX_SESSION_AGE_SECONDS = 2 * 24 * 60 * 60

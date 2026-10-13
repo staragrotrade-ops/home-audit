@@ -212,5 +212,5 @@ test('customers get their quote link by email and test orders still notify the o
   assert.match(route, /markTest\(/)
 
   const orders = await source('lib/orders.ts')
-  assert.doesNotMatch(orders, /if \(!job\.is_test\)/)
+  assert.doesNotMatch(orders, /if \(!job\.is_test\) \{\s*await sendEmail/)
 })

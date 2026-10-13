@@ -6,6 +6,7 @@ import { ownerEmail, sendEmail, markTest } from '@/lib/email'
 import { ownerPaidEmail, ownerPaymentProblemEmail, paymentReceivedEmail } from '@/lib/order-emails'
 import { earliestInstantDate } from '@/lib/pricing'
 import { SITE_URL } from '@/lib/site'
+import { syncJobToXero } from '@/lib/xero'
 import { STRIPE_SITE_KEY } from '@/lib/stripe-server'
 
 export const ORDER_COLUMNS =
@@ -165,6 +166,11 @@ async function notifyPaid(supabase: SupabaseClient, jobId: string, amountCents: 
     ),
     { supabase, jobId, templateKey: 'owner_paid' },
   )
+
+  // Paid invoice in Xero (emailed to the customer by Xero). Test orders are
+  // kept out of the accounts. Failures are recorded and can be retried from
+  // the dashboard.
+  if (!job.is_test) await syncJobToXero(supabase, jobId)
 }
 
 // Applies a Checkout session from Stripe. Only a Home Audit session whose
