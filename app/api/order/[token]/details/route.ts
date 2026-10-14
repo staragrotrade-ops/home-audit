@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { jobIdForToken } from '@/lib/access-tokens'
 import { ACCESS_CHOICES, BUYER_SITUATIONS } from '@/lib/booking-options'
+import { syncJobCalendar } from '@/lib/google-calendar'
 import { loadOrder } from '@/lib/orders'
 import { isSameOriginMutation, readJsonBody } from '@/lib/request-guard'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
@@ -77,6 +78,8 @@ export async function POST(request: Request, context: { params: Promise<{ token:
       actor_type: 'customer',
       event_data: { buyer_situation: input.buyerSituation, access_choice: input.accessChoice },
     })
+    // A booked job's calendar event shows the access details.
+    if (job.confirmed_start) await syncJobCalendar(supabase, job.id)
     return NextResponse.json({ ok: true })
   } catch (error) {
     console.error('order_details_failed', { message: error instanceof Error ? error.message : 'unknown' })

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { adminError, adminJson, requireAdmin } from '@/lib/admin-api'
 import { saveBookedTime, type BookingEmailResult } from '@/lib/booking-notify'
+import { syncJobCalendar } from '@/lib/google-calendar'
 import { JOB_STATUSES } from '@/lib/job-status'
 import { readJsonBody } from '@/lib/request-guard'
 
@@ -88,6 +89,13 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     let booking: BookingEmailResult = { bookingEmail: 'unchanged', bookingEmailError: '' }
     if (input.confirmedStart !== undefined) {
       booking = await saveBookedTime(supabase, id, input.confirmedStart || null)
+    }
+
+    // Keep the calendar event in step with status (cancelled), test flag and
+    // agent details. A new booked time is already synced above.
+    const calendarFields = ['status', 'isTest', 'agentName', 'agentAgency', 'agentPhone'] as const
+    if (input.confirmedStart === undefined && calendarFields.some((key) => input[key] !== undefined)) {
+      await syncJobCalendar(supabase, id)
     }
 
     return adminJson({ ok: true, ...booking })

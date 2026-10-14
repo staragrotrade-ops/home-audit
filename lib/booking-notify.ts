@@ -3,6 +3,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { audit, jobAddress, loadJobContact } from '@/lib/admin-jobs'
 import { markTest, sendEmail } from '@/lib/email'
+import { syncJobCalendar } from '@/lib/google-calendar'
 import { bookingConfirmedEmail } from '@/lib/order-emails'
 
 export async function sendBookingDateEmail(supabase: SupabaseClient, id: string) {
@@ -71,6 +72,10 @@ export async function saveBookedTime(
   const { error: closeError } = await close
   // Before the booking_requests migration is applied there is nothing to close.
   if (closeError && !/booking_requests/.test(closeError.message)) throw new Error(closeError.message)
+
+  // Put the job in (or take it out of) Google Calendar. A calendar problem is
+  // recorded on the job and never stops the booking.
+  await syncJobCalendar(supabase, id)
 
   if (!startIso || before.payment_status !== 'paid') return { bookingEmail: 'unchanged', bookingEmailError: '' }
   if (melbourneDay(startIso) === melbourneDay(before.confirmed_start)) {

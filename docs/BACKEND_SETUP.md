@@ -192,3 +192,29 @@ How it works:
   Melbourne month they were paid; test jobs are left out. CSV download.
 - The customer's order page shows "Referred by …", and the privacy policy
   explains referral links and fees.
+
+## 15. Google Calendar (0.12.0)
+
+Booked jobs go into Google Calendar, like the 137B site.
+
+1. Supabase SQL Editor → run `20261016100000_calendar_sync.sql` once.
+2. Google Cloud → the project that holds the 137B site's OAuth client →
+   APIs & Services → Credentials → open that OAuth 2.0 Client → Authorised
+   redirect URIs → add `https://homeaudit.com.au/api/admin/google/callback`
+   → Save. (Reusing the 137B client keeps its "In production" status, so the
+   connection does not expire after 7 days.)
+3. Vercel (Production):
+   - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (Sensitive): the same values
+     as in the 137B Vercel project
+   - `GOOGLE_REDIRECT_URI` = `https://homeaudit.com.au/api/admin/google/callback`
+   - Optional `GOOGLE_CALENDAR_ID`: leave unset to use the same "NBI job"
+     calendar as 137B.
+4. Redeploy, then /admin → Connections → Connect Google Calendar → sign in
+   with the Google account that owns that calendar.
+5. For jobs booked before this: open the job → "Add to calendar".
+
+What happens: saving a booked time (by hand, or when the agent confirms)
+creates or moves the event; clearing the time or cancelling the job removes
+it; changing the agent or the customer's access details updates it. Test
+jobs are left out. Events are named "HA – SUBURB", 2 hours long, with the
+job, client, access and agent details and a link to the dashboard.

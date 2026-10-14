@@ -9,6 +9,7 @@ import { JobReferrerSelect } from '@/components/admin/job-referrer-select'
 import { ReferrerManager } from '@/components/admin/referrer-manager'
 import { StaffManager } from '@/components/admin/staff-manager'
 import { XeroSyncButton } from '@/components/admin/xero-sync-button'
+import { CalendarSyncButton } from '@/components/admin/calendar-sync-button'
 import {
   CHANNEL_LABELS,
   INSPECTION_TYPE_LABELS,
@@ -46,6 +47,7 @@ import {
 import { SITE_URL } from '@/lib/site'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { xeroConnectionName, xeroSetupMissing } from '@/lib/xero'
+import { calendarId, googleCalendarConnection, googleCalendarSetupMissing } from '@/lib/google-calendar'
 
 export const dynamic = 'force-dynamic'
 
@@ -260,7 +262,7 @@ function SetupNeeded() {
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: Promise<{ period?: string; jobs?: string; q?: string; xero?: string; month?: string }>
+  searchParams: Promise<{ period?: string; jobs?: string; q?: string; xero?: string; google?: string; month?: string }>
 }) {
   if (!isAdminConfigured()) notFound()
   const store = await cookies()
@@ -399,6 +401,20 @@ export default async function AdminPage({
   const xeroMissing = xeroSetupMissing()
   const xeroOrg = xeroMissing.length ? null : await xeroConnectionName(supabase).catch(() => null)
   const xeroNotice = params.xero || ''
+  const googleMissing = googleCalendarSetupMissing()
+  const googleAccount = googleMissing.length ? null : await googleCalendarConnection(supabase).catch(() => null)
+  const googleNotice = params.google || ''
+  // Calendar status per booked job. Read separately so the page still works
+  // before the calendar migration is applied.
+  const bookedIds = jobs.filter((job) => job.confirmed_start).map((job) => job.id)
+  const { data: calendarRows } = bookedIds.length
+    ? await supabase.from('jobs').select('id,calendar_synced_at,calendar_error').in('id', bookedIds)
+    : { data: [] }
+  const calendarByJob = new Map(
+    ((calendarRows || []) as { id: string; calendar_synced_at: string | null; calendar_error: string | null }[]).map(
+      (row) => [row.id, row],
+    ),
+  )
   const staff = (staffResult.data || []) as StaffRow[]
 
   // Referrers and who referred each job. Read separately so the page still
@@ -885,6 +901,29 @@ export default async function AdminPage({
                       </details>
                     )}
 
+                    {job.confirmed_start && !job.is_test && googleAccount && (
+                      <div className="admin-xero">
+                        <strong>Calendar:</strong>{' '}
+                        {(() => {
+                          const row = calendarByJob.get(job.id)
+                          if (row?.calendar_synced_at && !row.calendar_error) {
+                            return (
+                              <>
+                                in Google Calendar (updated {formatDateTime(row.calendar_synced_at)}){' '}
+                                <CalendarSyncButton jobId={job.id} label="Update calendar" />
+                              </>
+                            )
+                          }
+                          return (
+                            <>
+                              {row?.calendar_error ? `not added – ${row.calendar_error} ` : 'not added yet '}
+                              <CalendarSyncButton jobId={job.id} label="Add to calendar" />
+                            </>
+                          )
+                        })()}
+                      </div>
+                    )}
+
                     {job.payment_status === 'paid' && !job.is_test && (
                       <div className="admin-xero">
                         <strong>Xero:</strong>{' '}
@@ -1081,6 +1120,28 @@ export default async function AdminPage({
               {xeroOrg ? `Connected to ${xeroOrg}. Paid jobs get a paid invoice, emailed by Xero.` : 'Not connected.'}{' '}
               <a className="admin-button small" href="/api/admin/xero/connect">
                 {xeroOrg ? 'Reconnect Xero' : 'Connect Xero'}
+              </a>
+            </p>
+          )}
+        </div>
+        <div className="admin-card">
+          <h3>Google Calendar</h3>
+          {googleNotice && (
+            <p className={`admin-message${googleNotice.startsWith('connected:') ? '' : ' error'}`}>
+              {googleNotice.startsWith('connected:')
+                ? `Connected as ${googleNotice.slice('connected:'.length)}.`
+                : googleNotice}
+            </p>
+          )}
+          {googleMissing.length > 0 ? (
+            <p className="admin-muted">Not set up yet. Missing in Vercel: {googleMissing.join(', ')}.</p>
+          ) : (
+            <p>
+              {googleAccount
+                ? `Connected as ${googleAccount}. Booked jobs go into ${calendarId().startsWith('69l2e18k') ? 'the same "NBI job" calendar as the 137B site' : `calendar ${calendarId()}`}. Test jobs are left out.`
+                : 'Not connected.'}{' '}
+              <a className="admin-button small" href="/api/admin/google/connect">
+                {googleAccount ? 'Reconnect Google Calendar' : 'Connect Google Calendar'}
               </a>
             </p>
           )}
