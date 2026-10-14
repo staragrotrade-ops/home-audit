@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.12.0 — 2026-10-15
+
+- Booked jobs go into Google Calendar, like the 137B site: same "NBI job"
+  calendar by default, event "HA – SUBURB" (2 hours) with job, client,
+  payment, access and agent details and a dashboard link.
+- The event is created or moved whenever a booked time is saved (by the
+  owner or by the agent's confirmation), updated when agent or access details
+  change, and removed when the time is cleared or the job is cancelled. Test
+  jobs are skipped. A calendar problem is shown on the job and never stops a
+  booking.
+- Job card: calendar status with "Add to calendar" / "Update calendar".
+  Connections: Connect Google Calendar.
+- Needs Supabase migration `20261016100000_calendar_sync.sql` and the Google
+  OAuth settings in docs/BACKEND_SETUP.md section 15.
+
 ## 0.11.2 — 2026-10-15
 
 - The owner's "Price review needed" email is now also sent when a request is
