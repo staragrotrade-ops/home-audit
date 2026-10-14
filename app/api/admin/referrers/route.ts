@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { adminError, adminJson, requireAdmin } from '@/lib/admin-api'
 import { createUniqueReferrerCode } from '@/lib/referral-store'
 import { commissionColumns, REFERRER_TYPES } from '@/lib/referrals'
+import { emailReferrerLink } from '@/lib/referrer-emails'
 import { readJsonBody } from '@/lib/request-guard'
 
 export const runtime = 'nodejs'
@@ -30,6 +31,7 @@ const createSchema = z
 const updateSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('status'), id: z.uuid(), status: z.enum(['pending', 'active', 'disabled']) }).strict(),
   z.object({ action: z.literal('commission'), id: z.uuid(), ...commission }).strict(),
+  z.object({ action: z.literal('email'), id: z.uuid() }).strict(),
 ])
 
 // Adds a referrer straight away as active (the owner is adding them).
@@ -69,12 +71,26 @@ export async function POST(request: Request) {
   }
 }
 
-// Approve, disable or reactivate; or change the commission.
+// Approve, disable or reactivate; change the commission; or email the link.
+// Approving someone who registered online emails them their link
+// (the registration page tells them it will).
 export async function PATCH(request: Request) {
   const supabase = requireAdmin(request)
   if (supabase instanceof Response) return supabase
   try {
     const input = updateSchema.parse(await readJsonBody(request, 2_000))
+
+    if (input.action === 'email') {
+      await emailReferrerLink(supabase, input.id, false)
+      return adminJson({ ok: true })
+    }
+
+    const { data: before } = await supabase
+      .from('referrers')
+      .select('status,source,email')
+      .eq('id', input.id)
+      .maybeSingle()
+
     const update =
       input.action === 'status'
         ? {
@@ -87,7 +103,24 @@ export async function PATCH(request: Request) {
       .update({ ...update, updated_at: new Date().toISOString() })
       .eq('id', input.id)
     if (error) throw new Error(error.message)
-    return adminJson({ ok: true })
+
+    let emailed = false
+    let emailError = ''
+    const approvingRegistration =
+      input.action === 'status' &&
+      input.status === 'active' &&
+      before?.status === 'pending' &&
+      before?.source === 'self' &&
+      Boolean(before?.email)
+    if (approvingRegistration) {
+      try {
+        await emailReferrerLink(supabase, input.id, true)
+        emailed = true
+      } catch (sendError) {
+        emailError = sendError instanceof Error ? sendError.message : 'Email failed.'
+      }
+    }
+    return adminJson({ ok: true, emailed, emailError })
   } catch (error) {
     return adminError(error, 'Unable to update the referrer.')
   }

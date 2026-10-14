@@ -181,6 +181,8 @@ How it works:
 - Referrers can register at `/partners/register` (small link in the footer,
   not in the menu or sitemap). They start as "Waiting for approval"; their
   link already counts. Approve, disable or set commission in Admin.
+  Approving an online registration emails them their link; "Email link"
+  sends it to anyone else. Adding a referrer in Admin sends nothing.
 - Commission per referrer: a fixed amount per paid job, or a percentage of the
   fee excluding GST.
 - On a job, "Referred by" can be changed: from the referral link, a referrer

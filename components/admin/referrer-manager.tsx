@@ -17,8 +17,12 @@ async function call(method: string, body: unknown) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   }).catch(() => null)
-  const result = ((await response?.json().catch(() => ({}))) || {}) as { error?: string }
-  return { ok: Boolean(response?.ok), error: result.error }
+  const result = ((await response?.json().catch(() => ({}))) || {}) as {
+    error?: string
+    emailed?: boolean
+    emailError?: string
+  }
+  return { ok: Boolean(response?.ok), error: result.error, emailed: result.emailed, emailError: result.emailError }
 }
 
 function CommissionFields({ type, value }: { type?: string | null; value?: string }) {
@@ -56,12 +60,23 @@ export function ReferrerManager({ referrers, siteUrl }: { referrers: ReferrerRec
   const [message, setMessage] = useState('')
   const [editing, setEditing] = useState('')
 
-  async function run(action: () => Promise<{ ok: boolean; error?: string }>, done: string) {
+  async function run(
+    action: () => Promise<{ ok: boolean; error?: string; emailed?: boolean; emailError?: string }>,
+    done: string,
+  ) {
     setBusy(true)
     setMessage('')
     const result = await action()
     setBusy(false)
-    setMessage(result.ok ? done : result.error || 'Something went wrong.')
+    setMessage(
+      !result.ok
+        ? result.error || 'Something went wrong.'
+        : result.emailed
+          ? `${done} Their link was emailed to them.`
+          : result.emailError
+            ? `${done} The email was not sent: ${result.emailError}`
+            : done,
+    )
     if (result.ok) router.refresh()
     return result.ok
   }
@@ -133,6 +148,21 @@ export function ReferrerManager({ referrers, siteUrl }: { referrers: ReferrerRec
                   <a className="admin-button small" href={referralQrUrl(link)} target="_blank" rel="noreferrer">
                     QR code
                   </a>
+                  {referrer.email && referrer.status !== 'disabled' && (
+                    <button
+                      className="admin-button small"
+                      type="button"
+                      disabled={busy}
+                      onClick={() =>
+                        void run(
+                          () => call('PATCH', { action: 'email', id: referrer.id }),
+                          `Link emailed to ${referrer.email}.`,
+                        )
+                      }
+                    >
+                      Email link
+                    </button>
+                  )}
                   <span>{commissionLabel(referrer)}</span>
                   <button className="admin-button small" type="button" onClick={() => setEditing(editing === referrer.id ? '' : referrer.id)}>
                     Change commission

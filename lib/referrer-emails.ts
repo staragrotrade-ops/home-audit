@@ -1,0 +1,22 @@
+// Server-only. Emails a referral partner their link and QR code.
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { sendEmail } from '@/lib/email'
+import { referrerLinkEmail } from '@/lib/order-emails'
+import { referralLink, referralQrUrl } from '@/lib/referrals'
+import { SITE_URL } from '@/lib/site'
+
+export async function emailReferrerLink(supabase: SupabaseClient, id: string, justApproved: boolean) {
+  const { data, error } = await supabase
+    .from('referrers')
+    .select('name,email,ref_code,status')
+    .eq('id', id)
+    .maybeSingle()
+  if (error || !data) throw new Error('Referrer not found.')
+  if (!data.email) throw new Error('This referrer has no email address.')
+  if (data.status === 'disabled') throw new Error('Turn this referrer back on first.')
+  const link = referralLink(SITE_URL, data.ref_code)
+  const result = await sendEmail(
+    referrerLinkEmail({ to: data.email, name: data.name, link, qrUrl: referralQrUrl(link), justApproved }),
+  )
+  if (!result.sent) throw new Error(result.reason)
+}

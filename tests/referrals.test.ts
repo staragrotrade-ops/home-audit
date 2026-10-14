@@ -130,3 +130,15 @@ test('the quote saves the referral code, and the customer sees who referred them
   const privacy = await source('app/privacy/page.tsx')
   assert.match(privacy, /Referral partners/)
 })
+
+test('referrers get their link by email: on approving an online registration, or on request', async () => {
+  const route = await source('app/api/admin/referrers/route.ts')
+  assert.match(route, /action: z\.literal\('email'\)/)
+  assert.match(route, /before\?\.status === 'pending' &&\s*before\?\.source === 'self'/)
+  assert.match(route, /emailReferrerLink\(supabase, input\.id, true\)/)
+  const manager = await source('components/admin/referrer-manager.tsx')
+  assert.match(manager, /Email link/)
+  const emails = await source('lib/order-emails.ts')
+  assert.match(emails, /export function referrerLinkEmail/)
+  assert.equal(r.referrerTypeLabel('selling_agent'), 'Real estate agent')
+})
