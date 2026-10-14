@@ -5,6 +5,8 @@ import { ExclusionToggle } from '@/components/admin/exclusion-toggle'
 import { JobEditor } from '@/components/admin/job-editor'
 import { JobWorkflow } from '@/components/admin/job-workflow'
 import type { BookingRequestSummary } from '@/components/admin/booking-panel'
+import { JobReferrerSelect } from '@/components/admin/job-referrer-select'
+import { ReferrerManager } from '@/components/admin/referrer-manager'
 import { StaffManager } from '@/components/admin/staff-manager'
 import { XeroSyncButton } from '@/components/admin/xero-sync-button'
 import {
@@ -28,6 +30,20 @@ import {
 } from '@/lib/booking-options'
 import { CLOSED_STATUSES, JOB_STATUS_LABELS, type JobStatus } from '@/lib/job-status'
 import { formatAud } from '@/lib/pricing'
+import { loadReferralStatement, loadReferrers } from '@/lib/referral-store'
+import {
+  commissionLabel,
+  effectiveReferral,
+  isMonthKey,
+  melbourneMonthKey,
+  monthLabel,
+  recentMonthKeys,
+  referralCodeLabel,
+  referrerDisplayName,
+  type ReferrerRecord,
+  type StatementRow,
+} from '@/lib/referrals'
+import { SITE_URL } from '@/lib/site'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { xeroConnectionName, xeroSetupMissing } from '@/lib/xero'
 
@@ -244,7 +260,7 @@ function SetupNeeded() {
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: Promise<{ period?: string; jobs?: string; q?: string; xero?: string }>
+  searchParams: Promise<{ period?: string; jobs?: string; q?: string; xero?: string; month?: string }>
 }) {
   if (!isAdminConfigured()) notFound()
   const store = await cookies()
@@ -267,6 +283,7 @@ export default async function AdminPage({
       <nav className="admin-nav" aria-label="Admin sections">
         <a href="#visitors">Visitors</a>
         <a href="#jobs">Quotes &amp; jobs</a>
+        <a href="#referrers">Referrers</a>
         <a href="#inspectors">Inspectors</a>
         <a href="#settings">Connections</a>
       </nav>
@@ -383,6 +400,51 @@ export default async function AdminPage({
   const xeroOrg = xeroMissing.length ? null : await xeroConnectionName(supabase).catch(() => null)
   const xeroNotice = params.xero || ''
   const staff = (staffResult.data || []) as StaffRow[]
+
+  // Referrers and who referred each job. Read separately so the page still
+  // works before the referrers migration is applied.
+  const { referrers, ready: referralsReady } = await loadReferrers(supabase)
+  const referrersById = new Map(referrers.map((r) => [r.id, r]))
+  const referrersByCode = new Map(referrers.map((r) => [r.ref_code, r]))
+  const { data: referralRows } =
+    referralsReady && jobs.length
+      ? await supabase
+          .from('jobs')
+          .select('id,ref_code,referrer_override_id,referrer_override_none')
+          .in('id', jobs.map((job) => job.id))
+      : { data: [] }
+  const referralByJob = new Map(
+    ((referralRows || []) as {
+      id: string
+      ref_code: string | null
+      referrer_override_id: string | null
+      referrer_override_none: boolean
+    }[]).map((row) => [row.id, row]),
+  )
+  const { data: refEvents } =
+    referralsReady && sessions.length
+      ? await supabase
+          .from('analytics_events')
+          .select('session_id,ref_code')
+          .neq('ref_code', '')
+          .in('session_id', sessions.map((session) => session.session_id))
+      : { data: [] }
+  const refBySession = new Map(
+    ((refEvents || []) as { session_id: string; ref_code: string }[]).map((row) => [row.session_id, row.ref_code]),
+  )
+  const statementMonth = isMonthKey(params.month) ? params.month : melbourneMonthKey(new Date())
+  let statement: StatementRow[] = []
+  let statementError = ''
+  if (referralsReady) {
+    try {
+      statement = await loadReferralStatement(supabase, statementMonth, referrers)
+    } catch (error) {
+      statementError = error instanceof Error ? error.message : 'Could not build the statement.'
+    }
+  }
+  const referrerOptions = referrers
+    .filter((r) => r.status !== 'disabled')
+    .map((r) => ({ id: r.id, label: referrerDisplayName(r) }))
 
   const journeyIds = [
     ...new Set([
@@ -588,6 +650,11 @@ export default async function AdminPage({
                         <em>Started quote</em>
                       ) : null}
                       {session.contact_clicked && <em>Phone/email tap</em>}
+                      {refBySession.get(session.session_id) && (
+                        <em className="good">
+                          Referred: {referralCodeLabel(refBySession.get(session.session_id)!, referrersByCode)}
+                        </em>
+                      )}
                     </span>
                   </summary>
                   <Journey rows={journeys.get(session.session_id) || []} />
@@ -753,6 +820,26 @@ export default async function AdminPage({
                           {job.access_contact || '—'}
                           {job.access_notes ? <><br />{job.access_notes}</> : null}
                         </dd>
+                        {referralsReady && (() => {
+                          const fields = referralByJob.get(job.id)
+                          const referral = effectiveReferral(fields || {}, referrersById, referrersByCode)
+                          const value = fields?.referrer_override_none
+                            ? 'none'
+                            : fields?.referrer_override_id || 'link'
+                          return (
+                            <>
+                              <dt>Referred by</dt>
+                              <dd>
+                                {referral.referrer
+                                  ? `${referrerDisplayName(referral.referrer)} · ${commissionLabel(referral.referrer)}`
+                                  : referral.code
+                                    ? `Unregistered code ${referral.code}`
+                                    : '—'}{' '}
+                                <JobReferrerSelect jobId={job.id} value={value} options={referrerOptions} />
+                              </dd>
+                            </>
+                          )
+                        })()}
                         <dt>Came via</dt>
                         <dd>
                           {CHANNEL_LABELS[job.intake_channel] || job.intake_channel}
@@ -872,6 +959,103 @@ export default async function AdminPage({
               )
             })}
           </div>
+        )}
+      </section>
+
+      <section className="admin-section" id="referrers" aria-labelledby="referrers-heading">
+        <div className="admin-section-head">
+          <h2 id="referrers-heading">Referrers</h2>
+        </div>
+        {!referralsReady ? (
+          <div className="admin-card">
+            <p className="admin-muted">
+              Run <code>20261015100000_referrers.sql</code> in the Supabase SQL Editor to switch this on.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="admin-card">
+              <div className="admin-section-head">
+                <h3>Monthly statement · {monthLabel(statementMonth)}</h3>
+                <div className="admin-actions">
+                  <form action="/admin#referrers" method="get" className="admin-inline">
+                    <input type="hidden" name="period" value={period.key} />
+                    <input type="hidden" name="jobs" value={jobView.key} />
+                    <select name="month" defaultValue={statementMonth} aria-label="Month">
+                      {recentMonthKeys().map((key) => (
+                        <option key={key} value={key}>
+                          {monthLabel(key)}
+                        </option>
+                      ))}
+                    </select>
+                    <button className="admin-button small" type="submit">
+                      Show
+                    </button>
+                  </form>
+                  <a className="admin-button small" href={`/api/admin/referrers/statement?month=${statementMonth}`}>
+                    Download CSV
+                  </a>
+                </div>
+              </div>
+              <p className="admin-muted">
+                Paid jobs count in the month they were paid (Melbourne time). Test jobs are left out.
+                Commission is worked out on the fee excluding GST.
+              </p>
+              {statementError ? (
+                <p className="admin-message error">{statementError}</p>
+              ) : statement.length === 0 ? (
+                <p className="admin-muted">No referral activity this month.</p>
+              ) : (
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Referrer</th>
+                      <th>Link visits</th>
+                      <th>Quotes</th>
+                      <th>Paid jobs</th>
+                      <th>Success</th>
+                      <th>Fees (ex GST)</th>
+                      <th>Commission</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {statement.map((row) => (
+                      <tr key={row.key}>
+                        <td>
+                          {row.label}
+                          {row.jobs.length > 0 && (
+                            <details>
+                              <summary>{row.jobs.length} paid job{row.jobs.length === 1 ? '' : 's'}</summary>
+                              <ul>
+                                {row.jobs.map((line) => (
+                                  <li key={line.jobId}>
+                                    {line.reference} · {line.address} · {formatDate(line.paidAt)} ·{' '}
+                                    {formatAud(line.feeInclGstCents)}
+                                    {line.commissionCents != null ? ` · commission ${formatAud(line.commissionCents)}` : ''}
+                                    {line.source === 'manual' ? ' · set by you' : ''}
+                                  </li>
+                                ))}
+                              </ul>
+                            </details>
+                          )}
+                        </td>
+                        <td>{row.visits}</td>
+                        <td>{row.quotes}</td>
+                        <td>{row.paidJobs}</td>
+                        <td>{row.successRate == null ? '—' : `${Math.round(row.successRate * 100)}%`}</td>
+                        <td>{formatAud(row.feeExGstCents)}</td>
+                        <td>{row.commissionCents == null ? '—' : formatAud(row.commissionCents)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+            <div className="admin-card">
+              <h3>Referral partners</h3>
+              <ReferrerManager referrers={referrers as ReferrerRecord[]} siteUrl={SITE_URL} />
+            </div>
+          </>
         )}
       </section>
 

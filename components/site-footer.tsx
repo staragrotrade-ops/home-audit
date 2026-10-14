@@ -46,7 +46,12 @@ export function SiteFooter() {
         <span>
           {COMPANY_NAME} · ACN {COMPANY_ACN}
         </span>
-        <span>Victoria, Australia</span>
+        <span>
+          Victoria, Australia ·{' '}
+          <Link className="footer-partner-link" href="/partners/register">
+            Referral partners
+          </Link>
+        </span>
       </div>
     </footer>
   )

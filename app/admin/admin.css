@@ -605,3 +605,27 @@ a.admin-button {
 .admin-booking-requests em.warn {
   background: var(--sand-light);
 }
+
+.admin-referrer-list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+}
+
+.admin-referrer-list > li {
+  display: grid;
+  gap: 6px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line, #e3e7e2);
+}
+
+.admin-referrer-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.admin-referrer-list code {
+  overflow-wrap: anywhere;
+}

@@ -100,7 +100,10 @@ test('visitor tracking skips admin pages, bots, previews and the owner', async (
   const client = await source('lib/visitor-analytics.ts')
   assert.match(client, /EXCLUDED_PATH_PREFIXES = \['\/admin', '\/api', '\/order', '\/booking'\]/)
   assert.match(client, /sessionStorage/)
-  assert.doesNotMatch(client, /document\.cookie/)
+  // The only cookie is the referral code from a partner's ?ref= link.
+  const cookieWrites = client.match(/document\.cookie = [^\n]+/g) || []
+  assert.equal(cookieWrites.length, 1)
+  assert.match(cookieWrites[0], /\$\{REFERRAL_COOKIE\}=\$\{code\}/)
 
   const server = await source('lib/analytics-server.ts')
   assert.match(server, /VERCEL_ENV !== 'production'/)

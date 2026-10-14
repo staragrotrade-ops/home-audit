@@ -1,5 +1,8 @@
 // Browser-side visitor analytics. A visit is one browser tab session: the id
-// lives in sessionStorage, so no cookie is set and nothing identifies a person.
+// lives in sessionStorage and nothing identifies a person. The only cookie is
+// the referral code from a partner's ?ref= link (see lib/referrals.ts).
+
+import { normaliseRefCode, REFERRAL_COOKIE, REFERRAL_DAYS } from './referrals.ts'
 
 export type VisitorEventName =
   | 'page_view'
@@ -17,6 +20,7 @@ type Attribution = {
   utmSource: string
   utmMedium: string
   utmCampaign: string
+  refCode?: string
 }
 
 const SESSION_KEY = 'ha_visit_v1'
@@ -48,6 +52,28 @@ export function setAnalyticsExcluded(excluded: boolean) {
   } catch {
     // Preferences must never break the page.
   }
+}
+
+// Saves the code from a referral link (?ref=CODE) for 90 days. A newer link
+// replaces an older one. Works even when analytics is switched off.
+export function captureReferral() {
+  if (typeof window === 'undefined') return null
+  try {
+    const code = normaliseRefCode(new URLSearchParams(window.location.search).get('ref'))
+    if (code) {
+      const secure = window.location.protocol === 'https:' ? '; Secure' : ''
+      document.cookie = `${REFERRAL_COOKIE}=${code}; Max-Age=${REFERRAL_DAYS * 86_400}; Path=/; SameSite=Lax${secure}`
+    }
+    return code
+  } catch {
+    return null
+  }
+}
+
+export function savedReferral() {
+  if (typeof document === 'undefined') return ''
+  const match = document.cookie.match(new RegExp(`(?:^|; )${REFERRAL_COOKIE}=([a-z0-9]{3,12})(?:;|$)`))
+  return match ? match[1] : ''
 }
 
 export function newId() {
@@ -87,6 +113,7 @@ export function getVisit(): Attribution | null {
       utmSource: (params.get('utm_source') || '').slice(0, 120),
       utmMedium: (params.get('utm_medium') || '').slice(0, 120),
       utmCampaign: (params.get('utm_campaign') || '').slice(0, 160),
+      refCode: normaliseRefCode(params.get('ref')) || savedReferral(),
     }
     window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(visit))
     return visit

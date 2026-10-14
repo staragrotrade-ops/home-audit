@@ -24,6 +24,8 @@ const schema = z
     listingPriceGuide: z.string().trim().max(160).optional(),
     listingChecked: z.boolean().optional(),
     agentTexted: z.literal(true).optional(),
+    // A referrer id, 'none' (not referred) or 'link' (follow the referral link).
+    referrer: z.union([z.uuid(), z.enum(['none', 'link'])]).optional(),
   })
   .strict()
 
@@ -52,6 +54,10 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       update.listing_checked_at = input.listingChecked ? new Date().toISOString() : null
     }
     if (input.agentTexted) update.agent_texted_at = new Date().toISOString()
+    if (input.referrer !== undefined) {
+      update.referrer_override_id = input.referrer === 'none' || input.referrer === 'link' ? null : input.referrer
+      update.referrer_override_none = input.referrer === 'none'
+    }
 
     if (Object.keys(update).length > 0) {
       const { error } = await supabase.from('jobs').update(update).eq('id', id)

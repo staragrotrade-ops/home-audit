@@ -7,6 +7,7 @@ import { PRICING_VERSION, priceQuote } from '@/lib/pricing'
 import { quoteRequestSchema } from '@/lib/quote-schema'
 import { clientHash, globalHash, isSameOriginMutation } from '@/lib/request-guard'
 import { SITE_URL } from '@/lib/site'
+import { referralCodeFromRequest } from '@/lib/referral-store'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { turnstileConfigured, verifyTurnstile } from '@/lib/turnstile'
 import { destinationAddress, driveMinutesFromBase } from '@/lib/travel'
@@ -221,6 +222,15 @@ export async function POST(request: Request) {
     listing_url: fields.listing_url || null,
   }
 
+  // The referral partner whose link the customer used (saved for 90 days).
+  // Written on its own so a database without the referrals columns still
+  // saves the request.
+  const refCode = await referralCodeFromRequest(request, supabase).catch(() => null)
+  if (refCode) {
+    const { error: refError } = await supabase.from('jobs').update({ ref_code: refCode }).eq('id', jobId)
+    if (refError) console.error('quote_ref_code_failed', { code: refError.code })
+  }
+
   // The email handoff only keeps a copy; pricing happens on real submissions.
   if (intakeMode === 'email_handoff') {
     const { error: updateError } = await supabase.from('jobs').update(update).eq('id', jobId)
@@ -311,6 +321,7 @@ export async function POST(request: Request) {
         address: fields.property_address,
         decision: pricing.decision,
         reasons: pricing.reasons,
+        refCode,
         adminUrl: `${SITE_URL}/admin?q=${encodeURIComponent(reference || '')}#jobs`,
       }),
       isTest,

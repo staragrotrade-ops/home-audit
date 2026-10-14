@@ -164,3 +164,29 @@ In a paid job, "3. Arrange a time":
   and press "Save booked time". This closes any request still waiting, so a
   late click on an old link cannot change the booking.
 - Links stop working after 21 days, once answered, or when cancelled.
+
+## 14. Referral partners (0.11.0)
+
+1. Supabase SQL Editor → run `20261015100000_referrers.sql` once, before this
+   version goes live. Running it twice is harmless.
+2. No new Vercel variables. The registration form uses the same Turnstile
+   keys as the quote form.
+
+How it works:
+
+- Each referrer has a short code and a link `https://homeaudit.com.au/?ref=CODE`
+  (Admin → Referrers → Copy link / QR code).
+- The link saves the code in the visitor's browser for 90 days; a newer link
+  replaces it. A quote request records the code on the job.
+- Referrers can register at `/partners/register` (small link in the footer,
+  not in the menu or sitemap). They start as "Waiting for approval"; their
+  link already counts. Approve, disable or set commission in Admin.
+- Commission per referrer: a fixed amount per paid job, or a percentage of the
+  fee excluding GST.
+- On a job, "Referred by" can be changed: from the referral link, a referrer
+  you choose (phoned-in referrals), or not referred.
+- Monthly statement (Admin → Referrers): link visits, quotes, paid jobs,
+  success rate, fees and commission per referrer; jobs count in the
+  Melbourne month they were paid; test jobs are left out. CSV download.
+- The customer's order page shows "Referred by …", and the privacy policy
+  explains referral links and fees.
