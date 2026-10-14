@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.11.1 — 2026-10-15
+
+- Approving a referral partner who registered online emails them their link
+  and QR code (the registration page says it will).
+- "Email link" button for each referrer with an email address, so the owner
+  can send the link to anyone added in the dashboard. Adding a referrer does
+  not email them by itself.
+- The type "Real estate agent (selling)" is now "Real estate agent".
+
 ## 0.11.0 — 2026-10-14
 
 - Referral partners, as on ownerbuilderinspection.melbourne: conveyancers,

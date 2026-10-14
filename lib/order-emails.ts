@@ -322,3 +322,34 @@ ${lines.join('\n')}
 ${input.adminUrl}`,
   }
 }
+
+// ---- Referral partners ------------------------------------------------------------
+
+export function referrerLinkEmail(input: {
+  to: string
+  name: string
+  link: string
+  qrUrl: string
+  justApproved: boolean
+}): EmailMessage {
+  const first = input.name.trim().split(/\s+/)[0] || ''
+  return {
+    to: input.to,
+    subject: 'Your Home Audit referral link',
+    text: `Hi${first ? ` ${first}` : ''},
+
+${input.justApproved ? 'Thanks for registering. Your registration as a Home Audit referral partner is approved.' : 'You are set up as a Home Audit referral partner.'}
+
+Your referral link:
+${input.link}
+
+When a client opens this link and books an inspection within 90 days, the booking is recorded under your name. You can send the link by email or text, or put it in your client information.
+
+A QR code of the same link, to print or share:
+${input.qrUrl}
+
+Questions about referrals? Reply to this email or call us.
+
+${SIGN_OFF}`,
+  }
+}
