@@ -3236,6 +3236,26 @@ button:focus-visible {
   padding-left: 18px;
 }
 
+.partner-form {
+  display: grid;
+  gap: 16px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.footer-partner-link {
+  color: inherit;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
 .booking-response {
   display: grid;
   gap: 16px;

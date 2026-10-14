@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.11.0 — 2026-10-14
+
+- Referral partners, as on ownerbuilderinspection.melbourne: conveyancers,
+  solicitors, buyer's agents, mortgage brokers, selling agents, past
+  customers and others. Each gets a short code, a link (?ref=CODE) and a QR
+  code.
+- The referral code is kept in the visitor's browser for 90 days (the last
+  link wins) and saved on the quote request. The owner can change "Referred
+  by" on any job.
+- Commission per referrer: fixed $ per paid job or % of the fee excluding GST.
+- Admin → Referrers: approve or disable partners, change commission, and a
+  monthly statement (visits, quotes, paid jobs, success rate, fees,
+  commission) with CSV download. Visits from referral links are marked.
+- Low-key self-registration at /partners/register (footer link only,
+  noindex, Turnstile, rate limited); new registrations wait for approval
+  and email the owner.
+- The customer's order page shows who referred them; privacy policy updated.
+- Needs Supabase migration `20261015100000_referrers.sql`.
+
 ## 0.10.1 — 2026-10-13
 
 - "Text times" is now "Generate text": the dashboard only prepares the text.

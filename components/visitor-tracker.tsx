@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import {
+  captureReferral,
   getVisit,
   isExcludedPath,
   newId,
@@ -29,6 +30,8 @@ export function VisitorTracker() {
   }, [])
 
   useEffect(() => {
+    // Before anything else, so a ?ref= link is saved even on excluded pages.
+    captureReferral()
     if (!pathname || isExcludedPath(pathname) || !getVisit()) return
 
     const pageInstanceId = newId()

@@ -159,6 +159,7 @@ export function ownerNewRequestEmail(input: {
   address: string
   decision: 'instant' | 'manual'
   reasons: string[]
+  refCode?: string | null
   adminUrl: string
 }): EmailMessage {
   return {
@@ -168,7 +169,7 @@ export function ownerNewRequestEmail(input: {
 ${input.address}
 
 ${input.decision === 'manual' ? `Needs a price review:\n- ${input.reasons.join('\n- ')}` : 'Quoted automatically. Waiting for payment.'}
-
+${input.refCode ? `\nReferral code: ${input.refCode}\n` : ''}
 ${input.adminUrl}`,
   }
 }

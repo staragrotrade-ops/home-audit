@@ -25,6 +25,7 @@ const schema = z.object({
     utmSource: text(120),
     utmMedium: text(120),
     utmCampaign: text(160),
+    refCode: z.union([z.literal(''), z.string().regex(/^[a-z0-9]{3,12}$/)]).default(''),
   }),
   metadata: z
     .record(z.string().max(40), z.union([z.string().max(120), z.number(), z.boolean()]))
@@ -55,6 +56,7 @@ export async function POST(request: Request) {
       utm_source: input.visit.utmSource,
       utm_medium: input.visit.utmMedium,
       utm_campaign: input.visit.utmCampaign,
+      ...(input.visit.refCode ? { ref_code: input.visit.refCode } : {}),
       device: deviceType(request),
       country: visitorCountry(request),
       metadata: input.metadata,

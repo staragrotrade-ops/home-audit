@@ -37,8 +37,10 @@ export function Turnstile({
   siteKey,
   onToken,
   resetKey = 0,
+  action = 'quote',
 }: {
   siteKey: string
+  action?: string
   onToken: (token: string) => void
   resetKey?: number
 }) {
@@ -54,7 +56,7 @@ export function Turnstile({
         if (cancelled || !container.current || !window.turnstile) return
         widgetId.current = window.turnstile.render(container.current, {
           sitekey: siteKey,
-          action: 'quote',
+          action,
           callback: (token: string) => callback.current(token),
           'expired-callback': () => callback.current(''),
           'error-callback': () => callback.current(''),
@@ -66,7 +68,7 @@ export function Turnstile({
       if (widgetId.current && window.turnstile) window.turnstile.remove(widgetId.current)
       widgetId.current = null
     }
-  }, [siteKey])
+  }, [siteKey, action])
 
   useEffect(() => {
     if (resetKey > 0 && widgetId.current && window.turnstile) {
