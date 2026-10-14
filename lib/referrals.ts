@@ -15,7 +15,7 @@ export const REFERRER_TYPES = [
   ['conveyancer_solicitor', 'Conveyancer or solicitor'],
   ['buyers_agent', "Buyer's agent"],
   ['mortgage_broker', 'Mortgage broker'],
-  ['selling_agent', 'Real estate agent (selling)'],
+  ['selling_agent', 'Real estate agent'],
   ['past_customer', 'Past customer'],
   ['other', 'Other'],
 ] as const
