@@ -274,6 +274,22 @@ export async function POST(request: Request) {
   const { error: updateError } = await supabase.from('jobs').update(update).eq('id', jobId)
   if (updateError) {
     console.error('quote_pricing_update_failed', { code: updateError.code })
+    // The request is saved but not priced: the owner must still hear about it.
+    await sendEmail(
+      markTest(
+        ownerNewRequestEmail({
+          to: ownerEmail(),
+          reference: reference || jobId,
+          address: fields.property_address,
+          decision: 'manual',
+          reasons: ['The automatic price could not be saved. Check the request and price it by hand.'],
+          refCode,
+          adminUrl: `${SITE_URL}/admin?q=${encodeURIComponent(reference || '')}#jobs`,
+        }),
+        isTest,
+      ),
+      { supabase, jobId, templateKey: 'owner_new_request' },
+    )
     return NextResponse.json({ ok: true, reference, decision: 'manual' }, { status: 201 })
   }
 

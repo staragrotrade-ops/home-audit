@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.11.2 — 2026-10-15
+
+- The owner's "Price review needed" email is now also sent when a request is
+  saved but its automatic price could not be saved (before, that request
+  arrived with no email).
+
 ## 0.11.1 — 2026-10-15
 
 - Approving a referral partner who registered online emails them their link
