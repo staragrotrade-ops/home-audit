@@ -56,10 +56,12 @@ const CODE_ALPHABET = '23456789abcdefghjkmnpqrstuvwxyz'
 
 // Initials of the first and last name, e.g. "Jane Smith" -> "js".
 export function referrerCodeBase(name: string) {
-  const ascii = name.normalize('NFKD').replace(/[̀-ͯ]/g, '')
+  const ascii = name.normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
   const words = ascii.match(/[a-z]+/gi) || []
-  if (words.length >= 2) return `${words[0][0]}${words[words.length - 1][0]}`.toLowerCase()
-  if (words.length === 1) return words[0][0].toLowerCase()
+  const first = words[0]
+  const last = words[words.length - 1]
+  if (words.length >= 2 && first && last) return `${first[0]}${last[0]}`.toLowerCase()
+  if (first) return first[0].toLowerCase()
   return 'r'
 }
 
