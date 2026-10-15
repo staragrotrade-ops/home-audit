@@ -60,6 +60,8 @@ const featuredAreaSlugs = new Set([
   'berwick',
   'clyde-north',
   'pakenham',
+  'cheltenham',
+  'mentone',
 ])
 
 const featuredAreas = SERVICE_AREAS.filter((area) =>
@@ -301,7 +303,7 @@ export default function HomePage() {
           <div>
             <p>
               Explore specific guidance for the Mornington Peninsula, Frankston,
-              Casey and Cardinia. Other Melbourne and selected Victorian
+              Casey, Cardinia and Kingston. Other Melbourne and selected Victorian
               addresses are considered according to travel and scheduling.
             </p>
             <Link className="button button-secondary" href="/service-areas">

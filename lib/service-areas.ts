@@ -1,6 +1,7 @@
 export type ServiceAreaRegion =
   | 'Mornington Peninsula & Frankston'
   | 'Casey & Cardinia'
+  | 'City of Kingston'
 
 export type InspectionPriority = {
   title: string
@@ -34,6 +35,7 @@ export type ServiceArea = {
 export const SERVICE_AREA_REGIONS: readonly ServiceAreaRegion[] = [
   'Mornington Peninsula & Frankston',
   'Casey & Cardinia',
+  'City of Kingston',
 ]
 
 export const SERVICE_AREAS: readonly ServiceArea[] = [
@@ -271,7 +273,7 @@ export const SERVICE_AREAS: readonly ServiceArea[] = [
           'Yes. Add the agent or access contact to the quote request, together with any contract or auction deadline.',
       },
     ],
-    nearby: ['mount-eliza', 'langwarrin', 'carrum-downs', 'mornington'],
+    nearby: ['mount-eliza', 'langwarrin', 'carrum-downs', 'chelsea'],
   },
   {
     slug: 'langwarrin',
@@ -389,7 +391,7 @@ export const SERVICE_AREAS: readonly ServiceArea[] = [
           'If you are the building owner approaching handover, a practical completion inspection is usually the closer fit. If you are buying an already completed property, request a pre-purchase scope.',
       },
     ],
-    nearby: ['langwarrin', 'frankston', 'cranbourne', 'narre-warren'],
+    nearby: ['langwarrin', 'frankston', 'chelsea', 'cranbourne'],
   },
   {
     slug: 'berwick',
@@ -744,6 +746,360 @@ export const SERVICE_AREAS: readonly ServiceArea[] = [
       },
     ],
     nearby: ['berwick', 'cranbourne', 'clyde-north', 'carrum-downs'],
+  },
+  {
+    slug: 'cheltenham',
+    name: 'Cheltenham',
+    postcode: '3192',
+    council: 'City of Kingston and Bayside City Council',
+    region: 'City of Kingston',
+    serviceBalance: 'Postwar houses, units and townhouse redevelopment',
+    metaTitle: 'Building & Pest Inspections Cheltenham',
+    metaDescription:
+      'Independent building and pest inspections in Cheltenham for postwar houses, units, townhouses and new builds near Southland and the station areas.',
+    hero:
+      'Independent pre-purchase, timber-pest and new-home inspections for Cheltenham houses, units and townhouses. The scope follows the building type and the access on the day.',
+    summary:
+      'Cheltenham buyers often compare an original postwar house, a 1970s unit and a new townhouse in the same street. Each type needs a different inspection plan. An older house has a roof space and subfloor to check. A townhouse often has neither, and the common areas may belong to an owners corporation.',
+    localContext: [
+      'Cheltenham spreads across the Kingston and Bayside council areas. Many streets still have brick-veneer and weatherboard houses built after the Second World War. Many original blocks now hold two or three townhouses. Units and apartments sit closer to Southland and the Cheltenham and Southland stations.',
+      'Sandy ground is common across Melbourne’s sandbelt suburbs. Sandy soil drains quickly. Water from a broken downpipe or a blocked drain can still wash soil away from the footings. The inspection notes where roof water lands and how the ground falls away from the walls.',
+    ],
+    priorities: [
+      {
+        title: 'Original postwar construction',
+        text: 'Timber floors, stumps, old roof covers and early wet areas are checked where reachable. Cracks and uneven floors are recorded with photos.',
+      },
+      {
+        title: 'Townhouse and unit boundaries',
+        text: 'The report separates the private lot from common property. Shared roofs, driveways and drains are noted as outside the standard scope when no access is given.',
+      },
+      {
+        title: 'Roof water and site drainage',
+        text: 'Gutters, downpipes, stormwater pits and ground falls near the walls are reviewed. Moisture readings are taken inside where stains or a musty smell suggest damp.',
+      },
+      {
+        title: 'Building work next door',
+        text: 'Many Cheltenham blocks sit beside a new build. Visible effects on shared fences, edging and surface-water paths are recorded on the day.',
+      },
+    ],
+    existingHomeFit:
+      'For a Cheltenham house or unit, a combined building and timber-pest inspection gives one report on structure, moisture and timber-pest risk. Subfloor access, where present, is a key part of the visit.',
+    newHomeFit:
+      'Townhouse and replacement-home builds can be checked at the slab, frame, pre-plaster and fixing stages, then at practical completion before handover.',
+    faqs: [
+      {
+        question: 'Do you inspect townhouses in Cheltenham?',
+        answer:
+          'Yes. The report covers the private lot and any common areas open on the day. Ask the owners corporation for records on shared roofs and drains.',
+      },
+      {
+        question: 'Is my Cheltenham address in Kingston or Bayside?',
+        answer:
+          'Cheltenham crosses both council areas. Check the rates notice or the council property tool. The inspection is the same either way. Planning records sit with the council that covers the address.',
+      },
+      {
+        question: 'Can you inspect a 1950s or 1960s house before auction?',
+        answer:
+          'Yes, with agent access. Give the auction date in the quote request. Older houses usually need a subfloor check, so the visit takes a little longer.',
+      },
+    ],
+    nearby: ['highett', 'mentone', 'parkdale', 'mordialloc'],
+  },
+  {
+    slug: 'mentone',
+    name: 'Mentone',
+    postcode: '3194',
+    council: 'City of Kingston',
+    region: 'City of Kingston',
+    serviceBalance: 'Period homes, bayside houses and apartments',
+    metaTitle: 'Building & Pest Inspections Mentone',
+    metaDescription:
+      'Independent building and pest inspections in Mentone for period homes, bayside houses, units and apartments. Clear photos and plain-English findings.',
+    hero:
+      'Independent pre-purchase, timber-pest and new-home inspections in Mentone, from older homes near the station to newer apartments on the bay side.',
+    summary:
+      'Mentone has some homes from the late 1800s and early 1900s, mixed with newer apartments and townhouses. For an older home, the age of the stumps, roof and wet areas matters more than fresh paint. For a newer home, finishing and waterproofing matter most.',
+    localContext: [
+      'Mentone grew around the railway in the late 1800s. Some Victorian, Edwardian and interwar homes remain near the station and the shopping strip. Beach Road and nearby streets now include apartments and large rebuilt houses facing the bay.',
+      'Older Mentone homes often have timber floors on stumps, original or replaced roofs and several rounds of renovation. Homes near the water face more wind and salt air. The inspection covers both: age-related wear inland and weather exposure near the bay.',
+    ],
+    priorities: [
+      {
+        title: 'Stumps, floors and subfloor',
+        text: 'Where the subfloor is reachable, stumps, bearers, ventilation and damp are checked. Uneven floors are noted along with any visible cause.',
+      },
+      {
+        title: 'Roofs, flashings and chimneys',
+        text: 'Older roofs, flashings and unused chimneys are common leak points. Accessible roof areas and the roof space are checked for water entry.',
+      },
+      {
+        title: 'Bay-facing exposure',
+        text: 'Metal fixings, balustrades, window seals and render on bay-facing walls are checked for rust and cracking.',
+      },
+      {
+        title: 'Renovation joins',
+        text: 'New kitchens, bathrooms and extensions are checked where new work meets the original house. Signs of leaks behind tiles and around showers are recorded.',
+      },
+    ],
+    existingHomeFit:
+      'For a Mentone period home, add timber pest to the building inspection. Older timber, subfloor damp and garden beds against the walls all affect timber-pest risk.',
+    newHomeFit:
+      'Replacement homes and townhouses can be inspected at the frame and pre-plaster stages. A practical completion inspection checks finishes and waterproofing before handover.',
+    faqs: [
+      {
+        question: 'Do you inspect older period homes in Mentone?',
+        answer:
+          'Yes. Allow extra time for the subfloor and roof space. Heritage controls, if any, are checked through the council, not the inspection.',
+      },
+      {
+        question: 'Do you inspect apartments on Beach Road?',
+        answer:
+          'Yes. The inspection covers the lot, the balcony and any open storage or car space. Building-wide items sit with the owners corporation.',
+      },
+      {
+        question: 'Can you inspect before a Mentone auction?',
+        answer:
+          'Yes, with agent access. Send the auction date with the quote request so the visit can be planned in time.',
+      },
+    ],
+    nearby: ['parkdale', 'cheltenham', 'mordialloc', 'highett'],
+  },
+  {
+    slug: 'mordialloc',
+    name: 'Mordialloc',
+    postcode: '3195',
+    council: 'City of Kingston',
+    region: 'City of Kingston',
+    serviceBalance: 'Creek-side homes, townhouses and bayside rebuilds',
+    metaTitle: 'Building & Pest Inspections Mordialloc',
+    metaDescription:
+      'Independent building and pest inspections in Mordialloc for creek-side and bayside homes, townhouses and new builds. Clear notes on drainage and access.',
+    hero:
+      'Independent pre-purchase, timber-pest and new-home inspections in Mordialloc, with close attention to drainage near the creek and weather on the bay side.',
+    summary:
+      'Mordialloc Creek runs through the suburb to the bay, and some land near the creek is low. A building inspection shows how water moves around a home today. A building inspection does not show whether the land is in a flood overlay. Check the overlay through the council before you buy.',
+    localContext: [
+      'Mordialloc has a creek mouth with boats, a pier and a busy Main Street. Homes range from older weatherboard cottages to postwar houses and new townhouses. Large rebuilt homes face the bay along Beach Road.',
+      'Parts of the land along Mordialloc Creek are mapped in flood overlays. Many properties are not affected. The City of Kingston property information tool shows the overlays for an exact address. The inspection report then adds what can be seen on site: ground levels, drainage and damp.',
+    ],
+    priorities: [
+      {
+        title: 'Floor levels and surface water',
+        text: 'Floor heights above the ground, falls away from the walls and signs of past water entry are recorded.',
+      },
+      {
+        title: 'Subfloor damp',
+        text: 'Where a subfloor exists, damp soil, ventilation and timber condition are checked.',
+      },
+      {
+        title: 'Weatherboard cottages',
+        text: 'Older weatherboards, window frames and verandahs are checked for rot, paint failure and movement.',
+      },
+      {
+        title: 'Bayside wear',
+        text: 'Fixings, gutters and exposed timber on homes near the bay are checked for rust and weathering.',
+      },
+    ],
+    existingHomeFit:
+      'For a Mordialloc house, a building and timber-pest inspection is usually the best start. Damp ground and older timber both raise timber-pest risk.',
+    newHomeFit:
+      'New townhouses and rebuilds can be checked at each stage. At practical completion, the inspector also checks drainage falls and paving levels near the doors.',
+    faqs: [
+      {
+        question: 'Will the report say if the home floods?',
+        answer:
+          'No. The report records visible drainage and signs of past water entry. Flood overlays are shown by the council property tool and by Melbourne Water.',
+      },
+      {
+        question: 'Do you inspect older weatherboard homes in Mordialloc?',
+        answer:
+          'Yes. Allow time for the subfloor and roof space. A timber-pest inspection is a good idea for an older timber home.',
+      },
+      {
+        question: 'Do you inspect townhouses near Main Street?',
+        answer:
+          'Yes. The report covers the private lot. Shared driveways and common areas are noted where visible.',
+      },
+    ],
+    nearby: ['parkdale', 'chelsea', 'mentone', 'cheltenham'],
+  },
+  {
+    slug: 'chelsea',
+    name: 'Chelsea',
+    postcode: '3196',
+    council: 'City of Kingston',
+    region: 'City of Kingston',
+    serviceBalance: 'Low-lying bayside homes, cottages and townhouses',
+    metaTitle: 'Building & Pest Inspections Chelsea VIC',
+    metaDescription:
+      'Independent building and pest inspections in Chelsea, Victoria for bayside homes, older cottages, townhouses and new builds between the beach and the wetlands.',
+    hero:
+      'Independent building, timber-pest and new-home inspections in Chelsea, Victoria, for older beach-side homes, townhouses and new builds.',
+    summary:
+      'Chelsea sits on flat, low ground between the beach and the wetlands. Older cottages and postwar homes stand beside new townhouses. Drainage, damp and floor levels matter on most Chelsea inspections. The right scope still depends on the building itself.',
+    localContext: [
+      'Much of the land behind Chelsea beach was once part of the Carrum Carrum Swamp. The swamp was drained in the late 1800s. The Edithvale-Seaford Wetlands remain to the east. The streets are flat and sit close to sea level.',
+      'Chelsea started as a holiday area. Small weatherboard cottages and 1950s houses are still common. Many have been extended or replaced by two townhouses. Old cottages bring timber risks. Some new builds bring rushed finishing.',
+    ],
+    priorities: [
+      {
+        title: 'Damp and ground levels',
+        text: 'Flat, low sites can hold water near the walls. Ground levels against the house, weep holes and subfloor damp are checked.',
+      },
+      {
+        title: 'Cottage timber and verandahs',
+        text: 'Old weatherboards, stumps and verandah posts are checked for rot and movement.',
+      },
+      {
+        title: 'Salt air and wind',
+        text: 'Roof fixings, gutters, metal fences and window hardware close to the beach are checked for rust.',
+      },
+      {
+        title: 'Townhouse workmanship',
+        text: 'New townhouses are checked for drainage falls, sealant, tiling and finishing defects.',
+      },
+    ],
+    existingHomeFit:
+      'For a Chelsea cottage or older house, a building and timber-pest inspection is the safest start. Low, damp ground and older timber both raise timber-pest risk.',
+    newHomeFit:
+      'For a new townhouse build, stage inspections check the slab, frame and waterproofing before linings and tiles go on. Practical completion checks the finished home before handover.',
+    faqs: [
+      {
+        question: 'Do you check for flooding in Chelsea?',
+        answer:
+          'The inspection records visible drainage, ground levels and damp. Flood overlays for an exact address are checked through the City of Kingston property tool.',
+      },
+      {
+        question: 'Do you inspect old beach cottages?',
+        answer:
+          'Yes. Allow time for the subfloor. Some cottages have a very low crawl space. Areas that cannot be reached safely are listed as limitations.',
+      },
+      {
+        question: 'Can you inspect a new Chelsea townhouse before handover?',
+        answer:
+          'Yes. Book a practical completion inspection when the builder gives a handover date. The report lists visible defects for the builder to fix.',
+      },
+    ],
+    nearby: ['mordialloc', 'parkdale', 'carrum-downs', 'frankston'],
+  },
+  {
+    slug: 'parkdale',
+    name: 'Parkdale',
+    postcode: '3195',
+    council: 'City of Kingston',
+    region: 'City of Kingston',
+    serviceBalance: 'Mid-century homes and dual-occupancy rebuilds',
+    metaTitle: 'Building & Pest Inspections Parkdale',
+    metaDescription:
+      'Independent building and pest inspections in Parkdale for 1950s–70s homes, townhouses and dual-occupancy builds between Mentone and Mordialloc.',
+    hero:
+      'Independent building, timber-pest and new-home inspections for Parkdale houses, townhouses and dual-occupancy builds, from purchase through to handover.',
+    summary:
+      'Much of Parkdale was built in the 1950s, 1960s and 1970s. Many original blocks now hold two new homes instead of one. A Parkdale buyer often compares an original mid-century house with a new townhouse. The two need different inspections.',
+    localContext: [
+      'Parkdale sits between Mentone and Mordialloc, with Beach Road on the bay side and the railway inland. Brick-veneer houses from the postwar boom are common. Side-by-side and front-and-back townhouses have replaced many original houses.',
+      'Mid-century houses often have concrete or timber floors and bathrooms redone more than once. New dual-occupancy homes carry different risks: rushed finishes, missing sealant, poor falls on paving and shared driveway drainage.',
+    ],
+    priorities: [
+      {
+        title: 'Mid-century floors and walls',
+        text: 'Cracks in brick veneer, sticking doors and uneven floors are recorded. Each sign can point to movement or past drainage problems.',
+      },
+      {
+        title: 'Dual-occupancy site drainage',
+        text: 'Shared driveways, boundary paving and new stormwater pits are checked for falls and ponding near the walls.',
+      },
+      {
+        title: 'New-build finishing',
+        text: 'Sealant, flashings, door and window fit, tiling and paint are checked for visible workmanship defects before handover.',
+      },
+      {
+        title: 'Timber and subfloor',
+        text: 'Where a timber floor and subfloor space exist, ventilation, damp and timber-pest signs are checked.',
+      },
+    ],
+    existingHomeFit:
+      'For an original Parkdale house, a building and timber-pest inspection covers structure, moisture and timber. For a recently built townhouse, a building inspection focused on workmanship and drainage is often the better fit.',
+    newHomeFit:
+      'Dual-occupancy builds can be inspected at the slab, frame, pre-plaster and fixing stages. Each home on the block can be inspected at practical completion.',
+    faqs: [
+      {
+        question: 'Do you inspect both homes in a Parkdale dual-occupancy build?',
+        answer:
+          'Yes. Each home is inspected and reported separately. Shared driveways and services are noted in both reports.',
+      },
+      {
+        question: 'Is a building inspection worth it for a new townhouse?',
+        answer:
+          'Yes. New homes can still have defects. A builder warranty does not replace an independent check before purchase or handover.',
+      },
+      {
+        question: 'How soon can you inspect in Parkdale?',
+        answer:
+          'The online quote gives an instant price when the inspection is at least three business days away. Shorter deadlines are reviewed by hand.',
+      },
+    ],
+    nearby: ['mentone', 'mordialloc', 'cheltenham', 'chelsea'],
+  },
+  {
+    slug: 'highett',
+    name: 'Highett',
+    postcode: '3190',
+    council: 'City of Kingston and Bayside City Council',
+    region: 'City of Kingston',
+    serviceBalance: 'Older homes, apartments and new townhouses',
+    metaTitle: 'Building & Pest Inspections Highett',
+    metaDescription:
+      'Independent building and pest inspections in Highett for older homes, apartments and new townhouses near the station. Clear limits for owners-corporation areas.',
+    hero:
+      'Independent building, timber-pest and new-home inspections in Highett, from older detached homes to apartments and new townhouses near the station.',
+    summary:
+      'Highett has older detached homes beside large new apartment and townhouse projects. A buyer of an older home needs a close look at the subfloor, roof and later additions. A buyer of an apartment needs clear limits. The report covers the lot. Building-wide items sit with the owners corporation.',
+    localContext: [
+      'Highett sits across the Kingston and Bayside council areas. Streets near Highett Road and the station have seen many new apartment and townhouse projects. Further out, detached homes from the interwar and postwar years remain.',
+      'Apartments change what a building inspection can tell a buyer. Roofs, basements, fire systems and façades usually belong to the owners corporation. The inspection records what is visible inside the lot and on the balcony. Building-wide reports and maintenance plans come from the owners corporation.',
+    ],
+    priorities: [
+      {
+        title: 'Apartment and lot boundaries',
+        text: 'Internal finishes, wet areas, windows and balconies inside the lot are checked. Common property is outside the scope unless access is arranged.',
+      },
+      {
+        title: 'Balconies and waterproofing',
+        text: 'Visible falls, edge details, tiles and damp near balcony doors are reviewed. A visual inspection cannot confirm a hidden membrane.',
+      },
+      {
+        title: 'Older homes and additions',
+        text: 'Original weatherboard and brick homes often have rear extensions. Roof and floor junctions at the extension are checked for movement and leaks.',
+      },
+      {
+        title: 'New townhouse defects',
+        text: 'Recently finished townhouses can still show settling cracks, missing sealant and incomplete work. Each item is listed with a photo.',
+      },
+    ],
+    existingHomeFit:
+      'For an older Highett house, a combined building and timber-pest inspection is usually the right start. For an apartment, a building inspection of the lot is often enough, with owners-corporation records checked separately.',
+    newHomeFit:
+      'New townhouses and replacement homes can be inspected at each construction stage. A practical completion inspection lists visible defects before handover.',
+    faqs: [
+      {
+        question: 'Do you inspect apartments in Highett?',
+        answer:
+          'Yes. The inspection covers the inside of the lot, the balcony and any open storage or car space. Common property is outside the standard scope.',
+      },
+      {
+        question: 'Do I need a timber-pest inspection for an apartment?',
+        answer:
+          'Often not for an upper-level concrete apartment. For a ground-level unit, townhouse or timber-framed house, a timber-pest inspection is usually worthwhile.',
+      },
+      {
+        question: 'Is Highett in Kingston or Bayside?',
+        answer:
+          'Both. Part of Highett is in Kingston and part is in Bayside. Check the rates notice or the council property tool for planning records.',
+      },
+    ],
+    nearby: ['cheltenham', 'mentone', 'parkdale', 'mordialloc'],
   },
 ]
 

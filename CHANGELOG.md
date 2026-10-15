@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.13.0 — 2026-10-16
+
+- New cluster 3, City of Kingston: six suburb pages in the same format as
+  Casey & Cardinia: Cheltenham, Mentone, Mordialloc, Chelsea, Parkdale and
+  Highett. Each page has its own housing context, four priorities and three
+  FAQs, in short plain sentences (about 11 words per sentence). Each new page
+  is at least 71.9% different from every other area page (5-word shingles of
+  the visible text); the first 12 pages are at least 73.2% different.
+- Cheltenham and Highett show both councils (Kingston and Bayside).
+  Mordialloc and Chelsea explain that flood overlays are checked through the
+  Council, not by the inspection.
+- /service-areas: "Priority service areas" instead of a fixed count; Kingston
+  added to the hero and description. Home page text and featured links
+  include Kingston suburbs. Carrum Downs and Frankston list Chelsea as nearby.
+- Calendar events are now 1.5 hours long (owner decision 15 October).
+  Existing events change when "Update calendar" is pressed or the job is
+  saved again.
+
 ## 0.12.0 — 2026-10-15
 
 - Booked jobs go into Google Calendar, like the 137B site: same "NBI job"
