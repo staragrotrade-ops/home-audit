@@ -6,7 +6,7 @@
   Casey & Cardinia: Cheltenham, Mentone, Mordialloc, Chelsea, Parkdale and
   Highett. Each page has its own housing context, four priorities and three
   FAQs, in short plain sentences (about 11 words per sentence). Each new page
-  is at least 71.9% different from every other area page (5-word shingles of
+  is at least 71.7% different from every other area page (5-word shingles of
   the visible text); the first 12 pages are at least 73.2% different.
 - Cheltenham and Highett show both councils (Kingston and Bayside).
   Mordialloc and Chelsea explain that flood overlays are checked through the
