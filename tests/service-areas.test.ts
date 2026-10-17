@@ -7,11 +7,11 @@ import {
   getServiceArea,
 } from '../lib/service-areas.ts'
 
-test('first service-area release contains 12 unique, complete locations', () => {
-  assert.equal(SERVICE_AREAS.length, 12)
-  assert.equal(new Set(SERVICE_AREAS.map((area) => area.slug)).size, 12)
-  assert.equal(new Set(SERVICE_AREAS.map((area) => area.metaTitle)).size, 12)
-  assert.equal(new Set(SERVICE_AREAS.map((area) => area.metaDescription)).size, 12)
+test('service areas: 18 unique, complete locations', () => {
+  assert.equal(SERVICE_AREAS.length, 18)
+  assert.equal(new Set(SERVICE_AREAS.map((area) => area.slug)).size, 18)
+  assert.equal(new Set(SERVICE_AREAS.map((area) => area.metaTitle)).size, 18)
+  assert.equal(new Set(SERVICE_AREAS.map((area) => area.metaDescription)).size, 18)
 
   for (const area of SERVICE_AREAS) {
     assert.match(area.slug, /^[a-z]+(?:-[a-z]+)*$/)
@@ -33,7 +33,7 @@ test('all service-area relationships resolve to published locations', () => {
   }
 })
 
-test('both launch clusters contain six service areas', () => {
+test('every cluster contains six service areas', () => {
   for (const region of SERVICE_AREA_REGIONS) {
     assert.equal(
       SERVICE_AREAS.filter((area) => area.region === region).length,

@@ -11,7 +11,7 @@ import { SITE_URL } from '@/lib/site'
 export const metadata = pageMetadata({
   title: 'Building Inspection Service Areas Melbourne',
   description:
-    'Explore Home Audit building, pest and new-home inspection service areas across the Mornington Peninsula, Frankston, Casey and Cardinia.',
+    'Explore Home Audit building, pest and new-home inspection service areas across the Mornington Peninsula, Frankston, Casey, Cardinia and Kingston.',
   path: '/service-areas',
 })
 
@@ -20,6 +20,8 @@ const regionIntroductions: Record<ServiceAreaRegion, string> = {
     'A strong fit for pre-purchase and timber-pest inspections across established, renovated and infill housing, with new-home services also available.',
   'Casey & Cardinia':
     'A balanced corridor for established-home due diligence and independent new-build stage or practical completion inspections.',
+  'City of Kingston':
+    'Coverage for established homes, coastal properties, units, townhouses, renovations and selected new-home projects across Kingston’s bayside and inland suburbs.',
 }
 
 const structuredData = {
@@ -73,9 +75,9 @@ export default function ServiceAreasPage() {
             </p>
           </div>
           <div className="page-hero-aside">
-            <strong>{SERVICE_AREAS.length} priority service areas</strong>
+            <strong>Priority service areas</strong>
             <span>
-              Mornington Peninsula · Frankston · Casey · Cardinia
+              Mornington Peninsula · Frankston · Casey · Cardinia · Kingston
             </span>
           </div>
         </div>

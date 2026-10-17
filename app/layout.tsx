@@ -90,7 +90,7 @@ const structuredData = {
       legalName: COMPANY_NAME,
       identifier: `ACN ${COMPANY_ACN}`,
       url: `${SITE_URL}/`,
-      telephone: '+61 3 7047 8366',
+      telephone: '+61 472 570 359',
       email: CONTACT_EMAIL,
       areaServed: [
         { '@type': 'City', name: 'Melbourne' },

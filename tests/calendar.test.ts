@@ -8,13 +8,13 @@ async function source(path: string) {
 
 const c = await import('../lib/calendar-event.ts')
 
-test('calendar event: one fixed id per job, 2 hours by default, Melbourne time', () => {
+test('calendar event: one fixed id per job, 1.5 hours by default, Melbourne time', () => {
   const id = c.calendarEventId('3F2504E0-4F89-11D3-9A0C-0305E82C3301')
   assert.equal(id, 'ha3f2504e04f8911d39a0c0305e82c3301')
   assert.match(id, /^[a-v0-9]{5,1024}$/)
-  assert.equal(c.eventEnd('2026-10-20T23:00:00Z', null), '2026-10-21T01:00:00.000Z')
+  assert.equal(c.eventEnd('2026-10-20T23:00:00Z', null), '2026-10-21T00:30:00.000Z')
   assert.equal(c.eventEnd('2026-10-20T23:00:00Z', '2026-10-21T00:30:00Z'), '2026-10-21T00:30:00.000Z')
-  assert.equal(c.eventEnd('2026-10-20T23:00:00Z', '2026-10-20T22:00:00Z'), '2026-10-21T01:00:00.000Z')
+  assert.equal(c.eventEnd('2026-10-20T23:00:00Z', '2026-10-20T22:00:00Z'), '2026-10-21T00:30:00.000Z')
 
   const event = c.buildCalendarEvent({
     reference: 'HA-20261013-10EDDF',

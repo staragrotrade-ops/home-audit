@@ -1,7 +1,8 @@
 // Google Calendar event for a booked job. No imports, so the tests can load
 // this file directly. Works like the 137B site's calendar events.
 
-export const DEFAULT_INSPECTION_MINUTES = 120
+// Owner decision 15 October 2026: each job takes 1.5 hours.
+export const DEFAULT_INSPECTION_MINUTES = 90
 
 export type CalendarEventInput = {
   reference: string

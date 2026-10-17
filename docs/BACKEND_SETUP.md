@@ -216,5 +216,5 @@ Booked jobs go into Google Calendar, like the 137B site.
 What happens: saving a booked time (by hand, or when the agent confirms)
 creates or moves the event; clearing the time or cancelling the job removes
 it; changing the agent or the customer's access details updates it. Test
-jobs are left out. Events are named "HA – SUBURB", 2 hours long, with the
+jobs are left out. Events are named "HA – SUBURB", 1.5 hours long, with the
 job, client, access and agent details and a link to the dashboard.

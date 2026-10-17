@@ -124,7 +124,10 @@ try {
     /<loc>https:\/\/homeaudit\.com\.au(\/service-areas\/[^<]+)<\/loc>/g,
   )].map((match) => match[1])
 
-  assert.equal(serviceAreaRoutes.length, 12, 'Sitemap must contain 12 service-area detail pages')
+  assert.equal(serviceAreaRoutes.length, 18, 'Sitemap must contain 18 service-area detail pages')
+  for (const slug of ['cheltenham', 'mentone', 'mordialloc', 'chelsea', 'parkdale', 'highett']) {
+    assert.ok(serviceAreaRoutes.includes(`/service-areas/${slug}`), `Sitemap must include ${slug}`)
+  }
 
   const indexableRoutes = [...coreIndexableRoutes, ...serviceAreaRoutes]
 
