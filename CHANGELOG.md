@@ -14,6 +14,9 @@
 - /service-areas: "Priority service areas" instead of a fixed count; Kingston
   added to the hero and description. Home page text and featured links
   include Kingston suburbs. Carrum Downs and Frankston list Chelsea as nearby.
+- Phone number changed to 0472 570 359 everywhere it appears (header,
+  footer, quote and order pages, booking pages, email sign-off and the
+  Organization structured data).
 - Calendar events are now 1.5 hours long (owner decision 15 October).
   Existing events change when "Update calendar" is pressed or the job is
   saved again.
