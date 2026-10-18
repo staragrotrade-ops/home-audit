@@ -80,7 +80,11 @@ test('booking links stay out of analytics and search', async () => {
 test('inline analytics scripts are valid JavaScript and skip private pages', async () => {
   const component = await source('components/analytics.tsx')
   const blocks = [...component.matchAll(/\{`([\s\S]*?)`\}/g)]
-    .map((match) => match[1].replace('${measurementId}', 'G-TEST1234'))
+    .map((match) =>
+      match[1]
+        .replace('${measurementId}', 'G-TEST1234')
+        .replace('${tagConfig}', "gtag('config', 'G-TEST1234'); gtag('config', 'AW-18520017169');"),
+    )
     .filter((block) => block.includes('function'))
   assert.equal(blocks.length, 2)
   for (const block of blocks) {

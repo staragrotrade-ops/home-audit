@@ -40,6 +40,7 @@ export default async function QuotePage({ searchParams }: QuotePageProps) {
         </div>
         <QuoteFlow
           initialService={initialService}
+          initialInspectionType={service === 'building-and-pest' ? 'building_and_pest' : ''}
           submissionEnabled={process.env.QUOTE_SUBMISSION_ENABLED === 'true'}
           turnstileSiteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
         />

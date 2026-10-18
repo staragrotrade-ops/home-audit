@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.14.0 — 2026-10-18
+
+- Google Ads (account 551-924-7556): the Google tag `AW-18520017169` loads on
+  the production site only (not on preview or local builds, and not on order,
+  booking or admin pages). It shares one gtag.js with GA4 when a measurement
+  ID is set.
+- Conversion `BP_Quote_Submitted` (label `vEi7CLqj96AdEJGShP9E`) is sent once
+  when an existing-home quote is accepted by the server with a reference. The
+  quote reference is the transaction id, so a repeat cannot double count.
+  New-home quotes, the email handoff and honeypot responses are not reported.
+  An instant quote waits up to one second for Google before opening the
+  order page.
+- Ad attribution is now captured on the first public page of a visit, not
+  only on /quote. Visitors who land on a service or suburb page from an ad
+  and then open the quote keep their gclid and UTM tags. gbraid and wbraid
+  are stored in `google_click_id` with a `gbraid:` / `wbraid:` prefix. A new
+  ad click replaces an older saved source; a saved source expires after 90
+  days.
+- `/quote?service=building-and-pest` opens at the property step with
+  Existing home and Building & pest already selected. A quote start is
+  counted at the first answer for these visits.
+- Content Security Policy allows the Google Ads hosts
+  (googleadservices.com, googleads.g.doubleclick.net, td.doubleclick.net).
+- Privacy page: new "Google Ads" section; the statement that no advertising
+  cookies are used is removed.
+
 ## 0.13.1 — 2026-10-18
 
 - Phone number changed to 03 7047 8366 everywhere it appears (header,
