@@ -94,7 +94,7 @@ export function nextAdAttribution(
     (typeof stored.saved_at !== 'number' ||
       now - stored.saved_at < AD_ATTRIBUTION_DAYS * 86_400_000)
 
-  if (!fresh) return { attribution: visit, save: true }
+  if (!fresh || stored === null) return { attribution: visit, save: true }
 
   const { saved_at: _savedAt, ...kept } = stored
   const keptAttribution = { ...emptyAdAttribution, ...kept }
