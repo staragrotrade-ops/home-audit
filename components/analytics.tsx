@@ -45,6 +45,7 @@ function GoogleTag() {
   const ads = isVercelProduction && isGoogleAdsId(GOOGLE_ADS_ID) ? GOOGLE_ADS_ID : ''
   const ids = [ga4, ads].filter(Boolean)
   if (ids.length === 0) return null
+  const tagConfig = ids.map((id) => `gtag('config', '${id}');`).join(' ')
 
   return (
     <>
@@ -59,7 +60,7 @@ window.gtag = gtag;
 // Private order and booking links and admin pages are never sent to Google.
 if (!/^\\/(order|booking|admin)(\\/|$)/.test(location.pathname)) {
   gtag('js', new Date());
-${ids.map((id) => `  gtag('config', '${id}');`).join('\n')}
+  ${tagConfig}
 }`}
       </Script>
     </>
