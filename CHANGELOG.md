@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.1 — 2026-10-18
+
+- Phone number changed to 03 7047 8366 everywhere it appears (header,
+  footer, quote and order pages, booking pages, email sign-off and the
+  Organization structured data).
+
 ## 0.13.0 — 2026-10-16
 
 - New cluster 3, City of Kingston: six suburb pages in the same format as
