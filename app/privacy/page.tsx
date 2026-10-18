@@ -74,8 +74,8 @@ export default function PrivacyPage() {
           We measure how the website is used: which pages are viewed, for how
           long, which site or link a visit came from, the type of device and
           the country. A visit is counted with a random number kept in your
-          browser for that visit only. We do not use advertising cookies and we
-          do not store your IP address. To stop misuse of the quote form we
+          browser for that visit only. We do not store your IP address. To
+          stop misuse of the quote form we
           keep a scrambled code made from it, which cannot be turned back into
           the address, for up to two hours.
         </p>
@@ -83,6 +83,19 @@ export default function PrivacyPage() {
           If you send a quote request, we link it to the pages viewed during
           that visit. This helps us see which information was useful and
           where our enquiries come from. We do not use it for anything else.
+        </p>
+
+        <h2>Google Ads</h2>
+        <p>
+          We advertise on Google Search. This website uses the Google tag, which
+          sets Google advertising cookies in your browser, so Google can tell us
+          when someone who clicked one of our ads goes on to request a quote.
+          Google receives the quote reference number, not your name, contact
+          details or property address. If you arrive from an ad, the click
+          code and campaign details in the link are saved in your browser for
+          up to 90 days and are kept with your quote request. You can manage
+          Google advertising settings at adssettings.google.com or block
+          cookies in your browser.
         </p>
 
         <h2>Referral partners</h2>
@@ -133,7 +146,7 @@ export default function PrivacyPage() {
           version is always published on this page.
         </p>
 
-        <p className="credential-note">Last updated: 14 October 2026.</p>
+        <p className="credential-note">Last updated: 18 October 2026.</p>
       </div>
     </main>
   )

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { QuoteRequest } from '@/lib/quote-schema'
 import { PRICE_GUIDE_BANDS } from '@/lib/booking-options'
 import { earliestInstantDate } from '@/lib/pricing'
@@ -8,6 +8,7 @@ import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_HREF } from '@/lib/site'
 import { currentVisitId, trackVisitorEvent } from '@/lib/visitor-analytics'
 import { Turnstile } from '@/components/turnstile'
 import { isRedirectLink } from '@/lib/listing-url'
+import { captureAdAttribution, reportQuoteConversion } from '@/lib/google-ads'
 
 type ServiceFamily = QuoteRequest['service_family'] | ''
 type Draft = Omit<
@@ -34,7 +35,6 @@ declare global {
 
 const LEGACY_DRAFT_KEY = 'home-audit-quote-draft-v1'
 const DRAFT_KEY = 'home-audit-quote-draft-v2'
-const ATTRIBUTION_KEY = 'home-audit-first-attribution-v1'
 // Saved contact and address details are removed from the device after a week.
 const DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
 
@@ -160,31 +160,6 @@ function requestBody(draft: Draft, intakeMode: 'submit' | 'email_handoff', turns
   })
 }
 
-function captureAttribution(): Attribution {
-  const stored = window.localStorage.getItem(ATTRIBUTION_KEY)
-  if (stored) {
-    try {
-      return { ...emptyAttribution, ...JSON.parse(stored) }
-    } catch {
-      window.localStorage.removeItem(ATTRIBUTION_KEY)
-    }
-  }
-
-  const params = new URLSearchParams(window.location.search)
-  const first = {
-    first_landing_url: window.location.href,
-    first_referrer: document.referrer,
-    utm_source: params.get('utm_source') || '',
-    utm_medium: params.get('utm_medium') || '',
-    utm_campaign: params.get('utm_campaign') || '',
-    utm_term: params.get('utm_term') || '',
-    utm_content: params.get('utm_content') || '',
-    google_click_id: params.get('gclid') || '',
-  }
-  window.localStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(first))
-  return first
-}
-
 function readSavedDraft(): Partial<Draft> | null {
   // Drafts from the first release had no expiry; drop them.
   window.localStorage.removeItem(LEGACY_DRAFT_KEY)
@@ -263,10 +238,14 @@ function buildEmailHref(draft: Draft, stageLabels: string) {
 
 export function QuoteFlow({
   initialService,
+  initialInspectionType = '',
   submissionEnabled,
   turnstileSiteKey = '',
 }: {
   initialService: ServiceFamily
+  // Set by links such as /quote?service=building-and-pest, which then open
+  // straight at the property questions.
+  initialInspectionType?: Draft['inspection_type']
   submissionEnabled: boolean
   turnstileSiteKey?: string
 }) {
@@ -274,6 +253,9 @@ export function QuoteFlow({
   const [turnstileReset, setTurnstileReset] = useState(0)
   const needsTurnstile = submissionEnabled && Boolean(turnstileSiteKey)
   const [step, setStep] = useState(0)
+  // A visit that opens with the service already chosen counts as a started
+  // quote at its first answer, not on page load.
+  const startTracked = useRef(false)
   const [draft, setDraft] = useState<Draft>({
     ...emptyDraft,
     service_family: initialService,
@@ -288,7 +270,9 @@ export function QuoteFlow({
 
   useEffect(() => {
     const saved = readSavedDraft()
-    const attribution = captureAttribution()
+    const attribution = captureAdAttribution()
+    const presetType =
+      initialService === 'existing_home' && initialInspectionType ? initialInspectionType : ''
 
     setDraft((current) => {
       const restored = saved ? { ...current, ...saved } : current
@@ -299,7 +283,8 @@ export function QuoteFlow({
         service_family: serviceFamily,
         // A service chosen from the link must not inherit the other
         // service's saved selections.
-        inspection_type: serviceFamily === 'existing_home' ? restored.inspection_type : '',
+        inspection_type:
+          presetType || (serviceFamily === 'existing_home' ? restored.inspection_type : ''),
         new_home_stages: serviceFamily === 'new_home' ? restored.new_home_stages : [],
         attribution,
         // Consent and the honeypot are never restored from storage.
@@ -307,8 +292,9 @@ export function QuoteFlow({
         website: '',
       }
     })
+    if (presetType) setStep(1)
     setReady(true)
-  }, [initialService])
+  }, [initialService, initialInspectionType])
 
   useEffect(() => {
     if (!ready || submitted) return
@@ -330,12 +316,19 @@ export function QuoteFlow({
   )
 
   function update<K extends keyof Draft>(key: K, value: Draft[K]) {
+    if (!startTracked.current && draft.service_family) {
+      startTracked.current = true
+      track('quote_start', { service_family: draft.service_family })
+    }
     setDraft((current) => ({ ...current, [key]: value }))
     setStatus(null)
   }
 
   function selectService(family: QuoteRequest['service_family']) {
-    if (draft.service_family === '') track('quote_start', { service_family: family })
+    if (draft.service_family === '' && !startTracked.current) {
+      startTracked.current = true
+      track('quote_start', { service_family: family })
+    }
 
     setDraft((current) =>
       current.service_family === family
@@ -498,6 +491,11 @@ export function QuoteFlow({
 
       window.localStorage.removeItem(DRAFT_KEY)
       track('quote_submit', { service_family: draft.service_family })
+      // Google Ads counts submitted existing-home quotes only. A response
+      // without a reference created no job, so it is never reported.
+      if (draft.service_family === 'existing_home' && result.reference) {
+        await reportQuoteConversion(result.reference)
+      }
       // An instant price goes straight to the order page to pay.
       if (result.decision === 'instant' && result.orderUrl) {
         window.location.href = result.orderUrl

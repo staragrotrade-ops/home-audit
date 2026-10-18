@@ -10,6 +10,7 @@ import {
   recordPageActivity,
   trackVisitorEvent,
 } from '@/lib/visitor-analytics'
+import { captureAdAttribution } from '@/lib/google-ads'
 
 const HEARTBEAT_MS = 15_000
 
@@ -32,7 +33,11 @@ export function VisitorTracker() {
   useEffect(() => {
     // Before anything else, so a ?ref= link is saved even on excluded pages.
     captureReferral()
-    if (!pathname || isExcludedPath(pathname) || !getVisit()) return
+    if (!pathname || isExcludedPath(pathname)) return
+    // Saves the ad click and campaign tags from the first page of the visit,
+    // so they still reach the quote after the visitor moves through the site.
+    captureAdAttribution()
+    if (!getVisit()) return
 
     const pageInstanceId = newId()
     let ended = false

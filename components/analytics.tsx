@@ -1,4 +1,5 @@
 import Script from 'next/script'
+import { GOOGLE_ADS_ID, isGoogleAdsId } from '@/lib/google-ads'
 
 // Google Analytics 4 loads only when a measurement ID is configured. Set
 // NEXT_PUBLIC_GA_MEASUREMENT_ID in the Production environment only, so preview
@@ -14,7 +15,7 @@ export function Analytics() {
   return (
     <>
       {isVercelProduction ? <VercelWebAnalytics /> : null}
-      <GoogleAnalytics />
+      <GoogleTag />
     </>
   )
 }
@@ -36,23 +37,29 @@ window.va('beforeSend', function (event) {
   )
 }
 
-function GoogleAnalytics() {
-  if (!/^G-[A-Z0-9]{4,20}$/.test(measurementId)) return null
+// One Google tag (gtag.js) serves both Google Analytics 4 (when a measurement
+// ID is configured) and the Google Ads account. Google Ads only loads on the
+// production site, so preview and local quotes never count as conversions.
+function GoogleTag() {
+  const ga4 = /^G-[A-Z0-9]{4,20}$/.test(measurementId) ? measurementId : ''
+  const ads = isVercelProduction && isGoogleAdsId(GOOGLE_ADS_ID) ? GOOGLE_ADS_ID : ''
+  const ids = [ga4, ads].filter(Boolean)
+  if (ids.length === 0) return null
 
   return (
     <>
       <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
+        src={`https://www.googletagmanager.com/gtag/js?id=${ids[0]}`}
         strategy="afterInteractive"
       />
-      <Script id="ga4-init" strategy="afterInteractive">
+      <Script id="google-tag-init" strategy="afterInteractive">
         {`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 window.gtag = gtag;
 // Private order and booking links and admin pages are never sent to Google.
 if (!/^\\/(order|booking|admin)(\\/|$)/.test(location.pathname)) {
   gtag('js', new Date());
-  gtag('config', '${measurementId}');
+${ids.map((id) => `  gtag('config', '${id}');`).join('\n')}
 }`}
       </Script>
     </>
