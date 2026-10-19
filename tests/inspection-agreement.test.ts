@@ -102,10 +102,12 @@ test('inspection agreement: accepted before payment, recorded once, required for
 })
 
 test('thermal case study does not promise thermal imaging on every inspection', async () => {
-  const card = await source('components/thermal-case-study.tsx')
-  assert.match(card, /Where conditions allow and it is necessary, our inspector may use thermal imaging as an\s+extra check/)
+  const card = await source('components/case-study.tsx')
+  assert.match(card, /Where conditions allow and it is necessary, our inspector may use thermal imaging as an extra check/)
   assert.match(card, /moisture meter confirmed water/)
-  assert.match(card, /The buyer used it to renegotiate the\s+price/)
+  assert.match(card, /The buyer used it to renegotiate the price/)
+  assert.match(card, /pink waterproof coating/)
+  assert.match(await source('app/new-home-inspections/page.tsx'), /<HebelBaseCaseStudy \/>/)
   assert.match(a.agreementPlainText(), /thermal imaging, unless the Order states that it is included/)
   const service = await source('app/building-and-pest-inspections/page.tsx')
   const home = await source('app/page.tsx')

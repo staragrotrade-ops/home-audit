@@ -8,8 +8,11 @@
   camera, about 1.4 °C cooler, and a moisture meter confirmed water from the
   floor above. The buyer used the finding to renegotiate the price (owner
   confirmed). Each card links to the quote form.
-- The photo has the device brand and model blurred, the on-screen labels in
-  English and a Home Audit watermark.
+- New home inspections page (after the stage cards): Hebel walls missing
+  the waterproof coating at the base, shown next to a wall done correctly
+  with the pink base coating; hard to see once rendered.
+- Photos: Home Audit watermark; device brand and model and the Hebel
+  packaging blurred. The thermal photo has the on-screen labels in English.
 - The card says the inspector may use thermal imaging as an extra check
   where conditions allow and it is necessary (owner wording), consistent
   with clause 5.1(w) of the Inspection Agreement.

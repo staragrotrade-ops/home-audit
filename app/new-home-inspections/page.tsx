@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { HebelBaseCaseStudy } from '@/components/case-study'
 import { JsonLd } from '@/components/json-ld'
 import { pageMetadata } from '@/lib/metadata'
 import { SITE_URL } from '@/lib/site'
@@ -119,6 +120,8 @@ export default function NewHomeInspectionsPage() {
                 </article>
               ))}
             </div>
+
+            <HebelBaseCaseStudy />
 
             <p>
               <Link className="text-link" href="/guides/pre-slab-inspection-glen-waverley">

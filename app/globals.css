@@ -647,7 +647,7 @@ button:focus-visible {
   font-size: 0.94rem;
 }
 
-.thermal-case {
+.case-card {
   display: grid;
   grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
   gap: 32px;
@@ -659,7 +659,11 @@ button:focus-visible {
   background: var(--warm-ivory);
 }
 
-.thermal-case-home {
+.case-card-pair {
+  grid-template-columns: 1fr;
+}
+
+.case-card-home {
   grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
   gap: 64px;
   margin: 0;
@@ -668,47 +672,74 @@ button:focus-visible {
   background: none;
 }
 
-.thermal-case-image img {
+.case-card-images {
+  display: grid;
+  gap: 14px;
+}
+
+.case-card-pair .case-card-images {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.case-card-image {
+  position: relative;
+}
+
+.case-card-image img {
   display: block;
   width: 100%;
   height: auto;
   border-radius: var(--radius-sm);
 }
 
-.thermal-case-copy h2,
-.thermal-case-copy h3 {
+.case-card-label {
+  display: block;
+  margin-top: 8px;
+  color: var(--eucalyptus);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.case-card-copy h2,
+.case-card-copy h3 {
   margin-top: 0;
 }
 
-.thermal-case-steps {
+.case-card-steps {
   display: grid;
   gap: 10px;
   margin: 18px 0;
   padding-left: 20px;
 }
 
-.thermal-case-steps strong {
+.case-card-steps strong {
   color: var(--eucalyptus);
 }
 
-.thermal-case-note {
+.case-card-note {
   color: var(--muted);
   font-size: 0.88rem;
 }
 
-.thermal-case-copy .button {
+.case-card-copy .button {
   margin-top: 8px;
 }
 
 @media (max-width: 900px) {
-  .thermal-case,
-  .thermal-case-home {
+  .case-card,
+  .case-card-home {
     grid-template-columns: 1fr;
     gap: 24px;
   }
 
-  .thermal-case-image {
+  .case-card:not(.case-card-pair) .case-card-image {
     max-width: 420px;
+  }
+}
+
+@media (max-width: 560px) {
+  .case-card-pair .case-card-images {
+    grid-template-columns: 1fr;
   }
 }
 

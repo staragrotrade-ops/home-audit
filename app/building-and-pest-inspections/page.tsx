@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { JsonLd } from '@/components/json-ld'
-import { ThermalCaseStudy } from '@/components/thermal-case-study'
+import { ThermalCaseStudy } from '@/components/case-study'
 import { pageMetadata } from '@/lib/metadata'
 import { SITE_URL } from '@/lib/site'
 
