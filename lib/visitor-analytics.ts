@@ -3,6 +3,7 @@
 // the referral code from a partner's ?ref= link (see lib/referrals.ts).
 
 import { normaliseRefCode, REFERRAL_COOKIE, REFERRAL_DAYS } from './referrals.ts'
+import { visitSource } from './google-ads.ts'
 
 export type VisitorEventName =
   | 'page_view'
@@ -106,12 +107,14 @@ export function getVisit(): Attribution | null {
       if (parsed?.sessionId) return parsed
     }
     const params = new URLSearchParams(window.location.search)
+    // Google Ads visits are labelled "google_ads" (see lib/google-ads.ts).
+    const { utmSource, utmMedium } = visitSource(params)
     const visit: Attribution = {
       sessionId: newId(),
       landingPath: window.location.pathname.slice(0, 300),
       referrer: cleanReferrer(document.referrer),
-      utmSource: (params.get('utm_source') || '').slice(0, 120),
-      utmMedium: (params.get('utm_medium') || '').slice(0, 120),
+      utmSource,
+      utmMedium,
       utmCampaign: (params.get('utm_campaign') || '').slice(0, 160),
       refCode: normaliseRefCode(params.get('ref')) || savedReferral(),
     }

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.15.5 — 2026-10-20
+
+- Visitor statistics: a visit that arrives with a Google Ads click id
+  (gclid, gbraid or wbraid) is recorded with source `google_ads` and medium
+  `cpc`, so ad visits show separately from ordinary Google search in
+  Admin → Visitors. Earlier visits keep their old label.
+
 ## 0.15.4 — 2026-10-20
 
 - "Checking before settlement" now says "If the condition is inconsistent
