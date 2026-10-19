@@ -6,7 +6,8 @@
   list) and on the home page (after "What a useful inspection does"): a
   ground-floor ceiling that looked normal showed a cold spot on a thermal
   camera, about 1.4 °C cooler, and a moisture meter confirmed water from the
-  floor above. Each card links to the quote form.
+  floor above. The buyer used the finding to renegotiate the price (owner
+  confirmed). Each card links to the quote form.
 - The photo has the device brand and model blurred, the on-screen labels in
   English and a Home Audit watermark.
 - The card says the inspector may use thermal imaging as an extra check

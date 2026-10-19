@@ -37,7 +37,10 @@ export function ThermalCaseStudy({ variant = 'full' }: { variant?: 'full' | 'hom
             coming from the floor above.
           </li>
         </ol>
-        <p>The finding went into the written report, with photos.</p>
+        <p>
+          The finding went into the written report, with photos. The buyer used it to renegotiate the
+          price.
+        </p>
         <p className="thermal-case-note">
           Where conditions allow and it is necessary, our inspector may use thermal imaging as an
           extra check.
