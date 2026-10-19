@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.15.1 — 2026-10-20
+
+- Real inspection example on the Building & Pest page (after the scope
+  list) and on the home page (after "What a useful inspection does"): a
+  ground-floor ceiling that looked normal showed a cold spot on a thermal
+  camera, about 1.4 °C cooler, and a moisture meter confirmed water from the
+  floor above. Each card links to the quote form.
+- The photo has the device brand and model blurred, the on-screen labels in
+  English and a Home Audit watermark.
+- The card says thermal imaging is an extra check where conditions allow
+  and is not part of every inspection, matching clause 5.1(w) of the
+  Inspection Agreement.
+
 ## 0.15.0 — 2026-10-19
 
 - Inspection Agreement. Customers tick "I have read and agree" on the order

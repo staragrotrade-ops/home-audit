@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { JsonLd } from '@/components/json-ld'
+import { ThermalCaseStudy } from '@/components/thermal-case-study'
 import { FEATURED_GUIDE } from '@/lib/guides'
 import { SERVICE_AREAS } from '@/lib/service-areas'
 import { SITE_URL } from '@/lib/site'
@@ -252,6 +253,12 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="section thermal-case-section" aria-label="Inspection example">
+        <div className="container">
+          <ThermalCaseStudy variant="home" />
         </div>
       </section>
 

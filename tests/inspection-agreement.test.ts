@@ -100,3 +100,14 @@ test('inspection agreement: accepted before payment, recorded once, required for
   assert.match(sql, /add column if not exists agreement_sha256 text/)
   assert.match(sql, /add column if not exists agreement_accepted_at timestamptz/)
 })
+
+test('thermal case study does not promise thermal imaging on every inspection', async () => {
+  const card = await source('components/thermal-case-study.tsx')
+  assert.match(card, /Thermal\s+imaging is not part of every inspection/)
+  assert.match(card, /moisture meter confirmed water/)
+  assert.match(a.agreementPlainText(), /thermal imaging, unless the Order states that it is included/)
+  const service = await source('app/building-and-pest-inspections/page.tsx')
+  const home = await source('app/page.tsx')
+  assert.match(service, /<ThermalCaseStudy \/>/)
+  assert.match(home, /<ThermalCaseStudy variant="home" \/>/)
+})

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { JsonLd } from '@/components/json-ld'
+import { ThermalCaseStudy } from '@/components/thermal-case-study'
 import { pageMetadata } from '@/lib/metadata'
 import { SITE_URL } from '@/lib/site'
 
@@ -109,6 +110,8 @@ export default function BuildingAndPestPage() {
                 </div>
               ))}
             </div>
+
+            <ThermalCaseStudy />
 
             <h2>Building and timber-pest scopes work together</h2>
             <p>
