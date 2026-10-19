@@ -23,7 +23,7 @@ export type AgreementSection = { id: string; heading: string; blocks: AgreementB
 
 /** SHA-256 of agreementPlainText() for each published version. */
 export const AGREEMENT_FINGERPRINTS: Record<string, string> = {
-  '2026-10-19': 'fdd25ef97754b5b3e18291bef374077436dbd319e53462423fa6a31c968222c9',
+  '2026-10-19': '8eaa029758a0452ee2ad2324ad1336eb721b49783bdf468184e5a2f20e5f8b77',
 }
 
 // The short version shown above the tick box. It must not say anything the
@@ -64,14 +64,13 @@ export const AGREEMENT_SECTIONS: AgreementSection[] = [
       'The purpose of a pre-purchase inspection is to give you advice about the condition of the property at the time of the inspection.',
       'As AS 4349.1 says, the inspection is a subjective appraisal by the inspector. Different inspectors, or the same inspector on another day, may reach different conclusions. The inspection is not a rigorous assessment of every part of the property.',
       'The building is compared with a building of similar age and type that was built to the accepted practice of its time and has been reasonably maintained. It is not checked against today’s building rules or Australian Standards, and it may not meet them.',
-      'If you want something added to or removed from the standard scope, we will agree it with you in writing before the inspection.',
     ],
   },
   {
     id: 'scope',
     heading: '3. Scope of the inspection',
     blocks: [
-      'The inspection is visual and non-invasive. Nothing is dismantled. We inspect the areas we can reach safely and reasonably on the day, and only what is in the inspector’s line of sight and close enough to assess. We use our eyes and simple tools such as a torch, a ladder and a moisture meter, and we do limited checks of how some items work.',
+      'The inspection is visual and non-invasive. Nothing is dismantled. We inspect the areas we can reach safely and reasonably on the day, and only what is in the inspector’s line of sight and close enough to assess.',
       'Any access that needs a tool to open is treated as not accessible. As AS 4349.1 says, reasonable access does not include cutting access holes or removing screws, bolts, other fastenings or sealants from access covers. This includes screwed or fixed access panels, hatches and covers, sealed or painted-shut openings, and locks. We do not open them, and the areas behind them are not inspected.',
       'The inspector decides on the day which areas can be reached safely. As a guide from AS 4349.1:',
       {
@@ -163,7 +162,7 @@ export const AGREEMENT_SECTIONS: AgreementSection[] = [
       'The report is not a certificate of compliance, a warranty against future problems or an insurance policy. It does not replace advice from a lawyer, conveyancer, engineer or licensed tradesperson.',
       'Your contract of sale may say who must prepare a report for a building inspection condition. Please check with your lawyer or conveyancer that our report meets your contract before you rely on that condition.',
       'If you buy at auction, the contract is usually unconditional. Make sure you have read the report, asked your questions and got the advice you need before you bid.',
-      'We own the copyright in the report, photos and site notes. We keep our site records.',
+      'We own the copyright in the report, photos and site notes.',
     ],
   },
   {
