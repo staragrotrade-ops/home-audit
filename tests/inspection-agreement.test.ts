@@ -29,6 +29,12 @@ test('inspection agreement: scope, exclusions, cancellation and limitation of li
   assert.match(text, /within 30 metres of the main building/)
   assert.match(text, /Australian Consumer Law/)
   assert.match(text, /limited to the fee you paid/)
+  // Owner decision: the report is an opinion, not a basis to buy, negotiate or budget.
+  assert.match(text, /the report is the inspector’s opinion/)
+  assert.match(text, /not a full list of every problem/)
+  assert.match(text, /may be different from the actual condition/)
+  assert.match(text, /We do not agree to you using the report as the basis to decide whether to buy the property, to negotiate the price, or as a budget for repairs/)
+  assert.match(text, /If you do not agree with this, please do not book our service/)
   // Owner decision: $100 if cancelled 3+ business days ahead; no refund after that.
   assert.equal(a.CANCELLATION_FEE_CENTS, 10_000)
   assert.equal(a.CANCELLATION_NOTICE_BUSINESS_DAYS, 3)

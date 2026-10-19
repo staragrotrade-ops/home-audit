@@ -16,6 +16,11 @@
   on the job (migration `20261019100000_inspection_agreement.sql`), with an
   audit event and the version in the Stripe metadata. Admin shows the
   status on each job.
+- The report section says the report is the inspector's opinion under the
+  Australian Standards, not a full list of problems, and may differ from the
+  actual condition; we do not agree to it being used as the basis to buy,
+  negotiate the price or budget repairs; customers who do not agree should
+  not book. This is also in the key points above the tick box.
 - New page /inspection-agreement (noindex), linked from the footer, the
   terms page, the quote email and the payment email. Terms and privacy
   notice updated (19 October 2026).

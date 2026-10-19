@@ -29,7 +29,7 @@ export type AgreementSection = { id: string; heading: string; blocks: AgreementB
 
 /** SHA-256 of agreementPlainText() for each published version. */
 export const AGREEMENT_FINGERPRINTS: Record<string, string> = {
-  '2026-10-19': 'e7914998b71ca52026a9790e35502f6f6acf4fabbeba6a9587e7a03c6e648eec',
+  '2026-10-19': 'f4f59e173232feae48b2a25f5953f527f9302bd323cff2aad7658a33e5f8b3d5',
 }
 
 // The short version shown above the tick box. It must not say anything the
@@ -37,7 +37,8 @@ export const AGREEMENT_FINGERPRINTS: Record<string, string> = {
 export const AGREEMENT_KEY_POINTS = [
   'The inspection is visual and non-invasive. We only inspect areas we can reach safely on the day.',
   'Concealed areas, services such as electrical, plumbing and gas, pools, asbestos and compliance checks are not included.',
-  'The report is for you only. It shows the condition on the inspection day.',
+  'The report is for you only. It is the inspector’s opinion of the condition on the inspection day, not a full list of every problem.',
+  'We do not agree to the report being used as the basis to buy, to negotiate the price or to budget for repairs. If you do not agree, please do not book.',
   'Cancelling 3 or more business days before the inspection costs $100. After that, the fee is not refunded.',
   'Our liability is limited to the inspection fee, as far as the law allows. Your rights under the Australian Consumer Law are not affected.',
 ]
@@ -131,11 +132,15 @@ export const AGREEMENT_SECTIONS: AgreementSection[] = [
     heading: '6. The report',
     blocks: [
       'We send the report by email after the inspection.',
+      'Under the Australian Standards, the report is the inspector’s opinion of the condition seen on the day. It is not a full list of every problem with the property.',
+      'The inspector’s opinion may be different from the actual condition of the property.',
+      'We do not agree to you using the report as the basis to decide whether to buy the property, to negotiate the price, or as a budget for repairs. For those decisions, get advice from the right professionals, such as your lawyer or conveyancer, and quotes from licensed tradespeople.',
+      'If you do not agree with this, please do not book our service.',
       'The report is for you only. Nobody else may rely on it without our written permission. As far as the law allows, we are not responsible to anyone else who relies on it.',
       'The report shows the condition of the property on the inspection day. Conditions can change after that.',
       'Please read the whole report, not just the summary. If anything is unclear, call us before you sign a contract or let a cooling-off period or finance date pass.',
       'The report is not a certificate of compliance, a warranty or an insurance policy. It does not replace advice from a lawyer, conveyancer, engineer or licensed tradesperson.',
-      'If you buy at auction, the contract is usually unconditional. Make sure you have read the report and asked your questions before you bid.',
+      'If you buy at auction, the contract is usually unconditional. Make sure you have read the report, asked your questions and got the advice you need before you bid.',
     ],
   },
   {
