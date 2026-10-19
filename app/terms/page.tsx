@@ -30,11 +30,12 @@ export default function TermsPage() {
 
         <h2>The inspection agreement</h2>
         <p>
-          Every inspection is carried out under a written, service-specific
-          agreement provided before the inspection. That agreement sets out
-          the scope, the visual and non-invasive limitations, access
-          requirements, payment, rescheduling and cancellation terms. Where
-          that agreement differs from this page, the agreement applies.
+          Every inspection is carried out under our{' '}
+          <Link href="/inspection-agreement">Inspection Agreement</Link>. You
+          accept it on your order page before you pay. It sets out the scope,
+          what is not included, access, payment, cancellation and the
+          limitation of liability. Where that agreement differs from this
+          page, the agreement applies.
         </p>
 
         <h2>Information on this website</h2>
@@ -85,7 +86,7 @@ export default function TermsPage() {
           <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
         </p>
 
-        <p className="credential-note">Last updated: 6 October 2026.</p>
+        <p className="credential-note">Last updated: 19 October 2026.</p>
       </div>
     </main>
   )

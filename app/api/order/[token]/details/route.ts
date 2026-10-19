@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { jobIdForToken } from '@/lib/access-tokens'
+import { loadAgreementStatus } from '@/lib/agreement-store'
 import { ACCESS_CHOICES, BUYER_SITUATIONS } from '@/lib/booking-options'
 import { syncJobCalendar } from '@/lib/google-calendar'
 import { loadOrder } from '@/lib/orders'
@@ -46,6 +47,12 @@ export async function POST(request: Request, context: { params: Promise<{ token:
     if (!job) return NextResponse.json({ error: 'This link has expired.' }, { status: 404 })
     if (job.payment_status !== 'paid') {
       return NextResponse.json({ error: 'Payment has not been received yet.' }, { status: 409 })
+    }
+    if (!(await loadAgreementStatus(supabase, job.id)).accepted) {
+      return NextResponse.json(
+        { error: 'Please read and accept the Inspection Agreement first.' },
+        { status: 409 },
+      )
     }
 
     const parsed = schema.safeParse(await readJsonBody(request, 5_000))

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { jobIdForToken } from '@/lib/access-tokens'
+import { loadAgreementStatus } from '@/lib/agreement-store'
 import { INSPECTION_TYPE_LABELS } from '@/lib/admin-format'
 import {
   addressOf,
@@ -66,6 +67,14 @@ export async function POST(request: Request, context: { params: Promise<{ token:
     if (!isPayable(job)) {
       return NextResponse.json({ error: 'This order cannot be paid online.' }, { status: 409 })
     }
+    // The Inspection Agreement must be accepted before payment.
+    const agreement = await loadAgreementStatus(supabase, job.id)
+    if (!agreement.accepted || !agreement.version) {
+      return NextResponse.json(
+        { error: 'Please read and accept the Inspection Agreement before paying.' },
+        { status: 409 },
+      )
+    }
 
     const stripe = getStripe()
     // Only one payment page may be open per job. If an open page turns out to
@@ -114,6 +123,7 @@ export async function POST(request: Request, context: { params: Promise<{ token:
       job_id: job.id,
       payment_id: payment.id as string,
       reference: job.public_reference,
+      agreement_version: agreement.version,
     }
 
     let session: Awaited<ReturnType<typeof stripe.checkout.sessions.create>>

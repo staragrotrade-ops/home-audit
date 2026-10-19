@@ -1,5 +1,55 @@
 # Changelog
 
+## 0.15.0 — 2026-10-19
+
+- Inspection Agreement. Customers tick "I have read and agree" on the order
+  page before paying; the button reads "Agree and pay". Payment and the
+  booking details form are refused without it. Jobs paid another way show
+  the agreement first.
+- The agreement follows AS 4349.1-2007 (building) and AS 4349.3-2010
+  (timber pest), and covers new home stage and handover inspections. It has
+  sections on scope, what is not included, access, the report, fees,
+  cancellation ($100 if cancelled 3+ business days ahead; no refund after
+  that), limitation of liability (the fee, as far as the law allows; the
+  Australian Consumer Law is not affected), complaints and general terms.
+- The accepted version, time and a SHA-256 fingerprint of the text are saved
+  on the job (migration `20261019100000_inspection_agreement.sql`), with an
+  audit event and the version in the Stripe metadata. Admin shows the
+  status on each job.
+- Reviewed against the owner's copy of AS 4349.1-2007: purpose (2.2),
+  subjective appraisal (Foreword), acceptance criteria (2.3.6), client
+  arranges entry (2.3.2), reasonable access sizes and no removing
+  fastenings (Table 3.2), 30 m site features (3.2.1), extent of reporting
+  (2.3.5, 4.1), no cost estimates (2.3.1), weather and recent-use defects
+  (C4.2), conditions on information and concealment (4.2.7), strata limits
+  and common-property costs (Appendix B), and the Appendix D exclusions.
+- The report is the inspector's opinion and is advice only: not a full list
+  of problems, may differ from the actual condition, and must not be the
+  only basis to buy, negotiate the price or value the property; the
+  client's decision and risk appetite are their own. Specialist
+  recommendations should be followed before buying. Contract-of-sale
+  inspection conditions are for the client's lawyer to check. Copyright in
+  the report stays with us; a copy may go to the client's lawyer,
+  conveyancer or lender.
+- The report is provided as a digital copy (email or download). The
+  inspector is not named in the agreement (registration details on
+  request). The "tell us before repairs" clause is removed.
+- Visual and non-invasive: any access that needs a tool to open (screwed or
+  fixed panels, hatches, covers, sealed openings, locks) is treated as not
+  accessible, in the scope, the exclusions and the key points.
+- Customers must read the full written report; spoken comments on site or
+  by phone are not guaranteed to be complete or accurate. Up to 15 minutes
+  of phone time per inspection; time beyond that is charged at a rate
+  given before the call goes past 15 minutes.
+- Written in formal contract style (owner decision): defined terms (the
+  Client, the Company, the Inspection, the Report, the Fee, Business Day,
+  ACL), 12 numbered clauses, plus severance, no-waiver and jurisdiction
+  clauses. The plain-English summary above the tick box stays, so the
+  terms remain transparent under the Australian Consumer Law.
+- New page /inspection-agreement (noindex), linked from the footer, the
+  terms page, the quote email and the payment email. Terms and privacy
+  notice updated (19 October 2026).
+
 ## 0.14.1 — 2026-10-19
 
 - The customer's order page no longer shows "Referred by …" (owner

@@ -33,6 +33,8 @@ Thanks for your request. The price for the inspection at ${input.address} is ${f
 You can review the details and pay here:
 ${input.url}
 
+Before you pay, please read our Inspection Agreement on that page. It sets out what the inspection covers, what is not included, the cancellation terms and the limitation of liability. You accept it by ticking the box.
+
 Once payment is made, you can tell us who to contact to arrange access.
 
 ${SIGN_OFF}`,
@@ -79,6 +81,9 @@ ${input.url}
 
 We will email you once the inspection date is confirmed.
 
+Your Inspection Agreement:
+${SITE_URL}/inspection-agreement
+
 ${SIGN_OFF}`,
   }
 }
@@ -96,7 +101,7 @@ export function bookingConfirmedEmail(input: {
 
 The inspection at ${input.address} is booked for ${inspectionDateLabel(input.dateIso)}.
 
-We will send the report by email after the inspection. If anything changes with access, reply to this email.
+We will provide a digital copy of the report after the inspection. If anything changes with access, reply to this email.
 
 ${SIGN_OFF}`,
   }

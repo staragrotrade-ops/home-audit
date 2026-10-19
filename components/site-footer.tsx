@@ -39,6 +39,7 @@ export function SiteFooter() {
           <Link href="/credentials">Credentials &amp; insurance</Link>
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
+          <Link href="/inspection-agreement">Inspection agreement</Link>
         </div>
       </div>
 

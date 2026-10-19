@@ -1,9 +1,18 @@
 import type { Metadata } from 'next'
 import { BookingDetailsForm } from '@/components/order/booking-details-form'
-import { PayButton } from '@/components/order/pay-button'
+import { AgreementText } from '@/components/agreement/agreement-text'
+import { AgreementConsent } from '@/components/order/agreement-consent'
 import { jobIdForToken } from '@/lib/access-tokens'
 import { INSPECTION_TYPE_LABELS, STAGE_LABELS } from '@/lib/admin-format'
+import { loadAgreementStatus } from '@/lib/agreement-store'
 import { ACCESS_CHOICE_LABELS, BUYER_SITUATION_LABELS, type AccessChoice, type BuyerSituation } from '@/lib/booking-options'
+import {
+  AGREEMENT_KEY_POINTS,
+  AGREEMENT_PATH,
+  AGREEMENT_TITLE,
+  AGREEMENT_VERSION,
+  agreementVersionLabel,
+} from '@/lib/inspection-agreement'
 import { inspectionDateLabel } from '@/lib/order-emails'
 import { addressOf, centsOf, instantPriceExpired, isPayable, loadOrder, type OrderJob } from '@/lib/orders'
 import { formatAud } from '@/lib/pricing'
@@ -23,6 +32,51 @@ function serviceLabel(job: OrderJob) {
     return `New home inspection (${job.new_home_stages.map((stage) => STAGE_LABELS[stage] || stage).join(', ')})`
   }
   return `${INSPECTION_TYPE_LABELS[job.inspection_type || ''] || 'Building'} inspection`
+}
+
+function acceptedLabel(iso: string) {
+  return new Intl.DateTimeFormat('en-AU', {
+    timeZone: 'Australia/Melbourne',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(iso))
+}
+
+// The main points, the full agreement (folded) and the tick box.
+function AgreementPanel({ token, mode, label }: { token: string; mode: 'pay' | 'accept'; label: string }) {
+  return (
+    <div className="agreement-panel">
+      <h3>{AGREEMENT_TITLE}</h3>
+      <p>
+        {mode === 'pay'
+          ? 'Please read the agreement before you pay. The main points are:'
+          : 'Before we book the inspection, please read and accept the agreement. The main points are:'}
+      </p>
+      <ul>
+        {AGREEMENT_KEY_POINTS.map((point) => (
+          <li key={point}>{point}</li>
+        ))}
+      </ul>
+      <details className="agreement-full">
+        <summary>Read the full agreement</summary>
+        <div className="agreement-scroll">
+          <AgreementText headingLevel={4} />
+        </div>
+      </details>
+      <p className="order-hint">
+        You can also <a href={AGREEMENT_PATH} target="_blank" rel="noopener">open the agreement on its own page</a>{' '}
+        to print or save it.
+      </p>
+      <AgreementConsent
+        token={token}
+        version={AGREEMENT_VERSION}
+        versionLabel={agreementVersionLabel()}
+        mode={mode}
+        label={label}
+      />
+    </div>
+  )
 }
 
 function Expired() {
@@ -57,6 +111,7 @@ export default async function OrderPage({
 
   const customer = job.customer_snapshot || {}
   const paid = job.payment_status === 'paid'
+  const agreement = await loadAgreementStatus(supabase, job.id)
   const total = centsOf(job.quote_total)
 
   return (
@@ -97,18 +152,15 @@ export default async function OrderPage({
             </dl>
             <p>
               After payment you can tell us who to contact for access. We then arrange a time and email
-              you the confirmed date. The report is sent by email after the inspection.
+              you the confirmed date. We provide a digital copy of the report after the inspection.
             </p>
-            {isPayable(job) && <PayButton token={token} label={`Pay ${formatAud(total)}`} />}
+            {isPayable(job) && <AgreementPanel token={token} mode="pay" label={`Agree and pay ${formatAud(total)}`} />}
             {pending && (
               <p className="order-hint">
                 If you have just paid, the payment may take a minute to show. Refresh this page shortly.
               </p>
             )}
-            <p className="order-hint">
-              By paying you agree to our <a href="/terms">terms</a>. Payment is processed securely by
-              Stripe.
-            </p>
+            <p className="order-hint">Payment is processed securely by Stripe.</p>
           </section>
         ) : (
           <>
@@ -125,8 +177,20 @@ export default async function OrderPage({
               ) : (
                 <p>We will email you once the inspection date is confirmed.</p>
               )}
+              {agreement.accepted && agreement.version && agreement.acceptedAt && (
+                <p className="order-hint">
+                  You accepted the <a href={AGREEMENT_PATH}>{AGREEMENT_TITLE}</a> (version{' '}
+                  {agreementVersionLabel(agreement.version)}) on {acceptedLabel(agreement.acceptedAt)}.
+                </p>
+              )}
             </section>
 
+            {!agreement.accepted ? (
+              <section className="quote-panel">
+                <h2>Next: the inspection agreement</h2>
+                <AgreementPanel token={token} mode="accept" label="Accept the agreement" />
+              </section>
+            ) : (
             <section className="quote-panel">
               <h2>{job.details_submitted_at ? 'Your booking details' : 'Next: a few details for the booking'}</h2>
               {job.details_submitted_at && (
@@ -156,6 +220,7 @@ export default async function OrderPage({
                 />
               )}
             </section>
+            )}
           </>
         )}
 

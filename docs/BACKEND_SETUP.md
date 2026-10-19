@@ -218,3 +218,33 @@ creates or moves the event; clearing the time or cancelling the job removes
 it; changing the agent or the customer's access details updates it. Test
 jobs are left out. Events are named "HA – SUBURB", 1.5 hours long, with the
 job, client, access and agent details and a link to the dashboard.
+
+## 16. Inspection Agreement (0.15.0)
+
+Customers accept the Inspection Agreement (AS 4349.1-2007, AS 4349.3-2010,
+scope, exclusions, cancellation and limitation of liability) before paying.
+
+1. Supabase SQL Editor → run `20261019100000_inspection_agreement.sql` once,
+   BEFORE this release is merged. Until it runs, nobody can pay online.
+2. Nothing to set in Vercel.
+
+How it works:
+
+- The order page shows the main points, the full agreement and a tick box.
+  "Agree and pay" saves the acceptance, then opens Stripe. Payment is refused
+  without it.
+- A job paid another way (or before 0.15.0) shows the agreement first. The
+  booking details form appears once it is accepted.
+- The job stores the version, the time and a SHA-256 fingerprint of the exact
+  text. An `agreement_accepted` audit event is written. Stripe gets
+  `agreement_version` in the payment metadata. Admin shows "Agreement" on
+  each job.
+- The agreement is also at /inspection-agreement (noindex, linked from the
+  footer, the terms page and the payment email).
+- Text is in `lib/inspection-agreement.ts`. Any wording change needs a new
+  `AGREEMENT_VERSION` (the date) and its fingerprint; the test prints it.
+  Jobs keep the version they accepted.
+- Cancellation (owner decision 19 October 2026): 3+ business days before the
+  inspection, refund less $100 including GST (also when no date is booked);
+  under 3 business days or no access on arrival, no refund. Refunds are made
+  by hand in Stripe.
