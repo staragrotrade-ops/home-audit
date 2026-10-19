@@ -190,6 +190,13 @@ try {
   assert.equal(partners.response.statusCode, 200, '/partners/register must render')
   assert.match(partners.body, /noindex/, '/partners/register must be noindex')
 
+  const agreementPage = await request('/inspection-agreement')
+  assert.equal(agreementPage.response.statusCode, 200, '/inspection-agreement must render')
+  assert.match(agreementPage.body, /noindex/, '/inspection-agreement must be noindex')
+  assert.match(agreementPage.body, /AS 4349\.1-2007/, '/inspection-agreement must name AS 4349.1')
+  assert.match(agreementPage.body, /Limitation of liability/, '/inspection-agreement must include the limitation of liability')
+  assert.match(agreementPage.body, /What is not included/, '/inspection-agreement must include the exclusions')
+
   const appAccount = await request('/api/app/account')
   assert.ok(appAccount.response.statusCode >= 400, '/api/app/account must refuse unauthenticated calls')
   assert.match(appAccount.body, /"ok":false/, '/api/app/account must return an error body')

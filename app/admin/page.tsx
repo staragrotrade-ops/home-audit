@@ -32,6 +32,8 @@ import {
 import { CLOSED_STATUSES, JOB_STATUS_LABELS, type JobStatus } from '@/lib/job-status'
 import { formatAud } from '@/lib/pricing'
 import { loadReferralStatement, loadReferrers } from '@/lib/referral-store'
+import { loadAgreementStatuses } from '@/lib/agreement-store'
+import { agreementVersionLabel } from '@/lib/inspection-agreement'
 import {
   commissionLabel,
   effectiveReferral,
@@ -416,6 +418,13 @@ export default async function AdminPage({
     ),
   )
   const staff = (staffResult.data || []) as StaffRow[]
+
+  // Which jobs have accepted the Inspection Agreement (read separately, like
+  // referrals, so the page works before the migration is applied).
+  const agreements = await loadAgreementStatuses(
+    supabase,
+    jobs.map((job) => job.id),
+  )
 
   // Referrers and who referred each job. Read separately so the page still
   // works before the referrers migration is applied.
@@ -831,6 +840,19 @@ export default async function AdminPage({
                         )}
                         <dt>Booked</dt>
                         <dd>{job.confirmed_start ? formatDateTime(job.confirmed_start) : 'Not booked'}</dd>
+                        {agreements.ready && (() => {
+                          const agreement = agreements.statuses.get(job.id)
+                          return (
+                            <>
+                              <dt>Agreement</dt>
+                              <dd>
+                                {agreement
+                                  ? `Accepted ${formatDateTime(agreement.acceptedAt)} (version ${agreementVersionLabel(agreement.version)})`
+                                  : 'Not accepted yet. The customer accepts it on the order page.'}
+                              </dd>
+                            </>
+                          )
+                        })()}
                         <dt>Access</dt>
                         <dd>
                           {job.access_contact || '—'}

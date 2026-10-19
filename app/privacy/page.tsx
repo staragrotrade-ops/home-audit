@@ -34,6 +34,10 @@ export default function PrivacyPage() {
           so we can follow up even if the email is not sent.
         </p>
         <p>
+          When you accept the Inspection Agreement on your order page, we
+          record which version you accepted and when.
+        </p>
+        <p>
           You can browse this website without giving us any personal
           information. If you choose not to provide the details we ask for, we
           may not be able to prepare a quote or carry out an inspection. If you

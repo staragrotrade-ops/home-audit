@@ -3236,6 +3236,62 @@ button:focus-visible {
   padding-left: 18px;
 }
 
+.agreement-panel {
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--warm-ivory);
+}
+
+.agreement-panel h3 {
+  margin: 0 0 8px;
+}
+
+.agreement-panel ul {
+  padding-left: 18px;
+}
+
+.agreement-full summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--eucalyptus);
+}
+
+.agreement-scroll {
+  max-height: 420px;
+  overflow-y: auto;
+  margin-top: 10px;
+  padding: 4px 14px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  font-size: 0.92rem;
+}
+
+.agreement-scroll h4 {
+  margin: 16px 0 6px;
+}
+
+.agreement-tick {
+  align-items: flex-start;
+  background: var(--paper);
+  line-height: 1.45;
+}
+
+.agreement-tick input {
+  flex: none;
+  margin-top: 2px;
+}
+
+.agreement-consent .button {
+  margin-top: 12px;
+}
+
+.agreement-section ul {
+  padding-left: 20px;
+}
+
 .partner-form {
   display: grid;
   gap: 16px;

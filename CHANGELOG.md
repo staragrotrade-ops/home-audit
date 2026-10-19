@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.15.0 — 2026-10-19
+
+- Inspection Agreement. Customers tick "I have read and agree" on the order
+  page before paying; the button reads "Agree and pay". Payment and the
+  booking details form are refused without it. Jobs paid another way show
+  the agreement first.
+- The agreement follows AS 4349.1-2007 (building) and AS 4349.3-2010
+  (timber pest), and covers new home stage and handover inspections. It has
+  sections on scope, what is not included, access, the report, fees,
+  cancellation ($100 if cancelled 3+ business days ahead; no refund after
+  that), limitation of liability (the fee, as far as the law allows; the
+  Australian Consumer Law is not affected), complaints and general terms.
+- The accepted version, time and a SHA-256 fingerprint of the text are saved
+  on the job (migration `20261019100000_inspection_agreement.sql`), with an
+  audit event and the version in the Stripe metadata. Admin shows the
+  status on each job.
+- New page /inspection-agreement (noindex), linked from the footer, the
+  terms page, the quote email and the payment email. Terms and privacy
+  notice updated (19 October 2026).
+
 ## 0.14.1 — 2026-10-19
 
 - The customer's order page no longer shows "Referred by …" (owner
