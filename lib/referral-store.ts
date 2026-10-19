@@ -8,7 +8,6 @@ import {
   normaliseRefCode,
   REFERRAL_COOKIE,
   referrerCodeBase,
-  referrerDisplayName,
   type ReferrerRecord,
   type StatementPaidJob,
 } from '@/lib/referrals'
@@ -144,21 +143,4 @@ export async function loadReferralStatement(supabase: SupabaseClient, month: str
     })),
     visitsByCode: new Map([...sessions].map(([code, set]) => [code, set.size])),
   })
-}
-
-/** "Jane Smith (ABC Conveyancing)" when a job has a referrer, for the customer's order page. */
-export async function jobReferrerLabel(supabase: SupabaseClient, jobId: string) {
-  const { data, error } = await supabase
-    .from('jobs')
-    .select('ref_code,referrer_override_id,referrer_override_none')
-    .eq('id', jobId)
-    .maybeSingle()
-  if (error || !data || data.referrer_override_none) return null
-  let query = supabase.from('referrers').select('name,agency,branch,status')
-  if (data.referrer_override_id) query = query.eq('id', data.referrer_override_id)
-  else if (data.ref_code) query = query.eq('ref_code', data.ref_code)
-  else return null
-  const { data: referrer } = await query.maybeSingle()
-  if (!referrer || referrer.status === 'disabled') return null
-  return referrerDisplayName(referrer)
 }

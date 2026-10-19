@@ -120,13 +120,13 @@ test('referral data stays private and the registration page stays low-key', asyn
   }
 })
 
-test('the quote saves the referral code, and the customer sees who referred them', async () => {
+test('the quote saves the referral code; the order page does not name the referrer', async () => {
   const quote = await source('app/api/quote/route.ts')
   assert.match(quote, /referralCodeFromRequest\(request, supabase\)/)
   const store = await source('lib/referral-store.ts')
   assert.match(store, /data\.status === 'disabled'\) return null/)
   const order = await source('app/order/[token]/page.tsx')
-  assert.match(order, /Referred by \{referredBy\}/)
+  assert.doesNotMatch(order, /Referred by|jobReferrerLabel/)
   const privacy = await source('app/privacy/page.tsx')
   assert.match(privacy, /Referral partners/)
 })

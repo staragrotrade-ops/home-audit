@@ -7,7 +7,6 @@ import { ACCESS_CHOICE_LABELS, BUYER_SITUATION_LABELS, type AccessChoice, type B
 import { inspectionDateLabel } from '@/lib/order-emails'
 import { addressOf, centsOf, instantPriceExpired, isPayable, loadOrder, type OrderJob } from '@/lib/orders'
 import { formatAud } from '@/lib/pricing'
-import { jobReferrerLabel } from '@/lib/referral-store'
 import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_HREF } from '@/lib/site'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
@@ -57,7 +56,6 @@ export default async function OrderPage({
   if (!job) return <Expired />
 
   const customer = job.customer_snapshot || {}
-  const referredBy = await jobReferrerLabel(supabase, job.id).catch(() => null)
   const paid = job.payment_status === 'paid'
   const total = centsOf(job.quote_total)
 
@@ -67,7 +65,6 @@ export default async function OrderPage({
         <p className="eyebrow">Order {job.public_reference}</p>
         <h1>{addressOf(job) || 'Your inspection'}</h1>
         <p className="order-service">{serviceLabel(job)}</p>
-        {referredBy && <p className="order-hint">Referred by {referredBy}</p>}
 
         {job.status === 'cancelled' ? (
           <section className="quote-panel">

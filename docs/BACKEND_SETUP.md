@@ -190,8 +190,8 @@ How it works:
 - Monthly statement (Admin → Referrers): link visits, quotes, paid jobs,
   success rate, fees and commission per referrer; jobs count in the
   Melbourne month they were paid; test jobs are left out. CSV download.
-- The customer's order page shows "Referred by …", and the privacy policy
-  explains referral links and fees.
+- The customer's order page does not name the referrer (owner decision,
+  19 October 2026). The privacy policy explains referral links and fees.
 
 ## 15. Google Calendar (0.12.0)
 
