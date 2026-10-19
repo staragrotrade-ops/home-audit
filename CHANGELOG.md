@@ -21,6 +21,9 @@
   actual condition; we do not agree to it being used as the basis to buy,
   negotiate the price or budget repairs; customers who do not agree should
   not book. This is also in the key points above the tick box.
+- Visual and non-invasive: any access that needs a tool to open (screwed or
+  fixed panels, hatches, covers, sealed openings, locks) is treated as not
+  accessible, in the scope, the exclusions and the key points.
 - New page /inspection-agreement (noindex), linked from the footer, the
   terms page, the quote email and the payment email. Terms and privacy
   notice updated (19 October 2026).

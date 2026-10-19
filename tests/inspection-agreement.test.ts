@@ -29,6 +29,8 @@ test('inspection agreement: scope, exclusions, cancellation and limitation of li
   assert.match(text, /within 30 metres of the main building/)
   assert.match(text, /Australian Consumer Law/)
   assert.match(text, /limited to the fee you paid/)
+  // Owner decision: access that needs a tool to open is not accessible.
+  assert.match(text, /Any access that needs a tool to open is treated as not accessible/)
   // Owner decision: the report is an opinion, not a basis to buy, negotiate or budget.
   assert.match(text, /the report is the inspector’s opinion/)
   assert.match(text, /not a full list of every problem/)

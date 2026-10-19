@@ -29,13 +29,13 @@ export type AgreementSection = { id: string; heading: string; blocks: AgreementB
 
 /** SHA-256 of agreementPlainText() for each published version. */
 export const AGREEMENT_FINGERPRINTS: Record<string, string> = {
-  '2026-10-19': 'f4f59e173232feae48b2a25f5953f527f9302bd323cff2aad7658a33e5f8b3d5',
+  '2026-10-19': '85851e127f2e8d3ae6d93cb9cb1c0198d1d49b7636d9963c5193262478397a63',
 }
 
 // The short version shown above the tick box. It must not say anything the
 // full text does not.
 export const AGREEMENT_KEY_POINTS = [
-  'The inspection is visual and non-invasive. We only inspect areas we can reach safely on the day.',
+  'The inspection is visual and non-invasive. We only inspect areas we can reach safely on the day. Any access that needs a tool to open is treated as not accessible.',
   'Concealed areas, services such as electrical, plumbing and gas, pools, asbestos and compliance checks are not included.',
   'The report is for you only. It is the inspector’s opinion of the condition on the inspection day, not a full list of every problem.',
   'We do not agree to the report being used as the basis to buy, to negotiate the price or to budget for repairs. If you do not agree, please do not book.',
@@ -74,6 +74,7 @@ export const AGREEMENT_SECTIONS: AgreementSection[] = [
     heading: '3. Scope of the inspection',
     blocks: [
       'The inspection is visual and non-invasive. We inspect the areas we can reach safely and reasonably on the day. We use our eyes and simple tools such as a torch, a ladder and a moisture meter.',
+      'Any access that needs a tool to open is treated as not accessible. This includes screwed or fixed access panels, hatches and covers, sealed or painted-shut openings, and locks. We do not open them, and the areas behind them are not inspected.',
       'For a building inspection, we inspect these areas where safe access is available:',
       {
         list: [
@@ -98,6 +99,7 @@ export const AGREEMENT_SECTIONS: AgreementSection[] = [
       'The inspection does not include:',
       {
         list: [
+          'areas behind any access that needs a tool to open, such as screwed or fixed panels, hatches and covers;',
           'areas we cannot reach safely and reasonably, including areas that are locked, too low or tight, or blocked by furniture, stored goods, floor coverings, vegetation, insulation, vehicles or occupants;',
           'anything hidden from view, such as inside walls, floors and ceilings, under concrete slabs and behind linings or tiles;',
           'invasive work, such as moving furniture or goods, lifting floor coverings, removing linings, cutting or drilling. If this is needed, it needs a separate written agreement and the owner’s permission;',
