@@ -41,6 +41,11 @@
   by phone are not guaranteed to be complete or accurate. Up to 15 minutes
   of phone time per inspection; time beyond that is charged at a rate
   given before the call goes past 15 minutes.
+- Written in formal contract style (owner decision): defined terms (the
+  Client, the Company, the Inspection, the Report, the Fee, Business Day,
+  ACL), 12 numbered clauses, plus severance, no-waiver and jurisdiction
+  clauses. The plain-English summary above the tick box stays, so the
+  terms remain transparent under the Australian Consumer Law.
 - New page /inspection-agreement (noindex), linked from the footer, the
   terms page, the quote email and the payment email. Terms and privacy
   notice updated (19 October 2026).
