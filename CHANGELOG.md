@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.14.1 — 2026-10-19
+
+- The customer's order page no longer shows "Referred by …" (owner
+  decision). Referral tracking, the statement and commission in Admin are
+  unchanged. The privacy policy no longer says the order page shows the
+  partner's name.
+
 ## 0.14.0 — 2026-10-18
 
 - Google Ads (account 551-924-7556): the Google tag `AW-18520017169` loads on

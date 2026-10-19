@@ -103,9 +103,8 @@ export default function PrivacyPage() {
           Some visitors reach us through a link from a referral partner, such
           as a conveyancer, buyer&apos;s agent, mortgage broker or real estate
           agent. That link saves the partner&apos;s short code in a cookie in
-          your browser for 90 days, so we know who referred you. Your order
-          page shows the partner&apos;s name. We may pay that partner a
-          referral fee; it does not change your price. We do not send the
+          your browser for 90 days, so we know who referred you. We may pay
+          that partner a referral fee; it does not change your price. We do not send the
           partner your report or your contact details.
         </p>
         <p>
@@ -146,7 +145,7 @@ export default function PrivacyPage() {
           version is always published on this page.
         </p>
 
-        <p className="credential-note">Last updated: 18 October 2026.</p>
+        <p className="credential-note">Last updated: 19 October 2026.</p>
       </div>
     </main>
   )
