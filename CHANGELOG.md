@@ -11,8 +11,12 @@
 - New home inspections page (after the stage cards): Hebel walls missing
   the waterproof coating at the base, shown next to a wall done correctly
   with the pink base coating; hard to see once rendered.
-- Photos: Home Audit watermark; device brand and model and the Hebel
-  packaging blurred. The thermal photo has the on-screen labels in English.
+- New home inspections page: warped studs found at frame stage (a level
+  showing gaps, and a warped stud). Plasterboard on warped studs can be
+  uneven or wavy and is almost impossible to fix later; the builder fixed
+  it within a week of the report.
+- Photos: Home Audit watermark; the thermal camera's brand and model are
+  blurred (other photos are not). The thermal photo has the on-screen labels in English.
 - The card says the inspector may use thermal imaging as an extra check
   where conditions allow and it is necessary (owner wording), consistent
   with clause 5.1(w) of the Inspection Agreement.

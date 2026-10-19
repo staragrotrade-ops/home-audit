@@ -108,6 +108,8 @@ test('thermal case study does not promise thermal imaging on every inspection', 
   assert.match(card, /The buyer used it to renegotiate the price/)
   assert.match(card, /pink waterproof coating/)
   assert.match(await source('app/new-home-inspections/page.tsx'), /<HebelBaseCaseStudy \/>/)
+  assert.match(await source('app/new-home-inspections/page.tsx'), /<FrameStudCaseStudy \/>/)
+  assert.match(card, /fixed within a week/)
   assert.match(a.agreementPlainText(), /thermal imaging, unless the Order states that it is included/)
   const service = await source('app/building-and-pest-inspections/page.tsx')
   const home = await source('app/page.tsx')

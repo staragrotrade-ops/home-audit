@@ -126,3 +126,40 @@ export function HebelBaseCaseStudy() {
     />
   )
 }
+
+// New home frame stage: warped studs that would leave the plasterboard
+// uneven. Fixed by the builder within a week of the report.
+export function FrameStudCaseStudy() {
+  return (
+    <CaseStudy
+      eyebrow="From a recent frame inspection"
+      heading="Warped studs found before the plasterboard went on."
+      steps={[
+        ['Gaps.', 'A long level held across the studs showed gaps where studs were out of line.'],
+        ['Warped stud.', 'One stud had bent out of line with the rest of the wall.'],
+        [
+          'Why it matters.',
+          'Plasterboard fixed to warped studs can end up uneven or wavy. Once the plasterboard is on, this is almost impossible to fix.',
+        ],
+      ]}
+      body={['The report went to the builder, and the problem was fixed within a week.']}
+      cta={{ href: '/quote?service=new-home', label: 'Get a quote' }}
+      images={[
+        {
+          src: '/case-study-frame-gaps.webp',
+          alt: 'A level held across wall studs at frame stage, showing gaps where studs are out of line',
+          width: 900,
+          height: 1200,
+          label: 'Gaps between the level and the studs',
+        },
+        {
+          src: '/case-study-frame-stud-warped.webp',
+          alt: 'A level held against a warped timber stud at frame stage',
+          width: 900,
+          height: 1200,
+          label: 'A warped stud',
+        },
+      ]}
+    />
+  )
+}
