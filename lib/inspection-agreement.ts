@@ -29,7 +29,7 @@ export type AgreementSection = { id: string; heading: string; blocks: AgreementB
 
 /** SHA-256 of agreementPlainText() for each published version. */
 export const AGREEMENT_FINGERPRINTS: Record<string, string> = {
-  '2026-10-19': '85851e127f2e8d3ae6d93cb9cb1c0198d1d49b7636d9963c5193262478397a63',
+  '2026-10-19': '11c507442f24a29213020e4dbd7b69026217c560157efee0931bf99909ab0a3c',
 }
 
 // The short version shown above the tick box. It must not say anything the
@@ -39,6 +39,7 @@ export const AGREEMENT_KEY_POINTS = [
   'Concealed areas, services such as electrical, plumbing and gas, pools, asbestos and compliance checks are not included.',
   'The report is for you only. It is the inspector’s opinion of the condition on the inspection day, not a full list of every problem.',
   'We do not agree to the report being used as the basis to buy, to negotiate the price or to budget for repairs. If you do not agree, please do not book.',
+  'You must read the full written report. Spoken comments are not guaranteed to be complete or accurate. Up to 15 minutes of phone time is included; extra time is charged.',
   'Cancelling 3 or more business days before the inspection costs $100. After that, the fee is not refunded.',
   'Our liability is limited to the inspection fee, as far as the law allows. Your rights under the Australian Consumer Law are not affected.',
 ]
@@ -140,7 +141,9 @@ export const AGREEMENT_SECTIONS: AgreementSection[] = [
       'If you do not agree with this, please do not book our service.',
       'The report is for you only. Nobody else may rely on it without our written permission. As far as the law allows, we are not responsible to anyone else who relies on it.',
       'The report shows the condition of the property on the inspection day. Conditions can change after that.',
-      'Please read the whole report, not just the summary. If anything is unclear, call us before you sign a contract or let a cooling-off period or finance date pass.',
+      'You must read the whole written report, not just the summary. Do not rely on anything the inspector says on site or on the phone. Spoken comments are not guaranteed to be complete or accurate. Only the written report counts.',
+      'Each inspection includes up to 15 minutes of phone time with the inspector to talk about the report. Time beyond 15 minutes is charged. We will tell you the rate before the call goes past 15 minutes, and only charge if you agree.',
+      'If anything in the report is unclear, call us before you sign a contract or let a cooling-off period or finance date pass.',
       'The report is not a certificate of compliance, a warranty or an insurance policy. It does not replace advice from a lawyer, conveyancer, engineer or licensed tradesperson.',
       'If you buy at auction, the contract is usually unconditional. Make sure you have read the report, asked your questions and got the advice you need before you bid.',
     ],

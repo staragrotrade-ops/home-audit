@@ -29,6 +29,10 @@ test('inspection agreement: scope, exclusions, cancellation and limitation of li
   assert.match(text, /within 30 metres of the main building/)
   assert.match(text, /Australian Consumer Law/)
   assert.match(text, /limited to the fee you paid/)
+  // Owner decision: the written report counts, not spoken comments; 15 minutes of phone time.
+  assert.match(text, /Spoken comments are not guaranteed to be complete or accurate/)
+  assert.match(text, /up to 15 minutes of phone time/)
+  assert.match(text, /Time beyond 15 minutes is charged/)
   // Owner decision: access that needs a tool to open is not accessible.
   assert.match(text, /Any access that needs a tool to open is treated as not accessible/)
   // Owner decision: the report is an opinion, not a basis to buy, negotiate or budget.

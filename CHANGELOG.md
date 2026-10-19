@@ -24,6 +24,10 @@
 - Visual and non-invasive: any access that needs a tool to open (screwed or
   fixed panels, hatches, covers, sealed openings, locks) is treated as not
   accessible, in the scope, the exclusions and the key points.
+- Customers must read the full written report; spoken comments on site or
+  by phone are not guaranteed to be complete or accurate. Up to 15 minutes
+  of phone time per inspection; time beyond that is charged at a rate
+  given before the call goes past 15 minutes.
 - New page /inspection-agreement (noindex), linked from the footer, the
   terms page, the quote email and the payment email. Terms and privacy
   notice updated (19 October 2026).
