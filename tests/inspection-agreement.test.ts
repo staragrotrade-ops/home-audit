@@ -35,12 +35,24 @@ test('inspection agreement: scope, exclusions, cancellation and limitation of li
   assert.match(text, /Time beyond 15 minutes is charged/)
   // Owner decision: access that needs a tool to open is not accessible.
   assert.match(text, /Any access that needs a tool to open is treated as not accessible/)
-  // Owner decision: the report is an opinion, not a basis to buy, negotiate or budget.
+  // Owner decisions: the report is an opinion and advice, not the only basis to buy, negotiate or value.
   assert.match(text, /the report is the inspector’s opinion/)
   assert.match(text, /not a full list of every problem/)
   assert.match(text, /may be different from the actual condition/)
-  assert.match(text, /We do not agree to you using the report as the basis to decide whether to buy the property, to negotiate the price, or as a budget for repairs/)
-  assert.match(text, /If you do not agree with this, please do not book our service/)
+  assert.match(text, /must not be used on its own as the only basis for deciding to buy the property, negotiating the price or valuing the property/)
+  assert.match(text, /how much risk you are willing to accept, are your own/)
+  assert.match(text, /If you do not agree with it, please do not book our service/)
+  // Owner decisions: digital copy; no inspector name; no "tell us before repairs" clause.
+  assert.match(text, /We provide the report as a digital copy/)
+  assert.match(text, /download from our website/)
+  assert.doesNotMatch(text, /We send the report by email/)
+  assert.doesNotMatch(text, /IN-L|Xiaoqiong|carried out by/)
+  assert.doesNotMatch(text, /before repairs start/)
+  // From AS 4349.1: subjective appraisal, acceptance criteria, tool access, no cost estimates.
+  assert.match(text, /Different inspectors, or the same inspector on another day, may reach different conclusions/)
+  assert.match(text, /similar age and type/)
+  assert.match(text, /removing screws, bolts, other fastenings or sealants/)
+  assert.match(text, /estimates of repair costs/)
   // Owner decision: $100 if cancelled 3+ business days ahead; no refund after that.
   assert.equal(a.CANCELLATION_FEE_CENTS, 10_000)
   assert.equal(a.CANCELLATION_NOTICE_BUSINESS_DAYS, 3)

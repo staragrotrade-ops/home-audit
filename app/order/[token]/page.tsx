@@ -152,7 +152,7 @@ export default async function OrderPage({
             </dl>
             <p>
               After payment you can tell us who to contact for access. We then arrange a time and email
-              you the confirmed date. The report is sent by email after the inspection.
+              you the confirmed date. We provide a digital copy of the report after the inspection.
             </p>
             {isPayable(job) && <AgreementPanel token={token} mode="pay" label={`Agree and pay ${formatAud(total)}`} />}
             {pending && (

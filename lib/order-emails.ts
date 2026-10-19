@@ -101,7 +101,7 @@ export function bookingConfirmedEmail(input: {
 
 The inspection at ${input.address} is booked for ${inspectionDateLabel(input.dateIso)}.
 
-We will send the report by email after the inspection. If anything changes with access, reply to this email.
+We will provide a digital copy of the report after the inspection. If anything changes with access, reply to this email.
 
 ${SIGN_OFF}`,
   }

@@ -16,11 +16,24 @@
   on the job (migration `20261019100000_inspection_agreement.sql`), with an
   audit event and the version in the Stripe metadata. Admin shows the
   status on each job.
-- The report section says the report is the inspector's opinion under the
-  Australian Standards, not a full list of problems, and may differ from the
-  actual condition; we do not agree to it being used as the basis to buy,
-  negotiate the price or budget repairs; customers who do not agree should
-  not book. This is also in the key points above the tick box.
+- Reviewed against the owner's copy of AS 4349.1-2007: purpose (2.2),
+  subjective appraisal (Foreword), acceptance criteria (2.3.6), client
+  arranges entry (2.3.2), reasonable access sizes and no removing
+  fastenings (Table 3.2), 30 m site features (3.2.1), extent of reporting
+  (2.3.5, 4.1), no cost estimates (2.3.1), weather and recent-use defects
+  (C4.2), conditions on information and concealment (4.2.7), strata limits
+  and common-property costs (Appendix B), and the Appendix D exclusions.
+- The report is the inspector's opinion and is advice only: not a full list
+  of problems, may differ from the actual condition, and must not be the
+  only basis to buy, negotiate the price or value the property; the
+  client's decision and risk appetite are their own. Specialist
+  recommendations should be followed before buying. Contract-of-sale
+  inspection conditions are for the client's lawyer to check. Copyright in
+  the report stays with us; a copy may go to the client's lawyer,
+  conveyancer or lender.
+- The report is provided as a digital copy (email or download). The
+  inspector is not named in the agreement (registration details on
+  request). The "tell us before repairs" clause is removed.
 - Visual and non-invasive: any access that needs a tool to open (screwed or
   fixed panels, hatches, covers, sealed openings, locks) is treated as not
   accessible, in the scope, the exclusions and the key points.
