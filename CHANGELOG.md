@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.15.1 — 2026-10-20
+
+- Real inspection example on the Building & Pest page (after the scope
+  list) and on the home page (after "What a useful inspection does"): a
+  ground-floor ceiling that looked normal showed a cold spot on a thermal
+  camera, about 1.4 °C cooler, and a moisture meter confirmed water from the
+  floor above. The buyer used the finding to renegotiate the price (owner
+  confirmed). Each card links to the quote form.
+- New home inspections page (after the stage cards): Hebel walls missing
+  the waterproof coating at the base, shown next to a wall done correctly
+  with the pink base coating; hard to see once rendered.
+- New home inspections page: warped studs found at frame stage (a level
+  showing gaps, and a warped stud). Plasterboard on warped studs can be
+  uneven or wavy and is almost impossible to fix later; the builder fixed
+  it within a week of the report.
+- Photos: Home Audit watermark; the thermal camera's brand and model are
+  blurred (other photos are not). The thermal photo has the on-screen labels in English.
+- The card says the inspector may use thermal imaging as an extra check
+  where conditions allow and it is necessary (owner wording), consistent
+  with clause 5.1(w) of the Inspection Agreement.
+
 ## 0.15.0 — 2026-10-19
 
 - Inspection Agreement. Customers tick "I have read and agree" on the order
