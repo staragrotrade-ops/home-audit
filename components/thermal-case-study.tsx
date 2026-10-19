@@ -39,8 +39,8 @@ export function ThermalCaseStudy({ variant = 'full' }: { variant?: 'full' | 'hom
         </ol>
         <p>The finding went into the written report, with photos.</p>
         <p className="thermal-case-note">
-          Where conditions allow, our inspector may use a thermal camera as an extra check. Thermal
-          imaging is not part of every inspection.
+          Where conditions allow and it is necessary, our inspector may use thermal imaging as an
+          extra check.
         </p>
         <Link className="button" href="/quote?service=building-and-pest">
           Get a quote

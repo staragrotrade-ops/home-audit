@@ -9,9 +9,9 @@
   floor above. Each card links to the quote form.
 - The photo has the device brand and model blurred, the on-screen labels in
   English and a Home Audit watermark.
-- The card says thermal imaging is an extra check where conditions allow
-  and is not part of every inspection, matching clause 5.1(w) of the
-  Inspection Agreement.
+- The card says the inspector may use thermal imaging as an extra check
+  where conditions allow and it is necessary (owner wording), consistent
+  with clause 5.1(w) of the Inspection Agreement.
 
 ## 0.15.0 — 2026-10-19
 
