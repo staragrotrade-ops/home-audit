@@ -73,6 +73,7 @@ Prices, payment ids and the owner's internal notes are never sent to the app.
 | POST | `/api/app/jobs/{id}/photos` | `Photo` | `{uploaded}`; when false also `{signedUrl, token, path}` |
 | POST | `/api/app/jobs/{id}/photos/{photoId}` | – | confirms the upload (`uploaded: true`) |
 | GET | `/api/app/jobs/{id}/photos/{photoId}` | – | `{url}` (valid 10 minutes) |
+| DELETE | `/api/app/jobs/{id}/photos/{photoId}` | – | marks the photo deleted (file kept for the audit trail) |
 | POST | `/api/app/jobs/{id}/floorplans/upload` | `{contentType, sizeBytes}` | `{path, signedUrl, token}` |
 | POST | `/api/app/jobs/{id}/floorplans/complete` | `{path, levelLabel}` | `floorplan` |
 | POST | `/api/app/jobs/{id}/submit` | – | hands fieldwork to review (`reportStatus: in_review`) |

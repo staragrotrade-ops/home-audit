@@ -67,3 +67,33 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     return appError(error, 'Unable to confirm the photo.')
   }
 }
+
+// Removes a photo from the inspection. The file stays in storage for the
+// audit trail; the row is marked deleted so every phone drops it on sync.
+export async function DELETE(request: Request, context: { params: Promise<{ id: string; photoId: string }> }) {
+  try {
+    const { supabase, staff } = await authenticateInspector(request)
+    const { id, photoId } = await context.params
+    z.uuid().parse(id)
+    z.uuid().parse(photoId)
+    await requireVisibleJob(supabase, id)
+    const { admin } = await load(id, photoId)
+    const { error } = await admin
+      .from('inspection_photos')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', photoId)
+      .eq('job_id', id)
+      .is('deleted_at', null)
+    if (error) throw new Error(error.message)
+    await admin.from('audit_events').insert({
+      job_id: id,
+      event_type: 'app_photo_deleted',
+      actor_type: 'staff',
+      actor_id: staff.id,
+      event_data: { photo_id: photoId },
+    })
+    return Response.json({ ok: true })
+  } catch (error) {
+    return appError(error, 'Unable to remove the photo.')
+  }
+}
