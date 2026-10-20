@@ -148,13 +148,18 @@ export default function BuildingAndPestPage() {
                 <strong>Ending the contract.</strong> If your contract has a
                 building inspection condition, the report can be the evidence
                 you rely on. Whether you can end the contract depends on its
-                wording, so ask your lawyer or conveyancer.
+                wording, so ask your lawyer or conveyancer. Many Victorian
+                contracts refer to a{' '}
+                <Link className="text-link" href="/guides/major-building-defect-vs-major-structural-defect-victoria">
+                  major building defect or a major structural defect
+                </Link>
+                , and the difference matters.
               </li>
               <li>
                 <strong>Checking before settlement.</strong> Take the report to
-                your final inspection before settlement. If there is new damage,
-                your lawyer or conveyancer can ask the vendor to repair it or
-                pay for it.
+                your final inspection before settlement. If the condition is
+                inconsistent with the report, your lawyer or conveyancer can
+                raise it with the vendor.
               </li>
               <li>
                 <strong>A record for later.</strong> The report records the

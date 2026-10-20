@@ -124,6 +124,8 @@ test('report uses stay consistent with the agreement (not the sole basis)', asyn
   assert.match(page, /Together with quotes\s+from licensed tradespeople/)
   assert.match(page, /depends on its\s+wording, so ask your lawyer or conveyancer/)
   assert.match(page, /Use it together with\s+advice from your lawyer or conveyancer/)
+  assert.match(page, /inconsistent with the report/)
+  assert.doesNotMatch(page, /new damage/)
   const prePurchase = await source('app/pre-purchase-building-inspection/page.tsx')
   assert.match(prePurchase, /#how-buyers-use-the-report/)
 })

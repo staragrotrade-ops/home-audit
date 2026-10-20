@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.15.4 — 2026-10-20
+
+- "Checking before settlement" now says "If the condition is inconsistent
+  with the report" instead of "If there is new damage" (the report may not
+  photograph everything), and the lawyer or conveyancer raises it with the
+  vendor.
+- "Ending the contract" links to the major building defect vs major
+  structural defect guide.
+
 ## 0.15.3 — 2026-10-20
 
 - Building & Pest page, "What the report is for": four ways buyers use the
