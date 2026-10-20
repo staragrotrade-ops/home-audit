@@ -1,5 +1,6 @@
 import type Stripe from 'stripe'
-import { NextResponse } from 'next/server'
+import { after, NextResponse } from 'next/server'
+import { fetchListingFloorplan } from '@/lib/floorplan'
 import { settleCheckoutSession } from '@/lib/orders'
 import { getStripe } from '@/lib/stripe-server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
@@ -31,7 +32,22 @@ export async function POST(request: Request) {
 
   try {
     if (CHECKOUT_EVENTS.has(event.type)) {
-      await settleCheckoutSession(supabase, event.data.object as Stripe.Checkout.Session)
+      const session = event.data.object as Stripe.Checkout.Session
+      const outcome = await settleCheckoutSession(supabase, session)
+      const jobId = session.metadata?.job_id || session.client_reference_id
+      if (outcome === 'paid' && jobId) {
+        // Once the order is paid, try to copy the floorplan from the listing
+        // for the inspector app. After the response, so Stripe is not kept
+        // waiting; the result is recorded on the job either way.
+        after(async () => {
+          const { data: job } = await supabase
+            .from('jobs')
+            .select('floorplan_fetch_status,listing_url')
+            .eq('id', jobId)
+            .maybeSingle()
+          if (job?.listing_url && !job.floorplan_fetch_status) await fetchListingFloorplan(supabase, jobId)
+        })
+      }
     }
     await supabase
       .from('stripe_events')

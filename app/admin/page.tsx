@@ -10,6 +10,7 @@ import { ReferrerManager } from '@/components/admin/referrer-manager'
 import { StaffManager } from '@/components/admin/staff-manager'
 import { XeroSyncButton } from '@/components/admin/xero-sync-button'
 import { CalendarSyncButton } from '@/components/admin/calendar-sync-button'
+import { FloorplanPanel } from '@/components/admin/floorplan-panel'
 import {
   CHANNEL_LABELS,
   INSPECTION_TYPE_LABELS,
@@ -170,6 +171,7 @@ type StaffRow = {
   role: string
   active: boolean
   registration_number: string | null
+  can_issue_reports?: boolean
 }
 
 function emptySummary(): Summary {
@@ -354,7 +356,8 @@ export default async function AdminPage({
     jobsQuery,
     supabase
       .from('staff')
-      .select('id,email,display_name,role,active,registration_number')
+      // '*' so the page still loads before the can_issue_reports migration.
+      .select('*')
       .order('created_at'),
   ])
 
@@ -969,6 +972,8 @@ export default async function AdminPage({
                         })()}
                       </div>
                     )}
+
+                    <FloorplanPanel jobId={job.id} hasListing={Boolean(job.listing_url)} />
 
                     <JobWorkflow
                       jobId={job.id}

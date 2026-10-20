@@ -3476,3 +3476,14 @@ button:focus-visible {
     display: inline;
   }
 }
+
+.order-floorplan {
+  display: grid;
+  gap: 12px;
+}
+
+.order-floorplan label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}

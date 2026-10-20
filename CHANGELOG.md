@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.16.0 — 2026-10-21
+
+Groundwork for the Home Audit Inspector app (building & pest).
+
+- Migration `20261021100000_inspection_capture.sql` (apply before deploying):
+  floorplans per job, defects pinned on a floorplan with root-cause links,
+  trade routing and quantities, defect photos, description templates ranked
+  by use, and the `trade_job_leads` view (defects grouped per job and trade,
+  for future repair quotes). Private buckets `job-floorplans` and
+  `inspection-photos`.
+- Field inspectors and issuers are separate: only admins and staff marked
+  "Allow issuing reports" (Admin → Inspectors) can register a report.
+  Others submit fieldwork, which sets the report to "in review".
+- Floorplans: after payment the website tries once to copy the floorplan
+  from the listing link (no retries, no bypassing site protection; the
+  outcome is shown on the job). Customers can upload a floorplan on their
+  order page after paying; admin can upload, remove or retry the listing
+  under "Floorplan for the inspector app".
+- New app API endpoints for catalog, inspection sync, photos, onsite
+  floorplans and fieldwork submission (`docs/APP_API.md`, API version 2).
+
 ## 0.15.5 — 2026-10-20
 
 - Visitor statistics: a visit that arrives with a Google Ads click id

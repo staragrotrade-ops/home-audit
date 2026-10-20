@@ -10,6 +10,7 @@ type Member = {
   role: string
   active: boolean
   registration_number: string | null
+  can_issue_reports?: boolean
 }
 
 async function send(url: string, method: string, body: unknown) {
@@ -82,6 +83,7 @@ export function StaffManager({ staff }: { staff: Member[] }) {
                 <span>
                   {member.email} · {member.role}
                   {member.registration_number ? ` · ${member.registration_number}` : ''}
+                  {member.role === 'admin' || member.can_issue_reports ? ' · issues reports' : ' · fieldwork only'}
                   {member.active ? '' : ' · disabled'}
                 </span>
               </div>
@@ -94,6 +96,16 @@ export function StaffManager({ staff }: { staff: Member[] }) {
                 >
                   Reset password
                 </button>
+                {member.role !== 'admin' && (
+                  <button
+                    className="admin-button small"
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void update(member.id, { canIssueReports: !member.can_issue_reports })}
+                  >
+                    {member.can_issue_reports ? 'Fieldwork only' : 'Allow issuing reports'}
+                  </button>
+                )}
                 <button
                   className="admin-button small"
                   type="button"
