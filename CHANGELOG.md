@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.15.3 — 2026-10-20
+
+- Building & Pest page, "What the report is for": four ways buyers use the
+  report (renegotiating the price with trade quotes; relying on a building
+  inspection condition, subject to the contract and legal advice; checking
+  the home before settlement; a record to compare years later), and a note
+  that the report is used together with legal advice and trade quotes
+  (Inspection Agreement 7.4).
+- Pre-purchase page, "After the inspection": a short version linking to it.
+
 ## 0.15.2 — 2026-10-20
 
 - The thermal camera case study also appears on the pre-purchase building

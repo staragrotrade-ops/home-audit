@@ -117,3 +117,14 @@ test('thermal case study does not promise thermal imaging on every inspection', 
   assert.match(home, /<ThermalCaseStudy variant="home" \/>/)
   assert.match(await source('app/pre-purchase-building-inspection/page.tsx'), /<ThermalCaseStudy \/>/)
 })
+
+test('report uses stay consistent with the agreement (not the sole basis)', async () => {
+  const page = await source('app/building-and-pest-inspections/page.tsx')
+  assert.match(page, /id="how-buyers-use-the-report"/)
+  assert.match(page, /Together with quotes\s+from licensed tradespeople/)
+  assert.match(page, /depends on its\s+wording, so ask your lawyer or conveyancer/)
+  assert.match(page, /Use it together with\s+advice from your lawyer or conveyancer/)
+  assert.doesNotMatch(page, /guarantee/i)
+  const prePurchase = await source('app/pre-purchase-building-inspection/page.tsx')
+  assert.match(prePurchase, /#how-buyers-use-the-report/)
+})

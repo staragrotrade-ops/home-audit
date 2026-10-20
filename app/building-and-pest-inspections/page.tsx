@@ -129,12 +129,44 @@ export default function BuildingAndPestPage() {
               subfloors are inspected only where access and safety allow.
             </p>
 
-            <h2>What the report is for</h2>
+            <h2 id="how-buyers-use-the-report">What the report is for</h2>
             <p>
               The report brings the visible findings, photographs and access
               limitations into one record. It is intended to help the purchaser
               understand the observed condition and decide whether further
               investigation, specialist advice or contract guidance is needed.
+            </p>
+            <p>Buyers use the report in four main ways:</p>
+            <ul className="report-uses">
+              <li>
+                <strong>Renegotiating the price.</strong> Together with quotes
+                from licensed tradespeople, the findings can support a request
+                to lower the price. This can cover repair costs or the risk you
+                take on.
+              </li>
+              <li>
+                <strong>Ending the contract.</strong> If your contract has a
+                building inspection condition, the report can be the evidence
+                you rely on. Whether you can end the contract depends on its
+                wording, so ask your lawyer or conveyancer.
+              </li>
+              <li>
+                <strong>Checking before settlement.</strong> Take the report to
+                your final inspection before settlement. If there is new damage,
+                your lawyer or conveyancer can ask the vendor to repair it or
+                pay for it.
+              </li>
+              <li>
+                <strong>A record for later.</strong> The report records the
+                condition of the home when you bought it. A few years later, you
+                can compare it and see whether recorded defects have got worse.
+                This helps you decide when to repair or renovate.
+              </li>
+            </ul>
+            <p>
+              The report is one part of the decision. Use it together with
+              advice from your lawyer or conveyancer and quotes from licensed
+              tradespeople.
             </p>
             <p>
               The report records the building evidence. Your contract

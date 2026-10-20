@@ -165,6 +165,17 @@ export default function PrePurchaseInspectionPage() {
               the property decision remains separate from the site process.
             </p>
             <p>
+              The report is a dated record of the property’s condition. With
+              your lawyer’s or conveyancer’s advice, it can help you
+              renegotiate, rely on a building inspection condition, check the
+              home again before settlement, and compare its condition years
+              later.{' '}
+              <Link className="text-link" href="/building-and-pest-inspections#how-buyers-use-the-report">
+                How buyers use the report
+              </Link>
+              .
+            </p>
+            <p>
               Already reviewing a contract? Learn why{' '}
               <Link className="text-link" href="/guides/major-building-defect-vs-major-structural-defect-victoria">
                 major building defect and major structural defect are not
