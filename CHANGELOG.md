@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.15.2 — 2026-10-20
+
+- The thermal camera case study also appears on the pre-purchase building
+  inspection page, after "What is inspected".
+
 ## 0.15.1 — 2026-10-20
 
 - Real inspection example on the Building & Pest page (after the scope

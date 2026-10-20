@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ThermalCaseStudy } from '@/components/case-study'
 import { JsonLd } from '@/components/json-ld'
 import { pageMetadata } from '@/lib/metadata'
 import { SITE_URL } from '@/lib/site'
@@ -134,6 +135,8 @@ export default function PrePurchaseInspectionPage() {
                 </div>
               ))}
             </div>
+
+            <ThermalCaseStudy />
 
             <h2>Building and timber-pest scopes are different</h2>
             <p>
