@@ -114,3 +114,18 @@ test('privacy page discloses the Google tag', async () => {
   assert.match(privacy, /<h2>Google Ads<\/h2>/)
   assert.doesNotMatch(privacy, /do not use advertising cookies/)
 })
+
+test('ad visits are labelled google_ads in visitor statistics', async () => {
+  assert.deepEqual(ads.visitSource(new URLSearchParams('gclid=abc')), {
+    utmSource: 'google_ads',
+    utmMedium: 'cpc',
+  })
+  assert.equal(ads.visitSource(new URLSearchParams('gbraid=x&utm_source=google')).utmSource, 'google_ads')
+  assert.deepEqual(ads.visitSource(new URLSearchParams('utm_source=newsletter&utm_medium=email')), {
+    utmSource: 'newsletter',
+    utmMedium: 'email',
+  })
+  assert.deepEqual(ads.visitSource(new URLSearchParams('')), { utmSource: '', utmMedium: '' })
+  const client = await source('lib/visitor-analytics.ts')
+  assert.match(client, /const \{ utmSource, utmMedium \} = visitSource\(params\)/)
+})

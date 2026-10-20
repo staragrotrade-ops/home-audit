@@ -54,6 +54,21 @@ export function clickIdFrom(params: URLSearchParams) {
   return ''
 }
 
+// How a visit is labelled in the owner's visitor statistics. A visit that
+// arrives with a Google Ads click id is always "google_ads", so ad visits are
+// told apart from ordinary Google search visits. Other visits keep their UTM
+// tags.
+export const GOOGLE_ADS_SOURCE = 'google_ads'
+
+export function visitSource(params: URLSearchParams) {
+  const utmSource = (params.get('utm_source') || '').trim().slice(0, 120)
+  const utmMedium = (params.get('utm_medium') || '').trim().slice(0, 120)
+  if (clickIdFrom(params)) {
+    return { utmSource: GOOGLE_ADS_SOURCE, utmMedium: utmMedium || 'cpc' }
+  }
+  return { utmSource, utmMedium }
+}
+
 function fromUrl(href: string, referrer: string): AdAttribution {
   const url = new URL(href)
   const params = url.searchParams
