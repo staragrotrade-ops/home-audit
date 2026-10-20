@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { BookingDetailsForm } from '@/components/order/booking-details-form'
+import { FloorplanUpload } from '@/components/order/floorplan-upload'
 import { AgreementText } from '@/components/agreement/agreement-text'
 import { AgreementConsent } from '@/components/order/agreement-consent'
 import { jobIdForToken } from '@/lib/access-tokens'
@@ -112,6 +113,15 @@ export default async function OrderPage({
   const customer = job.customer_snapshot || {}
   const paid = job.payment_status === 'paid'
   const agreement = await loadAgreementStatus(supabase, job.id)
+  // Counted defensively: before the floorplan migration the table is missing.
+  const { count: customerFloorplans } = paid
+    ? await supabase
+        .from('job_floorplans')
+        .select('id', { count: 'exact', head: true })
+        .eq('job_id', job.id)
+        .eq('source', 'customer')
+        .eq('status', 'active')
+    : { count: 0 }
   const total = centsOf(job.quote_total)
 
   return (
@@ -220,6 +230,13 @@ export default async function OrderPage({
                 />
               )}
             </section>
+            )}
+
+            {paid && agreement.accepted && job.service_family === 'existing_home' && (
+              <section className="quote-panel">
+                <h2>Floorplan</h2>
+                <FloorplanUpload token={token} existing={customerFloorplans || 0} />
+              </section>
             )}
           </>
         )}

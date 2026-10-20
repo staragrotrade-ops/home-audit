@@ -9,6 +9,7 @@ export type StaffMember = {
   role: 'admin' | 'inspector'
   active: boolean
   registration_number: string | null
+  can_issue_reports: boolean
 }
 
 export type AuthenticatedInspector = {
@@ -46,7 +47,7 @@ export async function authenticateInspector(request: Request): Promise<Authentic
 
   const { data: staff, error: staffError } = await supabase
     .from('staff')
-    .select('id,email,display_name,role,active,registration_number')
+    .select('id,email,display_name,role,active,registration_number,can_issue_reports')
     .eq('auth_user_id', user.id)
     .maybeSingle()
   if (staffError || !staff?.active) throw new AppAuthError('This account is not an active inspector.')
@@ -58,4 +59,19 @@ export function appError(error: unknown, fallback: string) {
   const status = error instanceof AppAuthError ? 401 : 400
   const message = error instanceof Error && error.message ? error.message : fallback
   return Response.json({ ok: false, error: message }, { status, headers: { 'Cache-Control': 'no-store' } })
+}
+
+export function canIssueReports(staff: StaffMember) {
+  return staff.role === 'admin' || staff.can_issue_reports === true
+}
+
+// Reading through the inspector's own client proves the job is theirs (RLS).
+export async function requireVisibleJob(supabase: SupabaseClient, jobId: string) {
+  const { data, error } = await supabase
+    .from('inspector_job_feed')
+    .select('id,public_reference')
+    .eq('id', jobId)
+    .maybeSingle()
+  if (error || !data) throw new Error('Job not found or not assigned to this inspector.')
+  return data as { id: string; public_reference: string }
 }

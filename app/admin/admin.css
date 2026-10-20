@@ -629,3 +629,27 @@ a.admin-button {
 .admin-referrer-list code {
   overflow-wrap: anywhere;
 }
+
+.admin-floorplans {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-floorplans li {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.admin-floorplans img {
+  width: 100%;
+  height: 140px;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+}

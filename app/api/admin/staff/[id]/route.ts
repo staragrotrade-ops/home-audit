@@ -7,6 +7,7 @@ export const runtime = 'nodejs'
 const schema = z
   .object({
     active: z.boolean().optional(),
+    canIssueReports: z.boolean().optional(),
     resetPassword: z.literal(true).optional(),
   })
   .strict()
@@ -29,6 +30,14 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 
     if (input.active !== undefined) {
       const { error } = await supabase.from('staff').update({ active: input.active }).eq('id', id)
+      if (error) throw new Error(error.message)
+    }
+
+    if (input.canIssueReports !== undefined) {
+      const { error } = await supabase
+        .from('staff')
+        .update({ can_issue_reports: input.canIssueReports })
+        .eq('id', id)
       if (error) throw new Error(error.message)
     }
 

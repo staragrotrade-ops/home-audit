@@ -1,0 +1,144 @@
+import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
+import test from 'node:test'
+
+async function source(path: string) {
+  return readFile(new URL(`../${path}`, import.meta.url), 'utf8')
+}
+
+test('catalog: roof tiles, gutters and downpipes form one roofer lead; termites go to pest control', async () => {
+  const { ELEMENTS, TRADES, elementOf, tradeFor } = await import('../lib/inspection-catalog.ts')
+  for (const key of ['roof_tile', 'gutter', 'downpipe', 'ridge_capping', 'flashing']) {
+    assert.equal(elementOf(key)?.trade, 'roofer', key)
+  }
+  assert.equal(tradeFor('subfloor_moisture', 'active_termites'), 'pest_controller')
+  assert.equal(tradeFor('roof_tile', 'minor_defect', 'builder'), 'builder')
+  assert.equal(tradeFor('roof_tile', 'minor_defect', 'not_a_trade'), 'roofer')
+  assert.equal(elementOf('roof_tile')?.quantity?.unit, 'tiles')
+
+  const trades = new Set(TRADES.map((trade) => trade.key))
+  const keys = new Set<string>()
+  for (const element of ELEMENTS) {
+    assert.ok(trades.has(element.trade), `${element.key} uses an unknown trade`)
+    assert.match(element.key, /^[a-z0-9_]{2,40}$/)
+    assert.ok(!keys.has(element.key), `duplicate ${element.key}`)
+    keys.add(element.key)
+  }
+})
+
+test('defect sync: derives category, trade and unit; rejects broken pins and cause chains', async () => {
+  const { defectInput, normaliseDefect, rootLinkProblem } = await import('../lib/inspection-sync.ts')
+  const base = {
+    id: '60000000-0000-4000-8000-000000000001',
+    elementKey: 'roof_tile',
+    severity: 'minor_defect',
+    title: 'Cracked tiles',
+    quantity: 4,
+    clientUpdatedAt: '2026-10-20T01:00:00Z',
+  }
+  const parsed = defectInput.parse(base)
+  const stored = normaliseDefect(parsed)
+  assert.equal(stored.category, 'building')
+  assert.equal(stored.tradeKey, 'roofer')
+  assert.equal(stored.quantityUnit, 'tiles')
+
+  assert.equal(normaliseDefect(defectInput.parse({ ...base, severity: 'termite_damage' })).category, 'timber_pest')
+  assert.equal(defectInput.safeParse({ ...base, pinX: 0.5 }).success, false)
+  assert.equal(defectInput.safeParse({ ...base, pinX: 0.5, pinY: 0.5 }).success, false)
+  assert.equal(
+    defectInput.safeParse({ ...base, pinX: 0.5, pinY: 0.5, floorplanId: '50000000-0000-4000-8000-000000000001' }).success,
+    true,
+  )
+  assert.equal(defectInput.safeParse({ ...base, pinX: 1.2, pinY: 0.5, floorplanId: base.id }).success, false)
+  assert.equal(defectInput.safeParse({ ...base, rootCauseId: base.id }).success, false)
+  assert.equal(defectInput.safeParse({ ...base, tradeKey: 'astronaut' }).success, false)
+  assert.equal(defectInput.safeParse({ ...base, clientUpdatedAt: '2099-01-01T00:00:00Z' }).success, false)
+
+  const a = defectInput.parse({ ...base, id: '60000000-0000-4000-8000-00000000000a' })
+  const b = defectInput.parse({ ...base, id: '60000000-0000-4000-8000-00000000000b', rootCauseId: a.id })
+  const c = defectInput.parse({ ...base, id: '60000000-0000-4000-8000-00000000000c', rootCauseId: b.id })
+  assert.equal(rootLinkProblem([a, b]), null)
+  assert.match(rootLinkProblem([a, b, c]) || '', /itself linked/)
+})
+
+test('floorplan finder: picks plans, ignores ordinary photos, https only', async () => {
+  const { findFloorplanImageUrls, sniffImageType, imageSize } = await import('../lib/floorplan.ts')
+  const html = `
+    <img src="https://cdn.example.com/photos/kitchen.jpg" alt="Kitchen">
+    <img src="/media/plan-ground.png" alt="Floor plan">
+    <script>{"floorplans":[{"url":"https:\\/\\/i2.cdn.example.com\\/abc\\/main.webp"}]}</script>
+    <a href="https://cdn.example.com/listing/123/floorplan_1.jpg?w=800">plan</a>
+    <img src="http://insecure.example.com/floorplan.jpg">
+  `
+  const urls = findFloorplanImageUrls(html, 'https://agency.example.com/listing/1')
+  assert.equal(urls[0], 'https://cdn.example.com/listing/123/floorplan_1.jpg?w=800')
+  assert.ok(urls.includes('https://i2.cdn.example.com/abc/main.webp'))
+  assert.ok(urls.includes('https://agency.example.com/media/plan-ground.png'))
+  assert.ok(!urls.some((url) => url.includes('kitchen')))
+  assert.ok(!urls.some((url) => url.startsWith('http:')))
+
+  const png = new Uint8Array(24)
+  png.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+  new DataView(png.buffer).setUint32(16, 1200)
+  new DataView(png.buffer).setUint32(20, 800)
+  assert.equal(sniffImageType(png), 'image/png')
+  assert.deepEqual(imageSize(png, 'image/png'), { width: 1200, height: 800 })
+  assert.equal(sniffImageType(new TextEncoder().encode('<html>')), null)
+})
+
+test('floorplan fetch: public https hosts only, no IP literals, capped and recorded', async () => {
+  const { assertPublicHttpsUrl } = await import('../lib/floorplan.ts')
+  await assert.rejects(assertPublicHttpsUrl('http://example.com/a'), /https/)
+  await assert.rejects(assertPublicHttpsUrl('https://127.0.0.1/a'), /IP address/)
+  await assert.rejects(assertPublicHttpsUrl('https://[::1]/a'), /IP address/)
+  await assert.rejects(assertPublicHttpsUrl('https://user:pw@example.com/a'), /credentials/)
+  await assert.rejects(assertPublicHttpsUrl('https://example.com:8443/a'), /port/)
+
+  const lib = await source('lib/floorplan.ts')
+  assert.match(lib, /redirect: 'manual'/)
+  assert.match(lib, /AbortSignal\.timeout/)
+  assert.match(lib, /floorplan_fetch_status/)
+
+  const webhook = await source('app/api/stripe/webhook/route.ts')
+  assert.match(webhook, /after\(async/)
+  assert.match(webhook, /!job\.floorplan_fetch_status/)
+})
+
+test('capture migration: RLS on every table, writes only via service_role functions', async () => {
+  const sql = await source('supabase/migrations/20261021100000_inspection_capture.sql')
+  for (const table of ['job_floorplans', 'inspection_defects', 'inspection_photos', 'defect_templates']) {
+    assert.match(sql, new RegExp(`alter table public\\.${table} enable row level security`))
+    assert.match(sql, new RegExp(`revoke all on table public\\.${table} from anon, authenticated`))
+  }
+  for (const fn of ['app_sync_defects', 'app_register_photo', 'app_submit_fieldwork']) {
+    assert.match(sql, new RegExp(`revoke all on function public\\.${fn}\\([^)]*\\) from public, anon, authenticated`))
+    assert.match(sql, new RegExp(`grant execute on function public\\.${fn}\\([^)]*\\) to service_role`))
+  }
+  assert.match(sql, /cannot issue reports/)
+  assert.match(sql, /photo\(s\) are still uploading/)
+  assert.match(sql, /grant select on table public\.trade_job_leads to service_role/)
+  assert.doesNotMatch(sql, /grant select on table public\.trade_job_leads to authenticated/)
+  // Storage paths of photos and floorplans are never readable by the app.
+  assert.doesNotMatch(sql.match(/grant select \([^)]*\) on public\.job_floorplans/)?.[0] || '', /storage_path/)
+  assert.doesNotMatch(sql.match(/grant select \([^)]*\) on public\.inspection_photos/)?.[0] || '', /storage_path/)
+})
+
+test('app routes: every capture route authenticates the inspector', async () => {
+  const routes = [
+    'app/api/app/catalog/route.ts',
+    'app/api/app/jobs/[id]/inspection/route.ts',
+    'app/api/app/jobs/[id]/defects/route.ts',
+    'app/api/app/jobs/[id]/photos/route.ts',
+    'app/api/app/jobs/[id]/photos/[photoId]/route.ts',
+    'app/api/app/jobs/[id]/floorplans/upload/route.ts',
+    'app/api/app/jobs/[id]/floorplans/complete/route.ts',
+    'app/api/app/jobs/[id]/submit/route.ts',
+  ]
+  for (const route of routes) {
+    assert.match(await source(route), /authenticateInspector\(request\)/, route)
+  }
+  const customer = await source('app/api/order/[token]/floorplan/route.ts')
+  assert.match(customer, /isSameOriginMutation\(request\)/)
+  assert.match(customer, /consume_rate_limit/)
+  assert.match(customer, /payment_status !== 'paid'/)
+})

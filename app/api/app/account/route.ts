@@ -1,4 +1,4 @@
-import { appError, authenticateInspector } from '@/lib/supabase-user'
+import { appError, authenticateInspector, canIssueReports } from '@/lib/supabase-user'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     return Response.json(
       {
         ok: true,
-        apiVersion: 1,
+        apiVersion: 2,
         account: {
           userId: user.id,
           staffId: staff.id,
@@ -17,6 +17,7 @@ export async function GET(request: Request) {
           displayName: staff.display_name,
           role: staff.role,
           registrationNumber: staff.registration_number,
+          canIssueReports: canIssueReports(staff),
         },
       },
       { headers: { 'Cache-Control': 'no-store' } },
