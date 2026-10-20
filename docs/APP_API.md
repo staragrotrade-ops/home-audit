@@ -6,6 +6,9 @@ JSON with `ok: true` or `ok: false` plus `error`.
 
 ## Sign-in
 
+`GET /api/app/config` (no sign-in) returns `{supabaseUrl, publishableKey}` so
+the app does not hard-code them.
+
 The app signs in directly with Supabase Auth (email + password) using the
 project URL and publishable key, then sends the access token on every call:
 

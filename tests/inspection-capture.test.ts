@@ -137,6 +137,10 @@ test('app routes: every capture route authenticates the inspector', async () => 
   for (const route of routes) {
     assert.match(await source(route), /authenticateInspector\(request\)/, route)
   }
+  const config = await source('app/api/app/config/route.ts')
+  assert.match(config, /sb_secret/)
+  assert.doesNotMatch(config, /SUPABASE_SECRET_KEY/)
+
   const customer = await source('app/api/order/[token]/floorplan/route.ts')
   assert.match(customer, /isSameOriginMutation\(request\)/)
   assert.match(customer, /consume_rate_limit/)
