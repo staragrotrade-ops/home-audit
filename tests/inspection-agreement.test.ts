@@ -115,4 +115,5 @@ test('thermal case study does not promise thermal imaging on every inspection', 
   const home = await source('app/page.tsx')
   assert.match(service, /<ThermalCaseStudy \/>/)
   assert.match(home, /<ThermalCaseStudy variant="home" \/>/)
+  assert.match(await source('app/pre-purchase-building-inspection/page.tsx'), /<ThermalCaseStudy \/>/)
 })
