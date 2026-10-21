@@ -56,8 +56,12 @@ export function JobEditor({
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const form = new FormData(event.currentTarget)
+    // Send the status only if it was changed here. The page may have been
+    // opened before a payment or booking moved the status on; re-sending the
+    // old value would put it back (HA-20261021-C4CE16, 22 Oct 2026).
+    const chosenStatus = String(form.get('status') || '')
     void save({
-      status: form.get('status'),
+      ...(chosenStatus && chosenStatus !== status ? { status: chosenStatus } : {}),
       staffId: String(form.get('staffId') || ''),
       internalNotes: String(form.get('internalNotes') || ''),
     })
@@ -68,7 +72,8 @@ export function JobEditor({
       <div className="admin-field-row">
         <label>
           Status
-          <select name="status" defaultValue={status}>
+          {/* key: show the latest status after each refresh, not the one the page first loaded. */}
+          <select name="status" defaultValue={status} key={status}>
             {JOB_STATUSES.map((value) => (
               <option key={value} value={value}>
                 {JOB_STATUS_LABELS[value]}
@@ -78,7 +83,7 @@ export function JobEditor({
         </label>
         <label>
           Inspector
-          <select name="staffId" defaultValue={staffId}>
+          <select name="staffId" defaultValue={staffId} key={staffId}>
             <option value="">Not assigned</option>
             {staff
               .filter((member) => member.active || member.id === staffId)
