@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.16.2 — 2026-10-21
+
+- /service-areas intro rewritten for buyers: "See what we look for in homes
+  like the one you are buying." replaces "Useful local guidance, not a list
+  of copied suburb pages."
+
 ## 0.16.1 — 2026-10-21
 
 - Phone menu no longer stays open over the page. It closes when a link is

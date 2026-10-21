@@ -86,13 +86,13 @@ export default function ServiceAreasPage() {
       <section className="section area-hub-intro">
         <div className="container split-heading">
           <div>
-            <p className="eyebrow">Focused local coverage</p>
-            <h2>Useful local guidance, not a list of copied suburb pages.</h2>
+            <p className="eyebrow">Find your suburb</p>
+            <h2>See what we look for in homes like the one you are buying.</h2>
           </div>
           <p>
-            Every page below explains the housing context, likely access issues
-            and inspection priorities for that area. Service remains subject to
-            the exact address, safe access and scheduling.
+            Each suburb page covers the common house types, the problems we
+            often find there and what to arrange for access. Not sure if we
+            cover your address? Ask for a quote and we will tell you.
           </p>
         </div>
       </section>
