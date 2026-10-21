@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { MobileMenu } from '@/components/mobile-menu'
 import { CONTACT_PHONE, CONTACT_PHONE_HREF, PRIMARY_NAV } from '@/lib/site'
 
 export function SiteHeader() {
@@ -35,19 +36,7 @@ export function SiteHeader() {
           </Link>
         </div>
 
-        <details className="mobile-menu">
-          <summary aria-label="Open navigation">Menu</summary>
-          <nav aria-label="Mobile navigation">
-            {PRIMARY_NAV.map((item) => (
-              <Link href={item.href} key={item.href}>
-                {item.label}
-              </Link>
-            ))}
-            <Link className="button" href="/quote">
-              Get a quote
-            </Link>
-          </nav>
-        </details>
+        <MobileMenu />
       </div>
     </header>
   )

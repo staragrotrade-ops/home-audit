@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.16.1 — 2026-10-21
+
+- Phone menu no longer stays open over the page. It closes when a link is
+  tapped, when the page changes, when you tap outside it, scroll, or press
+  Escape. The button reads "Close" while the menu is open.
+
 ## 0.16.0 — 2026-10-21
 
 Groundwork for the Home Audit Inspector app (building & pest).
