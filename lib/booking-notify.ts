@@ -30,12 +30,15 @@ export async function sendBookingDateEmail(supabase: SupabaseClient, id: string)
     .from('jobs')
     .update({
       booking_notified_at: new Date().toISOString(),
-      status: ['paid', 'scheduling', 'awaiting_customer'].includes(job.status) ? 'confirmed' : job.status,
+      status: BOOKABLE_STATUSES.includes(job.status) ? 'confirmed' : job.status,
     })
     .eq('id', id)
   if (error) throw new Error(error.message)
   await audit(supabase, id, 'booking_email_sent', { date: job.confirmed_start })
 }
+
+/** Open statuses that become Booked once a time is saved. */
+export const BOOKABLE_STATUSES = ['quote_received', 'awaiting_customer', 'awaiting_payment', 'paid', 'scheduling']
 
 export function melbourneDay(iso: string | null | undefined) {
   return iso
@@ -57,10 +60,13 @@ export async function saveBookedTime(
 ): Promise<BookingEmailResult> {
   const before = await loadJobContact(supabase, id)
 
-  const { error } = await supabase
-    .from('jobs')
-    .update({ confirmed_start: startIso, confirmed_end: null })
-    .eq('id', id)
+  // The status follows the booked time: a time moves an open job to Booked
+  // (whatever the payment state, which is shown separately); clearing the time
+  // moves a Booked job back to Scheduling.
+  const update: Record<string, unknown> = { confirmed_start: startIso, confirmed_end: null }
+  if (startIso && BOOKABLE_STATUSES.includes(before.status)) update.status = 'confirmed'
+  if (!startIso && before.status === 'confirmed') update.status = 'scheduling'
+  const { error } = await supabase.from('jobs').update(update).eq('id', id)
   if (error) throw new Error(error.message)
 
   let close = supabase

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.16.3 — 2026-10-22
+
+- Fixed: saving a job in Admin (inspector, notes) could put the status back
+  to what it was when the page was opened. HA-20261021-C4CE16 was paid and
+  booked but showed "Quote request". The editor now sends the status only
+  when it is changed there.
+- A saved booked time now moves an open job (Quote request, Waiting on
+  customer, Awaiting payment, Paid, Scheduling) to Booked, whatever the
+  payment state; clearing the time moves Booked back to Scheduling.
+
 ## 0.16.2 — 2026-10-21
 
 - /service-areas intro rewritten for buyers: "See what we look for in homes

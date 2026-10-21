@@ -56,8 +56,12 @@ export function JobEditor({
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const form = new FormData(event.currentTarget)
+    // Send the status only if it was changed here. The page may have been
+    // opened before a payment or booking moved the status on; re-sending the
+    // old value would put it back (HA-20261021-C4CE16, 22 Oct 2026).
+    const chosenStatus = String(form.get('status') || '')
     void save({
-      status: form.get('status'),
+      ...(chosenStatus && chosenStatus !== status ? { status: chosenStatus } : {}),
       staffId: String(form.get('staffId') || ''),
       internalNotes: String(form.get('internalNotes') || ''),
     })
