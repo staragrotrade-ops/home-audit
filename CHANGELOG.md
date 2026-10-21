@@ -5,7 +5,8 @@
 - Fixed: saving a job in Admin (inspector, notes) could put the status back
   to what it was when the page was opened. HA-20261021-C4CE16 was paid and
   booked but showed "Quote request". The editor now sends the status only
-  when it is changed there.
+  when it is changed there, and the status and inspector dropdowns show
+  the latest values after each refresh.
 - A saved booked time now moves an open job (Quote request, Waiting on
   customer, Awaiting payment, Paid, Scheduling) to Booked, whatever the
   payment state; clearing the time moves Booked back to Scheduling.

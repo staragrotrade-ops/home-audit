@@ -11,6 +11,7 @@ test('saving the job editor does not put back a status from when the page was op
   const editor = await source('components/admin/job-editor.tsx')
   assert.match(editor, /chosenStatus && chosenStatus !== status \? \{ status: chosenStatus \} : \{\}/)
   assert.doesNotMatch(editor, /status: form\.get\('status'\),/)
+  assert.match(editor, /defaultValue=\{status\} key=\{status\}/)
 })
 
 test('a booked time moves an open job to Booked; clearing it moves Booked back to Scheduling', async () => {

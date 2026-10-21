@@ -72,7 +72,8 @@ export function JobEditor({
       <div className="admin-field-row">
         <label>
           Status
-          <select name="status" defaultValue={status}>
+          {/* key: show the latest status after each refresh, not the one the page first loaded. */}
+          <select name="status" defaultValue={status} key={status}>
             {JOB_STATUSES.map((value) => (
               <option key={value} value={value}>
                 {JOB_STATUS_LABELS[value]}
@@ -82,7 +83,7 @@ export function JobEditor({
         </label>
         <label>
           Inspector
-          <select name="staffId" defaultValue={staffId}>
+          <select name="staffId" defaultValue={staffId} key={staffId}>
             <option value="">Not assigned</option>
             {staff
               .filter((member) => member.active || member.id === staffId)
