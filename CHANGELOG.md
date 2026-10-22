@@ -2,6 +2,11 @@
 
 ## 0.17.0 — 2026-10-22
 
+- A defect can be marked at several places on the floorplans (migration
+  `20261023110000_defect_extra_pins.sql`): the first location stays as
+  before; further ones are in `extra_pins` (up to 50, checked to be on the
+  job's own floorplans). Most defects keep a single pin.
+
 - Areas inspected (migration `20261023100000_inspection_areas.sql`, apply
   before deploying): each job gets a checklist of rooms and areas (roof
   space, subfloor, exterior, roof, site…) with status (inspected / limited /

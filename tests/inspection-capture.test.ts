@@ -190,3 +190,27 @@ test('areas: validated, never blocked by a missing reason; route authenticates; 
   assert.match(sql, /revoke all on function public\.app_sync_areas\(uuid, uuid, jsonb\) from public, anon, authenticated/)
   assert.match(sql, /Sync the area before its photos/)
 })
+
+test('defects: extra floorplan locations are optional, capped and need a first location', async () => {
+  const { defectInput, normaliseDefect, EXTRA_PINS_MAX } = await import('../lib/inspection-sync.ts')
+  const plan = '50000000-0000-4000-8000-000000000001'
+  const base = {
+    id: '60000000-0000-4000-8000-000000000001',
+    elementKey: 'ceiling',
+    severity: 'minor_defect',
+    title: 'Cracking',
+    clientUpdatedAt: '2026-10-22T01:00:00Z',
+  }
+  assert.deepEqual(normaliseDefect(defectInput.parse(base)).extraPins, [])
+  const pinned = { ...base, floorplanId: plan, pinX: 0.1, pinY: 0.1 }
+  const two = defectInput.parse({ ...pinned, extraPins: [{ floorplanId: plan, x: 0.5, y: 0.5 }, { floorplanId: plan, x: 0.9, y: 0.2 }] })
+  assert.equal(normaliseDefect(two).extraPins.length, 2)
+  assert.equal(defectInput.safeParse({ ...base, extraPins: [{ floorplanId: plan, x: 0.5, y: 0.5 }] }).success, false)
+  assert.equal(defectInput.safeParse({ ...pinned, extraPins: [{ floorplanId: plan, x: 1.5, y: 0.5 }] }).success, false)
+  const many = Array.from({ length: EXTRA_PINS_MAX + 1 }, () => ({ floorplanId: plan, x: 0.5, y: 0.5 }))
+  assert.equal(defectInput.safeParse({ ...pinned, extraPins: many }).success, false)
+
+  const sql = await source('supabase/migrations/20261023110000_defect_extra_pins.sql')
+  assert.match(sql, /extra_pins_valid\(p_job_id, v_extra\)/)
+  assert.match(sql, /revoke all on function public\.app_sync_defects\(uuid, uuid, jsonb\) from public, anon, authenticated/)
+})

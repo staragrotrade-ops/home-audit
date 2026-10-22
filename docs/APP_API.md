@@ -83,6 +83,8 @@ Prices, payment ids and the owner's internal notes are never sent to the app.
 **Defect** — the phone creates the `id` (UUID v4) so offline edits keep their
 identity. `{id, elementKey, severity, title, observation, recommendation?,
 locationLabel?, floorplanId?, pinX?, pinY? (0–1 of the plan's width/height),
+extraPins? ([{floorplanId, x, y}], up to 50 further locations of the same defect;
+needs the first pin),
 tradeKey?, quantity?, quantityUnit?, rootCauseId?, templateId?, sortOrder?,
 deleted?, clientUpdatedAt}`. The server fills `category` from the severity,
 the trade from the element when not given (inspector override wins) and the
