@@ -77,6 +77,7 @@ Prices, payment ids and the owner's internal notes are never sent to the app.
 | POST | `/api/app/jobs/{id}/floorplans/upload` | `{contentType, sizeBytes}` | `{path, signedUrl, token}` |
 | POST | `/api/app/jobs/{id}/floorplans/complete` | `{path, levelLabel}` | `floorplan` |
 | POST | `/api/app/jobs/{id}/submit` | – | hands fieldwork to review (`reportStatus: in_review`) |
+| POST | `/api/app/dictation` | multipart `audio` (wav/aac/m4a ≤ 4 MB) + `field` (observation\|recommendation\|title), optional `element`, `severity`, `location`, `existing`, `jobId` | `result {transcript, language, text, notes}` – Gemini; nothing stored; 240/hour per inspector |
 
 **Defect** — the phone creates the `id` (UUID v4) so offline edits keep their
 identity. `{id, elementKey, severity, title, observation, recommendation?,

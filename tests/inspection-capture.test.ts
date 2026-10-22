@@ -146,3 +146,32 @@ test('app routes: every capture route authenticates the inspector', async () => 
   assert.match(customer, /consume_rate_limit/)
   assert.match(customer, /payment_status !== 'paid'/)
 })
+
+test('catalog: landscaper takes retaining walls and vegetation; fencer keeps fences', async () => {
+  const { elementOf, isTradeKey } = await import('../lib/inspection-catalog.ts')
+  assert.ok(isTradeKey('landscaper'))
+  assert.equal(elementOf('retaining_wall')?.trade, 'landscaper')
+  assert.equal(elementOf('vegetation')?.trade, 'landscaper')
+  assert.equal(elementOf('fence')?.trade, 'fencer')
+})
+
+test('dictation: prompt forbids invented findings; reply is validated; nothing stored', async () => {
+  const { dictationPrompt, parseDictationReply, dictationMimeType } = await import('../lib/dictation.ts')
+  const prompt = dictationPrompt({ field: 'observation', element: 'Gutters', existing: 'Old text' })
+  assert.match(prompt, /Never add a defect/)
+  assert.match(prompt, /Mandarin Chinese/)
+  assert.match(prompt, /Gutters/)
+  assert.match(prompt, /do not repeat it/)
+
+  const parsed = parseDictationReply('```json\n{"transcript":"水槽堵了","language":"zh","text":"Gutters are blocked.","notes":"","extra":1}\n```')
+  assert.deepEqual(parsed, { transcript: '水槽堵了', language: 'zh', text: 'Gutters are blocked.', notes: '' })
+  assert.equal(parseDictationReply('{"transcript":"x","language":"klingon","text":"y","notes":""}').language, 'en')
+  assert.throws(() => parseDictationReply('not json'), /could not be read/)
+  assert.throws(() => parseDictationReply('{"transcript":"","text":""}'), /No speech/)
+  assert.equal(dictationMimeType('audio/x-wav'), 'audio/wav')
+
+  const route = await source('app/api/app/dictation/route.ts')
+  assert.match(route, /authenticateInspector\(request\)/)
+  assert.match(route, /consume_rate_limit/)
+  assert.doesNotMatch(route, /storage\.from/)
+})
