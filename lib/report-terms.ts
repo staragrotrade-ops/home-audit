@@ -41,7 +41,7 @@ export const REPORT_SCOPE_SECTIONS: TermsSection[] = [
         text: 'The timber pest inspection was carried out in accordance with AS 4349.3-2010 Inspection of buildings, Part 3: Timber pest inspections.',
       },
       {
-        text: 'This report is subject to the Inspection Agreement that the Client accepted before the inspection (version shown above). It explains the scope, exclusions and limitations of the inspection. If anything in this report appears to differ from that agreement, the agreement prevails. If you are unsure how it affects you, contact us before relying on this report.',
+        text: 'This report is subject to the Inspection Agreement that the Client accepted before the inspection. It explains the scope, exclusions and limitations of the inspection. If anything in this report appears to differ from that agreement, the agreement prevails. If you are unsure how it affects you, contact us before relying on this report.',
       },
       {
         text: 'This report is prepared only for the Client named above. No other person, including the vendor, an agent, another buyer or a lender, may rely on it. If this report has been passed to you by someone else, obtain your own inspection.',
