@@ -3,7 +3,7 @@
 // tradie can price it. The app downloads this from /api/app/catalog; the
 // database stores only the keys. Change keys never; add new ones freely.
 
-export const CATALOG_VERSION = 1
+export const CATALOG_VERSION = 2
 
 export const DEFECT_CATEGORIES = ['building', 'timber_pest'] as const
 export type DefectCategory = (typeof DEFECT_CATEGORIES)[number]
@@ -57,7 +57,8 @@ export const TRADES = [
   { key: 'glazier', label: 'Glazier' },
   { key: 'bricklayer', label: 'Bricklayer' },
   { key: 'concreter', label: 'Concreter' },
-  { key: 'fencer', label: 'Fencer / landscaper' },
+  { key: 'fencer', label: 'Fencer' },
+  { key: 'landscaper', label: 'Landscaper' },
   { key: 'pest_controller', label: 'Pest controller' },
   { key: 'hvac', label: 'Heating & cooling' },
   { key: 'builder', label: 'Builder (general)' },
@@ -138,7 +139,8 @@ export const ELEMENTS: readonly CatalogElement[] = [
   // Site
   { key: 'stormwater', label: 'Stormwater / surface drainage', area: 'site', trade: 'drainer', quantity: METRES },
   { key: 'paving_paths', label: 'Paths / driveway / paving', area: 'site', trade: 'concreter', quantity: SQM },
-  { key: 'retaining_wall', label: 'Retaining walls', area: 'site', trade: 'builder', quantity: METRES },
+  { key: 'retaining_wall', label: 'Retaining walls', area: 'site', trade: 'landscaper', quantity: METRES },
+  { key: 'vegetation', label: 'Trees / garden beds / vegetation', area: 'site', trade: 'landscaper', quantity: null },
   { key: 'fence', label: 'Fences / gates', area: 'site', trade: 'fencer', quantity: METRES },
   { key: 'outbuilding', label: 'Shed / garage / carport', area: 'site', trade: 'builder', quantity: null },
   // Timber pest — always routed to the pest controller.

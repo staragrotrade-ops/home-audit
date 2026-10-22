@@ -146,3 +146,71 @@ test('app routes: every capture route authenticates the inspector', async () => 
   assert.match(customer, /consume_rate_limit/)
   assert.match(customer, /payment_status !== 'paid'/)
 })
+
+test('catalog: landscaper takes retaining walls and vegetation; fencer keeps fences', async () => {
+  const { elementOf, isTradeKey } = await import('../lib/inspection-catalog.ts')
+  assert.ok(isTradeKey('landscaper'))
+  assert.equal(elementOf('retaining_wall')?.trade, 'landscaper')
+  assert.equal(elementOf('vegetation')?.trade, 'landscaper')
+  assert.equal(elementOf('fence')?.trade, 'fencer')
+})
+
+test('dictation: prompt forbids invented findings; reply is validated; nothing stored', async () => {
+  const { dictationPrompt, parseDictationReply, dictationMimeType } = await import('../lib/dictation.ts')
+  const prompt = dictationPrompt({ field: 'observation', element: 'Gutters', existing: 'Old text' })
+  assert.match(prompt, /Never add a defect/)
+  assert.match(prompt, /Mandarin Chinese/)
+  assert.match(prompt, /Gutters/)
+  assert.match(prompt, /do not repeat it/)
+
+  const parsed = parseDictationReply('```json\n{"transcript":"水槽堵了","language":"zh","text":"Gutters are blocked.","notes":"","extra":1}\n```')
+  assert.deepEqual(parsed, { transcript: '水槽堵了', language: 'zh', text: 'Gutters are blocked.', notes: '' })
+  assert.equal(parseDictationReply('{"transcript":"x","language":"klingon","text":"y","notes":""}').language, 'en')
+  assert.throws(() => parseDictationReply('not json'), /could not be read/)
+  assert.throws(() => parseDictationReply('{"transcript":"","text":""}'), /No speech/)
+  assert.equal(dictationMimeType('audio/x-wav'), 'audio/wav')
+
+  const route = await source('app/api/app/dictation/route.ts')
+  assert.match(route, /authenticateInspector\(request\)/)
+  assert.match(route, /consume_rate_limit/)
+  assert.doesNotMatch(route, /storage\.from/)
+})
+
+test('areas: validated, never blocked by a missing reason; route authenticates; RLS on', async () => {
+  const { areaInput } = await import('../lib/inspection-sync.ts')
+  const base = { id: '80000000-0000-4000-8000-000000000001', name: 'Roof space', kind: 'roof_space', clientUpdatedAt: '2026-10-22T01:00:00Z' }
+  assert.equal(areaInput.safeParse({ ...base, status: 'inspected' }).success, true)
+  assert.equal(areaInput.safeParse({ ...base, status: 'limited' }).success, true)
+  assert.equal(areaInput.safeParse({ ...base, status: 'not_accessible', limitation: 'No access hatch found' }).success, true)
+  assert.equal(areaInput.safeParse({ ...base, status: 'bogus' }).success, false)
+
+  assert.match(await source('app/api/app/jobs/[id]/areas/route.ts'), /authenticateInspector\(request\)/)
+  const sql = await source('supabase/migrations/20261023100000_inspection_areas.sql')
+  assert.match(sql, /alter table public\.inspection_areas enable row level security/)
+  assert.match(sql, /revoke all on function public\.app_sync_areas\(uuid, uuid, jsonb\) from public, anon, authenticated/)
+  assert.match(sql, /Sync the area before its photos/)
+})
+
+test('defects: extra floorplan locations are optional, capped and need a first location', async () => {
+  const { defectInput, normaliseDefect, EXTRA_PINS_MAX } = await import('../lib/inspection-sync.ts')
+  const plan = '50000000-0000-4000-8000-000000000001'
+  const base = {
+    id: '60000000-0000-4000-8000-000000000001',
+    elementKey: 'ceiling',
+    severity: 'minor_defect',
+    title: 'Cracking',
+    clientUpdatedAt: '2026-10-22T01:00:00Z',
+  }
+  assert.deepEqual(normaliseDefect(defectInput.parse(base)).extraPins, [])
+  const pinned = { ...base, floorplanId: plan, pinX: 0.1, pinY: 0.1 }
+  const two = defectInput.parse({ ...pinned, extraPins: [{ floorplanId: plan, x: 0.5, y: 0.5 }, { floorplanId: plan, x: 0.9, y: 0.2 }] })
+  assert.equal(normaliseDefect(two).extraPins.length, 2)
+  assert.equal(defectInput.safeParse({ ...base, extraPins: [{ floorplanId: plan, x: 0.5, y: 0.5 }] }).success, false)
+  assert.equal(defectInput.safeParse({ ...pinned, extraPins: [{ floorplanId: plan, x: 1.5, y: 0.5 }] }).success, false)
+  const many = Array.from({ length: EXTRA_PINS_MAX + 1 }, () => ({ floorplanId: plan, x: 0.5, y: 0.5 }))
+  assert.equal(defectInput.safeParse({ ...pinned, extraPins: many }).success, false)
+
+  const sql = await source('supabase/migrations/20261023110000_defect_extra_pins.sql')
+  assert.match(sql, /extra_pins_valid\(p_job_id, v_extra\)/)
+  assert.match(sql, /revoke all on function public\.app_sync_defects\(uuid, uuid, jsonb\) from public, anon, authenticated/)
+})

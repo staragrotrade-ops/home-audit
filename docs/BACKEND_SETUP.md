@@ -121,7 +121,8 @@ as a test), pay, then refund the test payment in Stripe.
    Searching the web from the API is a paid-tier feature; the cost per
    lookup is a few cents at most.
 2. Vercel (Production, Sensitive): `GEMINI_API_KEY`. Optional
-   `GEMINI_MODEL` (default `gemini-3.8-flash`).
+   `GEMINI_MODEL` (default `gemini-3.8-flash`). The same key powers inspector
+   app dictation; `GEMINI_DICTATION_MODEL` optionally overrides its model.
 
 ## 12. Xero
 

@@ -10,6 +10,11 @@ export const DEFECT_BATCH_MAX = 200
 
 const key = z.string().regex(/^[a-z0-9_]{2,40}$/)
 const coordinate = z.number().min(0).max(1)
+export const EXTRA_PINS_MAX = 50
+
+// Further locations of the same defect (e.g. the same crack in three rooms).
+// Most defects have none; the first location stays in floorplanId/pinX/pinY.
+const extraPin = z.object({ floorplanId: z.uuid(), x: coordinate, y: coordinate })
 
 export const defectInput = z
   .object({
@@ -17,6 +22,7 @@ export const defectInput = z
     floorplanId: z.uuid().nullable().optional(),
     pinX: coordinate.nullable().optional(),
     pinY: coordinate.nullable().optional(),
+    extraPins: z.array(extraPin).max(EXTRA_PINS_MAX).optional(),
     locationLabel: z.string().trim().max(120).nullable().optional(),
     elementKey: key,
     severity: z.enum(SEVERITIES),
@@ -37,6 +43,9 @@ export const defectInput = z
     const hasY = value.pinY != null
     if (hasX !== hasY) ctx.addIssue({ code: 'custom', message: 'A pin needs both x and y.' })
     if (hasX && !value.floorplanId) ctx.addIssue({ code: 'custom', message: 'A pin needs its floorplan.' })
+    if (value.extraPins?.length && !hasX) {
+      ctx.addIssue({ code: 'custom', message: 'Extra locations need a first location.' })
+    }
     if (value.rootCauseId && value.rootCauseId === value.id) {
       ctx.addIssue({ code: 'custom', message: 'A defect cannot be its own cause.' })
     }
@@ -69,6 +78,7 @@ export function normaliseDefect(input: DefectInput) {
     quantityUnit: input.quantity == null ? null : input.quantityUnit || element?.quantity?.unit || null,
     locationLabel: input.locationLabel || null,
     recommendation: input.recommendation || null,
+    extraPins: input.extraPins ?? [],
     pinX: input.pinX ?? null,
     pinY: input.pinY ?? null,
     floorplanId: input.floorplanId ?? null,
@@ -88,9 +98,30 @@ export function rootLinkProblem(defects: DefectInput[]) {
   return null
 }
 
+export const AREA_KINDS = ['room', 'wet_area', 'roof_exterior', 'roof_space', 'subfloor', 'exterior', 'site', 'outbuilding'] as const
+export const AREA_STATUSES = ['not_started', 'inspected', 'limited', 'not_accessible', 'not_applicable'] as const
+
+// A missing limitation reason is not refused here: one unfinished area must
+// never block the rest of the sync. The app asks for the reason, and the
+// report shows "reason not recorded".
+export const areaInput = z.object({
+  id: z.uuid(),
+  name: z.string().trim().min(1).max(80),
+  kind: z.enum(AREA_KINDS).default('room'),
+  status: z.enum(AREA_STATUSES).default('not_started'),
+  limitation: z.string().max(2000).nullable().optional(),
+  notes: z.string().max(2000).nullable().optional(),
+  sortOrder: z.number().int().min(0).max(100_000).optional(),
+  deleted: z.boolean().optional(),
+  clientUpdatedAt: z.iso.datetime({ offset: true }),
+})
+
+export const areaBatch = z.object({ areas: z.array(areaInput).max(200) })
+
 export const photoInput = z.object({
   id: z.uuid(),
   defectId: z.uuid().nullable().optional(),
+  areaId: z.uuid().nullable().optional(),
   contentType: z.enum(['image/jpeg', 'image/png', 'image/webp']).default('image/jpeg'),
   sizeBytes: z.number().int().positive().max(PHOTO_MAX_BYTES),
   sha256: z.string().regex(/^[a-fA-F0-9]{64}$/),

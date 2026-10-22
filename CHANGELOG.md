@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.17.0 — 2026-10-22
+
+- A defect can be marked at several places on the floorplans (migration
+  `20261023110000_defect_extra_pins.sql`): the first location stays as
+  before; further ones are in `extra_pins` (up to 50, checked to be on the
+  job's own floorplans). Most defects keep a single pin.
+
+- Areas inspected (migration `20261023100000_inspection_areas.sql`, apply
+  before deploying): each job gets a checklist of rooms and areas (roof
+  space, subfloor, exterior, roof, site…) with status (inspected / limited /
+  not accessible / not applicable), the reason for any limitation, and
+  general overview photos (`inspection_photos.area_id`). New
+  `POST /api/app/jobs/{id}/areas`; areas are included in the inspection
+  pull. Dictation also words access limitations.
+
+- Inspector app AI dictation: `POST /api/app/dictation` sends the
+  inspector's recording (English, Chinese or mixed) to Google Gemini and
+  returns the transcript plus professional report wording for the
+  observation, recommendation or title. The inspector reviews it before it
+  is used. Audio and text are not stored; only an audit line (field, size,
+  language). Uses the existing `GEMINI_API_KEY`; optional
+  `GEMINI_DICTATION_MODEL`.
+- Trades: new **Landscaper**; "Fencer / landscaper" is now "Fencer".
+  Retaining walls default to the landscaper, and a new element "Trees /
+  garden beds / vegetation" is added (catalog version 2).
+
 ## 0.16.3 — 2026-10-22
 
 - Fixed: saving a job in Admin (inspector, notes) could put the status back

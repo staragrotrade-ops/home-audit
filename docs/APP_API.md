@@ -69,6 +69,7 @@ Prices, payment ids and the owner's internal notes are never sent to the app.
 |---|---|---|---|
 | GET | `/api/app/catalog` | `?templatesSinceRev=` optional | `catalog {version, severities[], trades[], areas[], elements[]}`, `templates[]` (most used first) |
 | GET | `/api/app/jobs/{id}/inspection` | `?sinceRev=` optional | `floorplans[]` (with `url`, valid 1 hour), `defects[]`, `photos[]`, `serverRev` |
+| POST | `/api/app/jobs/{id}/areas` | `{areas: Area[]}` (max 200) | `result {applied[], stale[]}` |
 | POST | `/api/app/jobs/{id}/defects` | `{defects: Defect[]}` (max 200) | `result {applied[], stale[]}` |
 | POST | `/api/app/jobs/{id}/photos` | `Photo` | `{uploaded}`; when false also `{signedUrl, token, path}` |
 | POST | `/api/app/jobs/{id}/photos/{photoId}` | – | confirms the upload (`uploaded: true`) |
@@ -77,10 +78,13 @@ Prices, payment ids and the owner's internal notes are never sent to the app.
 | POST | `/api/app/jobs/{id}/floorplans/upload` | `{contentType, sizeBytes}` | `{path, signedUrl, token}` |
 | POST | `/api/app/jobs/{id}/floorplans/complete` | `{path, levelLabel}` | `floorplan` |
 | POST | `/api/app/jobs/{id}/submit` | – | hands fieldwork to review (`reportStatus: in_review`) |
+| POST | `/api/app/dictation` | multipart `audio` (wav/aac/m4a ≤ 4 MB) + `field` (observation\|recommendation\|title\|limitation), optional `element`, `severity`, `location`, `existing`, `jobId` | `result {transcript, language, text, notes}` – Gemini; nothing stored; 240/hour per inspector |
 
 **Defect** — the phone creates the `id` (UUID v4) so offline edits keep their
 identity. `{id, elementKey, severity, title, observation, recommendation?,
 locationLabel?, floorplanId?, pinX?, pinY? (0–1 of the plan's width/height),
+extraPins? ([{floorplanId, x, y}], up to 50 further locations of the same defect;
+needs the first pin),
 tradeKey?, quantity?, quantityUnit?, rootCauseId?, templateId?, sortOrder?,
 deleted?, clientUpdatedAt}`. The server fills `category` from the severity,
 the trade from the element when not given (inspector override wins) and the
@@ -93,7 +97,14 @@ pull. Deletes are soft (`deleted: true`).
 symptom is grouped under the cause's trade (a ceiling stain caused by a
 blocked gutter belongs to the roofer's lead).
 
-**Photo** — `{id, defectId?, contentType, sizeBytes, sha256, widthPx?,
+**Area** — a room or part of the property in the "Areas inspected" list:
+`{id, name, kind: room|wet_area|roof_exterior|roof_space|subfloor|exterior|site|outbuilding,
+status: not_started|inspected|limited|not_accessible|not_applicable, limitation?, notes?,
+sortOrder?, deleted?, clientUpdatedAt}`. Limited / not accessible should have a `limitation` (the app asks for it; the
+website accepts it missing so one area never blocks the sync).
+The inspection pull also returns `areas[]`.
+
+**Photo** — `{id, defectId?, areaId?, contentType, sizeBytes, sha256, widthPx?,
 heightPx?, caption?, source: camera|gallery, capturedAt}`. Sync the defect
 first, then register the photo, `PUT` the bytes to `signedUrl`, then confirm.
 `submit` is refused while any photo is unconfirmed.
