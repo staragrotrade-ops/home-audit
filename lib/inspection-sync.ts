@@ -88,9 +88,33 @@ export function rootLinkProblem(defects: DefectInput[]) {
   return null
 }
 
+export const AREA_KINDS = ['room', 'wet_area', 'roof_exterior', 'roof_space', 'subfloor', 'exterior', 'site', 'outbuilding'] as const
+export const AREA_STATUSES = ['not_started', 'inspected', 'limited', 'not_accessible', 'not_applicable'] as const
+
+export const areaInput = z
+  .object({
+    id: z.uuid(),
+    name: z.string().trim().min(1).max(80),
+    kind: z.enum(AREA_KINDS).default('room'),
+    status: z.enum(AREA_STATUSES).default('not_started'),
+    limitation: z.string().max(2000).nullable().optional(),
+    notes: z.string().max(2000).nullable().optional(),
+    sortOrder: z.number().int().min(0).max(100_000).optional(),
+    deleted: z.boolean().optional(),
+    clientUpdatedAt: z.iso.datetime({ offset: true }),
+  })
+  .superRefine((value, ctx) => {
+    if ((value.status === 'limited' || value.status === 'not_accessible') && !value.limitation?.trim() && !value.deleted) {
+      ctx.addIssue({ code: 'custom', message: `Say why "${value.name}" was limited or not accessible.` })
+    }
+  })
+
+export const areaBatch = z.object({ areas: z.array(areaInput).max(200) })
+
 export const photoInput = z.object({
   id: z.uuid(),
   defectId: z.uuid().nullable().optional(),
+  areaId: z.uuid().nullable().optional(),
   contentType: z.enum(['image/jpeg', 'image/png', 'image/webp']).default('image/jpeg'),
   sizeBytes: z.number().int().positive().max(PHOTO_MAX_BYTES),
   sha256: z.string().regex(/^[a-fA-F0-9]{64}$/),

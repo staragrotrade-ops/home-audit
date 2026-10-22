@@ -2,6 +2,14 @@
 
 ## 0.17.0 — 2026-10-22
 
+- Areas inspected (migration `20261023100000_inspection_areas.sql`, apply
+  before deploying): each job gets a checklist of rooms and areas (roof
+  space, subfloor, exterior, roof, site…) with status (inspected / limited /
+  not accessible / not applicable), the reason for any limitation, and
+  general overview photos (`inspection_photos.area_id`). New
+  `POST /api/app/jobs/{id}/areas`; areas are included in the inspection
+  pull. Dictation also words access limitations.
+
 - Inspector app AI dictation: `POST /api/app/dictation` sends the
   inspector's recording (English, Chinese or mixed) to Google Gemini and
   returns the transcript plus professional report wording for the

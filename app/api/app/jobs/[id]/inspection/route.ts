@@ -18,7 +18,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     const since = new URL(request.url).searchParams.get('sinceRev')
     const sinceRev = since ? z.coerce.number().int().min(0).parse(since) : 0
 
-    const [floorplans, defects, photos] = await Promise.all([
+    const [floorplans, defects, photos, areas] = await Promise.all([
       supabase
         .from('job_floorplans')
         .select('id,level_label,sort_order,content_type,size_bytes,width_px,height_px,source,status,updated_at')
@@ -28,12 +28,13 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       supabase.from('inspection_defects').select('*').eq('job_id', id).gt('sync_rev', sinceRev).order('sync_rev'),
       supabase
         .from('inspection_photos')
-        .select('id,defect_id,content_type,size_bytes,sha256,width_px,height_px,caption,source,captured_at,captured_by_staff_id,uploaded_at,deleted_at,sort_order,sync_rev')
+        .select('id,defect_id,area_id,content_type,size_bytes,sha256,width_px,height_px,caption,source,captured_at,captured_by_staff_id,uploaded_at,deleted_at,sort_order,sync_rev')
         .eq('job_id', id)
         .gt('sync_rev', sinceRev)
         .order('sync_rev'),
+      supabase.from('inspection_areas').select('*').eq('job_id', id).gt('sync_rev', sinceRev).order('sync_rev'),
     ])
-    const failed = floorplans.error || defects.error || photos.error
+    const failed = floorplans.error || defects.error || photos.error || areas.error
     if (failed) throw new Error(failed.message)
 
     // Storage paths are not readable by inspectors; sign them server-side.
@@ -54,7 +55,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       }),
     )
 
-    const rows = [...(defects.data || []), ...(photos.data || [])] as { sync_rev: number }[]
+    const rows = [...(defects.data || []), ...(photos.data || []), ...(areas.data || [])] as { sync_rev: number }[]
     const serverRev = rows.reduce((max, row) => Math.max(max, Number(row.sync_rev)), sinceRev)
 
     return Response.json(
@@ -64,6 +65,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
         floorplans: signed,
         defects: defects.data || [],
         photos: photos.data || [],
+        areas: areas.data || [],
       },
       { headers: { 'Cache-Control': 'no-store' } },
     )

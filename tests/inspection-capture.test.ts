@@ -175,3 +175,18 @@ test('dictation: prompt forbids invented findings; reply is validated; nothing s
   assert.match(route, /consume_rate_limit/)
   assert.doesNotMatch(route, /storage\.from/)
 })
+
+test('areas: limited / not accessible needs a reason; route authenticates; RLS on', async () => {
+  const { areaInput } = await import('../lib/inspection-sync.ts')
+  const base = { id: '80000000-0000-4000-8000-000000000001', name: 'Roof space', kind: 'roof_space', clientUpdatedAt: '2026-10-22T01:00:00Z' }
+  assert.equal(areaInput.safeParse({ ...base, status: 'inspected' }).success, true)
+  assert.equal(areaInput.safeParse({ ...base, status: 'limited' }).success, false)
+  assert.equal(areaInput.safeParse({ ...base, status: 'not_accessible', limitation: 'No access hatch found' }).success, true)
+  assert.equal(areaInput.safeParse({ ...base, status: 'bogus' }).success, false)
+
+  assert.match(await source('app/api/app/jobs/[id]/areas/route.ts'), /authenticateInspector\(request\)/)
+  const sql = await source('supabase/migrations/20261023100000_inspection_areas.sql')
+  assert.match(sql, /alter table public\.inspection_areas enable row level security/)
+  assert.match(sql, /revoke all on function public\.app_sync_areas\(uuid, uuid, jsonb\) from public, anon, authenticated/)
+  assert.match(sql, /Sync the area before its photos/)
+})

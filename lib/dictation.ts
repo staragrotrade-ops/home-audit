@@ -6,7 +6,7 @@ const API = 'https://generativelanguage.googleapis.com/v1beta/models'
 
 export const DICTATION_MAX_BYTES = 4 * 1024 * 1024
 export const DICTATION_TYPES = ['audio/wav', 'audio/x-wav', 'audio/aac', 'audio/mp4', 'audio/m4a', 'audio/mpeg', 'audio/ogg', 'audio/flac'] as const
-export const DICTATION_FIELDS = ['observation', 'recommendation', 'title'] as const
+export const DICTATION_FIELDS = ['observation', 'recommendation', 'title', 'limitation'] as const
 export type DictationField = (typeof DICTATION_FIELDS)[number]
 
 export type DictationContext = {
@@ -30,6 +30,8 @@ const FIELD_GUIDE: Record<DictationField, string> = {
   recommendation:
     'a RECOMMENDATION: the action the client should take and who should do it, e.g. "Engage a licensed roof plumber to replace the cracked tiles."',
   title: 'a SHORT TITLE of at most 8 words, no full stop, e.g. "Cracked roof tiles – rear slope".',
+  limitation:
+    'an ACCESS LIMITATION for an area of the property: what could not be inspected and why, e.g. "Floor coverings and stored items in the wardrobe restricted inspection of the floor." Do not describe defects.',
 }
 
 export function dictationPrompt(context: DictationContext) {
