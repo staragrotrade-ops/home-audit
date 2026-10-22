@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.17.1 — 2026-10-22
+
+- Fixed: the inspector app could not upload any new defect (and so none of
+  their photos). The phone gives a new defect the creation time in seconds
+  as its order (about 1.76 billion) and the website only accepted up to
+  100,000. The full database integer range is now accepted. Defects and
+  photos waiting on phones upload on the next sync; nothing is lost.
+- Refused inspector-app requests are logged (`app_api_error`, status and
+  message) for Vercel → Logs.
+
 ## 0.17.0 — 2026-10-22
 
 - A defect can be marked at several places on the floorplans (migration

@@ -214,3 +214,24 @@ test('defects: extra floorplan locations are optional, capped and need a first l
   assert.match(sql, /extra_pins_valid\(p_job_id, v_extra\)/)
   assert.match(sql, /revoke all on function public\.app_sync_defects\(uuid, uuid, jsonb\) from public, anon, authenticated/)
 })
+
+test('sort order: phones send creation time in seconds; it must be accepted', async () => {
+  const { defectInput, areaInput, photoInput } = await import('../lib/inspection-sync.ts')
+  const sortOrder = Math.floor(Date.parse('2026-10-22T10:00:00Z') / 1000)
+  assert.equal(
+    defectInput.safeParse({
+      id: '60000000-0000-4000-8000-000000000001',
+      elementKey: 'gutter',
+      severity: 'minor_defect',
+      title: 'Blocked gutter',
+      sortOrder,
+      clientUpdatedAt: '2026-10-22T10:00:00.000Z',
+    }).success,
+    true,
+  )
+  assert.equal(areaInput.safeParse({ id: '80000000-0000-4000-8000-000000000001', name: 'Kitchen', sortOrder, clientUpdatedAt: '2026-10-22T10:00:00Z' }).success, true)
+  assert.equal(
+    photoInput.safeParse({ id: '70000000-0000-4000-8000-000000000001', sizeBytes: 10, sha256: 'a'.repeat(64), capturedAt: '2026-10-22T10:00:00Z', sortOrder }).success,
+    true,
+  )
+})
