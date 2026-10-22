@@ -58,6 +58,9 @@ export async function authenticateInspector(request: Request): Promise<Authentic
 export function appError(error: unknown, fallback: string) {
   const status = error instanceof AppAuthError ? 401 : 400
   const message = error instanceof Error && error.message ? error.message : fallback
+  // Visible in Vercel → Logs, so a refused upload from a phone can be traced
+  // without access to the phone. Messages carry no customer data.
+  console.warn('app_api_error', JSON.stringify({ status, message: message.slice(0, 500) }))
   return Response.json({ ok: false, error: message }, { status, headers: { 'Cache-Control': 'no-store' } })
 }
 
