@@ -3,8 +3,9 @@
 -- recommended interval to the next timber pest inspection, plus further
 -- inspections recommended and conditions on the day. One row per job,
 -- written by the inspector app (newest edit wins, like defects).
+-- Safe to run more than once.
 
-create table public.inspection_assessments (
+create table if not exists public.inspection_assessments (
   job_id uuid primary key references public.jobs(id) on delete cascade,
   building_condition text,
   major_incidence text,
@@ -39,12 +40,14 @@ create table public.inspection_assessments (
   )
 );
 
+drop trigger if exists inspection_assessments_bump_rev on public.inspection_assessments;
 create trigger inspection_assessments_bump_rev
 before update on public.inspection_assessments
 for each row execute function private.bump_sync_rev();
 
 alter table public.inspection_assessments enable row level security;
 revoke all on table public.inspection_assessments from anon, authenticated;
+drop policy if exists inspection_assessments_select_assigned on public.inspection_assessments;
 create policy inspection_assessments_select_assigned on public.inspection_assessments
 for select to authenticated using (private.can_view_job(job_id));
 grant select on public.inspection_assessments to authenticated;
