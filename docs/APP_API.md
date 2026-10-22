@@ -98,7 +98,8 @@ blocked gutter belongs to the roofer's lead).
 **Area** — a room or part of the property in the "Areas inspected" list:
 `{id, name, kind: room|wet_area|roof_exterior|roof_space|subfloor|exterior|site|outbuilding,
 status: not_started|inspected|limited|not_accessible|not_applicable, limitation?, notes?,
-sortOrder?, deleted?, clientUpdatedAt}`. Limited / not accessible need a `limitation`.
+sortOrder?, deleted?, clientUpdatedAt}`. Limited / not accessible should have a `limitation` (the app asks for it; the
+website accepts it missing so one area never blocks the sync).
 The inspection pull also returns `areas[]`.
 
 **Photo** — `{id, defectId?, areaId?, contentType, sizeBytes, sha256, widthPx?,
