@@ -10,6 +10,9 @@ export const DEFECT_BATCH_MAX = 200
 
 const key = z.string().regex(/^[a-z0-9_]{2,40}$/)
 const coordinate = z.number().min(0).max(1)
+// Phones use the creation time in seconds as the order of a new defect, so
+// allow the whole database integer range.
+export const SORT_ORDER_MAX = 2_147_483_647
 export const EXTRA_PINS_MAX = 50
 
 // Further locations of the same defect (e.g. the same crack in three rooms).
@@ -34,7 +37,7 @@ export const defectInput = z
     quantityUnit: z.string().trim().max(20).nullable().optional(),
     rootCauseId: z.uuid().nullable().optional(),
     templateId: z.uuid().nullable().optional(),
-    sortOrder: z.number().int().min(0).max(100_000).optional(),
+    sortOrder: z.number().int().min(0).max(SORT_ORDER_MAX).optional(),
     deleted: z.boolean().optional(),
     clientUpdatedAt: z.iso.datetime({ offset: true }),
   })
@@ -111,7 +114,7 @@ export const areaInput = z.object({
   status: z.enum(AREA_STATUSES).default('not_started'),
   limitation: z.string().max(2000).nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
-  sortOrder: z.number().int().min(0).max(100_000).optional(),
+  sortOrder: z.number().int().min(0).max(SORT_ORDER_MAX).optional(),
   deleted: z.boolean().optional(),
   clientUpdatedAt: z.iso.datetime({ offset: true }),
 })
@@ -130,7 +133,7 @@ export const photoInput = z.object({
   caption: z.string().max(300).nullable().optional(),
   source: z.enum(['camera', 'gallery']).default('camera'),
   capturedAt: z.iso.datetime({ offset: true }),
-  sortOrder: z.number().int().min(0).max(100_000).optional(),
+  sortOrder: z.number().int().min(0).max(SORT_ORDER_MAX).optional(),
 })
 
 export function photoPath(jobId: string, photoId: string, contentType: string) {
