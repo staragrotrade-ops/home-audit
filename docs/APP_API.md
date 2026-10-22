@@ -69,6 +69,7 @@ Prices, payment ids and the owner's internal notes are never sent to the app.
 |---|---|---|---|
 | GET | `/api/app/catalog` | `?templatesSinceRev=` optional | `catalog {version, severities[], trades[], areas[], elements[]}`, `templates[]` (most used first) |
 | GET | `/api/app/jobs/{id}/inspection` | `?sinceRev=` optional | `floorplans[]` (with `url`, valid 1 hour), `defects[]`, `photos[]`, `serverRev` |
+| POST | `/api/app/jobs/{id}/assessment` | `Assessment` | `result {applied, stale}` |
 | POST | `/api/app/jobs/{id}/areas` | `{areas: Area[]}` (max 200) | `result {applied[], stale[]}` |
 | POST | `/api/app/jobs/{id}/defects` | `{defects: Defect[]}` (max 200) | `result {applied[], stale[]}` |
 | POST | `/api/app/jobs/{id}/photos` | `Photo` | `{uploaded}`; when false also `{signedUrl, token, path}` |
@@ -96,6 +97,16 @@ pull. Deletes are soft (`deleted: true`).
 `rootCauseId`; a cause cannot point to another cause. In trade leads a
 symptom is grouped under the cause's trade (a ceiling stain caused by a
 blocked gutter belongs to the roofer's lead).
+
+**Assessment** — the report summary (AS 4349.1 Appendix C, AS 4349.3), one per job:
+`{buildingCondition: above_average|average|below_average, majorIncidence / minorIncidence:
+low|typical|high, pestRisk: low|moderate|high|extreme, pestIntervalMonths 1–24,
+furtherInspections: [structural_engineer|electrician|plumber|gas_fitter|roofer|drainer|
+pest_manager|asbestos_assessor|pool_inspector|arborist|invasive_pest_inspection],
+weather?, occupancy?, summary?, clientUpdatedAt}` (all ratings optional). The inspection
+pull returns `assessment` (or null). The catalog also returns `reportTerms {version, scope[],
+terms[]}` – the standard report wording (lib/report-terms.ts); blocks have `scope`
+all|building|pest.
 
 **Area** — a room or part of the property in the "Areas inspected" list:
 `{id, name, kind: room|wet_area|roof_exterior|roof_space|subfloor|exterior|site|outbuilding,

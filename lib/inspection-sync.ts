@@ -2,6 +2,7 @@
 // inspection data. The database re-checks everything; this gives the phone a
 // clear message first and fills in derived fields (category, trade).
 import { z } from 'zod'
+import { BUILDING_CONDITIONS, FURTHER_INSPECTIONS, INCIDENCE, PEST_RISK } from './report-terms.ts'
 import { SEVERITIES, SEVERITY_CATEGORY, elementOf, isTradeKey, tradeFor } from './inspection-catalog.ts'
 
 export const PHOTO_BUCKET = 'inspection-photos'
@@ -140,3 +141,16 @@ export function photoPath(jobId: string, photoId: string, contentType: string) {
   const extension = contentType === 'image/png' ? 'png' : contentType === 'image/webp' ? 'webp' : 'jpg'
   return `${jobId}/${photoId}.${extension}`
 }
+
+export const assessmentInput = z.object({
+  buildingCondition: z.enum(BUILDING_CONDITIONS).nullable().optional(),
+  majorIncidence: z.enum(INCIDENCE).nullable().optional(),
+  minorIncidence: z.enum(INCIDENCE).nullable().optional(),
+  pestRisk: z.enum(PEST_RISK).nullable().optional(),
+  pestIntervalMonths: z.number().int().min(1).max(24).nullable().optional(),
+  furtherInspections: z.array(z.enum(FURTHER_INSPECTIONS)).max(20).default([]),
+  weather: z.string().trim().max(200).nullable().optional(),
+  occupancy: z.string().trim().max(200).nullable().optional(),
+  summary: z.string().max(4000).nullable().optional(),
+  clientUpdatedAt: z.iso.datetime({ offset: true }),
+})

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { catalogPayload } from '@/lib/inspection-catalog'
+import { reportTermsPayload } from '@/lib/report-terms'
 import { appError, authenticateInspector } from '@/lib/supabase-user'
 
 export const runtime = 'nodejs'
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
     if (error) throw new Error(error.message)
 
     return Response.json(
-      { ok: true, catalog: catalogPayload(), templates: data || [] },
+      { ok: true, catalog: catalogPayload(), reportTerms: reportTermsPayload(), templates: data || [] },
       { headers: { 'Cache-Control': 'no-store' } },
     )
   } catch (error) {
