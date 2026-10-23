@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.18.0 — 2026-10-22
+
+- Report template wording (`lib/report-terms.ts`, version 2026-10-22): the
+  scope statement and the terms, definitions and limitations printed in
+  every inspection report, rewritten from the owner's previous report for
+  AS 4349.1 / AS 4349.3 and the Australian Consumer Law, and aligned with
+  the Inspection Agreement (liability, complaints to CAV / VCAT, re-attend
+  for an agreed fee). Old arbitration / indemnity wording dropped. Served
+  to the app with the catalog.
+- Report summary ratings (migration `20261024100000_inspection_assessment.sql`):
+  overall condition, incidence of major / minor defects, timber pest risk,
+  next pest inspection interval, further inspections recommended, weather
+  and occupancy. `POST /api/app/jobs/{id}/assessment`; included in the
+  inspection pull.
+
 ## 0.17.1 — 2026-10-22
 
 - Fixed: the inspector app could not upload any new defect (and so none of

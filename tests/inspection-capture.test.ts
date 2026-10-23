@@ -235,3 +235,41 @@ test('sort order: phones send creation time in seconds; it must be accepted', as
     true,
   )
 })
+
+test('report terms: agree with the Inspection Agreement and Australian law', async () => {
+  const { reportTermsPayload, REPORT_TERMS_SECTIONS, REPORT_SCOPE_SECTIONS } = await import('../lib/report-terms.ts')
+  const payload = reportTermsPayload()
+  const all = JSON.stringify(payload)
+  // Placeholders are filled; no unfilled {tokens} reach the report.
+  assert.doesNotMatch(all, /\{(company|acn|phone|email)\}/)
+  assert.match(all, /GXH Consultancy Pty Ltd/)
+  // ACL rights preserved; no arbitration or indemnity clauses; complaints to CAV / VCAT.
+  assert.match(all, /Australian Consumer Law/)
+  assert.match(all, /VCAT/)
+  assert.doesNotMatch(all, /[Aa]rbitrat|indemnif/)
+  assert.doesNotMatch(all, /Institute of Arbitrators/)
+  // Standards and AS 4349.1 Appendix C ratings are defined.
+  for (const term of ['AS 4349.1-2007', 'AS 4349.3-2010', 'AS 3660.2', 'AS 2870', 'Above average', 'Typical']) {
+    assert.ok(all.includes(term), term)
+  }
+  // A building-only report must not get pest-only blocks; scopes are valid.
+  for (const section of [...REPORT_SCOPE_SECTIONS, ...REPORT_TERMS_SECTIONS]) {
+    assert.ok(['all', 'building', 'pest'].includes(section.scope))
+    for (const block of section.blocks) assert.ok(!block.scope || ['all', 'building', 'pest'].includes(block.scope))
+  }
+  assert.equal(REPORT_TERMS_SECTIONS.find((s) => s.id === 'timber-pests')?.scope, 'pest')
+})
+
+test('assessment: ratings validated; route authenticates; catalog serves the terms', async () => {
+  const { assessmentInput } = await import('../lib/inspection-sync.ts')
+  const ok = { buildingCondition: 'average', majorIncidence: 'low', pestRisk: 'moderate', pestIntervalMonths: 6, furtherInspections: ['electrician'], clientUpdatedAt: '2026-10-22T05:00:00Z' }
+  assert.equal(assessmentInput.safeParse(ok).success, true)
+  assert.equal(assessmentInput.safeParse({ ...ok, buildingCondition: 'great' }).success, false)
+  assert.equal(assessmentInput.safeParse({ ...ok, pestIntervalMonths: 36 }).success, false)
+  assert.equal(assessmentInput.safeParse({ ...ok, furtherInspections: ['astrologer'] }).success, false)
+  assert.match(await source('app/api/app/jobs/[id]/assessment/route.ts'), /authenticateInspector\(request\)/)
+  assert.match(await source('app/api/app/catalog/route.ts'), /reportTerms: reportTermsPayload\(\)/)
+  const sql = await source('supabase/migrations/20261024100000_inspection_assessment.sql')
+  assert.match(sql, /alter table public\.inspection_assessments enable row level security/)
+  assert.match(sql, /revoke all on function public\.app_save_assessment\(uuid, uuid, jsonb\) from public, anon, authenticated/)
+})
