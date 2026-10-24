@@ -6,7 +6,6 @@ import {
   commissionLabel,
   REFERRER_TYPES,
   referralLink,
-  referralQrUrl,
   referrerTypeLabel,
   type ReferrerRecord,
 } from '@/lib/referrals'
@@ -145,7 +144,12 @@ export function ReferrerManager({ referrers, siteUrl }: { referrers: ReferrerRec
                   >
                     Copy link
                   </button>
-                  <a className="admin-button small" href={referralQrUrl(link)} target="_blank" rel="noreferrer">
+                  <a
+                    className="admin-button small"
+                    href={`/api/admin/referrers/qr?code=${encodeURIComponent(referrer.ref_code)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     QR code
                   </a>
                   {referrer.email && referrer.status !== 'disabled' && (

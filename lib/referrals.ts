@@ -76,11 +76,6 @@ export function referralLink(siteUrl: string, code: string) {
   return `${siteUrl.replace(/\/$/, '')}/?ref=${encodeURIComponent(code)}`
 }
 
-// Free QR image of the referral link (no account; the code is not private).
-export function referralQrUrl(link: string) {
-  return `https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=16&data=${encodeURIComponent(link)}`
-}
-
 export function referrerOffice(referrer: Pick<ReferrerRecord, 'agency' | 'branch'>) {
   return [referrer.agency, referrer.branch].map((value) => String(value || '').trim()).filter(Boolean).join(' ')
 }

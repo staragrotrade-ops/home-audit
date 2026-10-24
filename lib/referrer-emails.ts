@@ -1,8 +1,10 @@
-// Server-only. Emails a referral partner their link and QR code.
+// Server-only. Emails a referral partner their link, with the QR code shown in
+// the email and attached.
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/email'
 import { referrerLinkEmail } from '@/lib/order-emails'
-import { referralLink, referralQrUrl } from '@/lib/referrals'
+import { qrPng } from '@/lib/qr'
+import { referralLink } from '@/lib/referrals'
 import { SITE_URL } from '@/lib/site'
 
 export async function emailReferrerLink(supabase: SupabaseClient, id: string, justApproved: boolean) {
@@ -16,7 +18,13 @@ export async function emailReferrerLink(supabase: SupabaseClient, id: string, ju
   if (data.status === 'disabled') throw new Error('Turn this referrer back on first.')
   const link = referralLink(SITE_URL, data.ref_code)
   const result = await sendEmail(
-    referrerLinkEmail({ to: data.email, name: data.name, link, qrUrl: referralQrUrl(link), justApproved }),
+    referrerLinkEmail({
+      to: data.email,
+      name: data.name,
+      link,
+      qrPngBase64: qrPng(link).toString('base64'),
+      justApproved,
+    }),
   )
   if (!result.sent) throw new Error(result.reason)
 }
