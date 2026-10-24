@@ -3,10 +3,20 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { CONTACT_EMAIL } from '@/lib/site'
 
+export type EmailAttachment = {
+  filename: string
+  /** Base64 file content. */
+  content: string
+  /** Set to show the image inside the HTML body as <img src="cid:...">. */
+  contentId?: string
+}
+
 export type EmailMessage = {
   to: string
   subject: string
   text: string
+  html?: string
+  attachments?: EmailAttachment[]
   replyTo?: string
 }
 
@@ -41,6 +51,16 @@ export async function sendEmail(
         reply_to: message.replyTo || process.env.EMAIL_REPLY_TO || CONTACT_EMAIL,
         subject: message.subject,
         text: message.text,
+        ...(message.html ? { html: message.html } : {}),
+        ...(message.attachments?.length
+          ? {
+              attachments: message.attachments.map((file) => ({
+                filename: file.filename,
+                content: file.content,
+                ...(file.contentId ? { content_id: file.contentId } : {}),
+              })),
+            }
+          : {}),
       }),
       signal: AbortSignal.timeout(10_000),
     })

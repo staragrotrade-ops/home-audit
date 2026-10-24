@@ -1,7 +1,7 @@
 // Plain-text emails for the quote, payment and booking steps.
 import type { EmailMessage } from '@/lib/email'
 import { formatAud } from '@/lib/pricing'
-import { CONTACT_EMAIL, CONTACT_PHONE, SITE_URL } from '@/lib/site'
+import { CONTACT_EMAIL, CONTACT_PHONE, OWNER_MOBILE, OWNER_SIGNATURE_NAME, SITE_URL } from '@/lib/site'
 import { smsSafe } from '@/lib/sms'
 
 const SIGN_OFF = `Home Audit\n${CONTACT_PHONE}\n${CONTACT_EMAIL}\n${SITE_URL}`
@@ -330,31 +330,61 @@ ${input.adminUrl}`,
 
 // ---- Referral partners ------------------------------------------------------------
 
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string)
+
+export const REFERRAL_QR_CONTENT_ID = 'referral-qr'
+export const REFERRAL_QR_FILENAME = 'Home-Audit-referral-QR.png'
+
+// Owner request 25 Oct 2026: the QR code is shown in the email and also
+// attached, and the email is signed by Alan Hou with his mobile.
 export function referrerLinkEmail(input: {
   to: string
   name: string
   link: string
-  qrUrl: string
+  qrPngBase64: string
   justApproved: boolean
 }): EmailMessage {
   const first = input.name.trim().split(/\s+/)[0] || ''
+  const greeting = `Hi${first ? ` ${first}` : ''},`
+  const opening = input.justApproved
+    ? 'Thanks for registering. Your registration as a Home Audit referral partner is approved.'
+    : 'You are set up as a Home Audit referral partner.'
+  const explain =
+    'When a client opens this link and books an inspection within 90 days, the booking is recorded under your name. You can send the link by email or text, or put it in your client information.'
+  const signature = [OWNER_SIGNATURE_NAME, 'Home Audit', `Mobile ${OWNER_MOBILE}`, `Office ${CONTACT_PHONE}`, CONTACT_EMAIL, SITE_URL]
+  const p = 'margin:0 0 14px'
+  const html = `<!doctype html><html lang="en-AU"><body style="margin:0;background:#f7f1e8;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#252b2a">
+<div style="max-width:600px;margin:0 auto;padding:24px 16px"><div style="background:#fffdf9;border:1px solid #cdd5ce;border-radius:12px;padding:26px">
+<p style="${p}">${escapeHtml(greeting)}</p>
+<p style="${p}">${escapeHtml(opening)}</p>
+<p style="margin:0 0 6px"><strong>Your referral link</strong></p>
+<p style="margin:0 0 18px"><a href="${escapeHtml(input.link)}" style="display:inline-block;background:#294b4a;color:#ffffff;text-decoration:none;padding:11px 18px;border-radius:8px;font-weight:700">Open my referral link</a><br><span style="font-size:13px;color:#64716c">${escapeHtml(input.link)}</span></p>
+<p style="margin:0 0 6px"><strong>Your QR code</strong> &mdash; print it or show it to clients. Scanning it opens the same link. It is also attached.</p>
+<p style="margin:0 0 18px"><img src="cid:${REFERRAL_QR_CONTENT_ID}" width="200" height="200" alt="QR code for your Home Audit referral link" style="display:block;border:1px solid #cdd5ce;border-radius:8px"></p>
+<p style="${p}">${escapeHtml(explain)}</p>
+<p style="${p}">Questions about referrals? Reply to this email or call me.</p>
+<p style="margin:0">${signature.map(escapeHtml).join('<br>')}</p>
+</div></div></body></html>`
+
   return {
     to: input.to,
     subject: 'Your Home Audit referral link',
-    text: `Hi${first ? ` ${first}` : ''},
+    text: `${greeting}
 
-${input.justApproved ? 'Thanks for registering. Your registration as a Home Audit referral partner is approved.' : 'You are set up as a Home Audit referral partner.'}
+${opening}
 
 Your referral link:
 ${input.link}
 
-When a client opens this link and books an inspection within 90 days, the booking is recorded under your name. You can send the link by email or text, or put it in your client information.
+${explain}
 
-A QR code of the same link, to print or share:
-${input.qrUrl}
+Your QR code is attached. Print it or show it to clients. Scanning it opens the same link.
 
-Questions about referrals? Reply to this email or call us.
+Questions about referrals? Reply to this email or call me.
 
-${SIGN_OFF}`,
+${signature.join('\n')}`,
+    html,
+    attachments: [{ filename: REFERRAL_QR_FILENAME, content: input.qrPngBase64, contentId: REFERRAL_QR_CONTENT_ID }],
   }
 }

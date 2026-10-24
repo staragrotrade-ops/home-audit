@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.20.0 — 2026-10-25
+
+- Referral partner email ("Email link" and approval): now an HTML email with
+  an "Open my referral link" button and the QR code shown in the body; the
+  QR code is also attached as Home-Audit-referral-QR.png. A plain-text
+  version is still sent. Signed by Alan Hou, Home Audit, mobile
+  0416 276 119, office 03 7047 8366 (owner request).
+- QR codes are made on our own server (lib/qr.ts) instead of
+  api.qrserver.com. Admin → Referrers → "QR code" opens
+  /api/admin/referrers/qr?code=… (admin only).
+- Emails can now carry HTML and attachments (inline images by content id).
+
 ## 0.19.0 — 2026-10-24
 
 - Building & Pest vouchers (owner decision 2026-10-24; migration

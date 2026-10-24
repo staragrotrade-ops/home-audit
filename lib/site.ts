@@ -7,6 +7,11 @@ export const CONTACT_EMAIL = 'info@homeaudit.com.au'
 export const CONTACT_PHONE = '03 7047 8366'
 export const CONTACT_PHONE_HREF = 'tel:+61370478366'
 
+// Signs the emails to referral partners (owner request 25 Oct 2026). Not
+// shown on the website itself.
+export const OWNER_SIGNATURE_NAME = 'Alan Hou'
+export const OWNER_MOBILE = '0416 276 119'
+
 export const COMPANY_NAME = 'GXH Consultancy Pty Ltd'
 export const COMPANY_ACN = '649 792 094'
 export const INSPECTOR_NAME = 'Xiaoqiong Yang'
