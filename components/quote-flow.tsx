@@ -80,6 +80,7 @@ const emptyDraft: Draft = {
   attribution: emptyAttribution,
   privacy_consent: false,
   website: '',
+  voucher_code: '',
 }
 
 const existingTypes = [
@@ -125,6 +126,7 @@ const fieldInfo: Record<string, { label: string; step: number }> = {
   access_contact: { label: 'Access contact', step: 3 },
   access_notes: { label: 'Access or scope notes', step: 3 },
   privacy_consent: { label: 'Privacy notice', step: 3 },
+  voucher_code: { label: 'Voucher code', step: 3 },
 }
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -227,6 +229,7 @@ function buildEmailHref(draft: Draft, stageLabels: string) {
     draft.flexible_booking && 'Dates are flexible',
     draft.access_contact && `Access contact: ${draft.access_contact}`,
     draft.access_notes && `Notes: ${draft.access_notes}`,
+    draft.voucher_code && `Voucher code: ${draft.voucher_code}`,
   ].filter((line): line is string => typeof line === 'string')
 
   const subject = `Inspection quote request — ${draft.suburb || draft.property_address}`
@@ -241,8 +244,11 @@ export function QuoteFlow({
   initialInspectionType = '',
   submissionEnabled,
   turnstileSiteKey = '',
+  initialVoucherCode = '',
 }: {
   initialService: ServiceFamily
+  // From the link in the 137B website's voucher email (/quote?voucher=…).
+  initialVoucherCode?: string
   // Set by links such as /quote?service=building-and-pest, which then open
   // straight at the property questions.
   initialInspectionType?: Draft['inspection_type']
@@ -290,11 +296,12 @@ export function QuoteFlow({
         // Consent and the honeypot are never restored from storage.
         privacy_consent: false,
         website: '',
+        voucher_code: initialVoucherCode || restored.voucher_code || '',
       }
     })
     if (presetType) setStep(1)
     setReady(true)
-  }, [initialService, initialInspectionType])
+  }, [initialService, initialInspectionType, initialVoucherCode])
 
   useEffect(() => {
     if (!ready || submitted) return
@@ -466,6 +473,7 @@ export function QuoteFlow({
         decision?: 'instant' | 'manual'
         orderUrl?: string | null
         issues?: Record<string, string[] | undefined>
+        voucher?: { applied: boolean; amountCents?: number } | null
       }
 
       if (!response.ok) {
@@ -502,11 +510,18 @@ export function QuoteFlow({
         return
       }
       setSubmitted(true)
+      const voucherMessage = result.voucher
+        ? result.voucher.applied
+          ? ` Your $${((result.voucher.amountCents || 0) / 100).toFixed(0)} voucher is recorded and will come off the price.`
+          : ' We could not apply the voucher code automatically; we will check it when we price your inspection.'
+        : ''
       setStatus({
         type: 'success',
-        message: result.reference
-          ? `Request received. Your reference is ${result.reference}.`
-          : 'Request received.',
+        message: `${
+          result.reference
+            ? `Request received. Your reference is ${result.reference}.`
+            : 'Request received.'
+        }${voucherMessage}`,
       })
     } catch (error) {
       setStatus({
@@ -920,6 +935,19 @@ export function QuoteFlow({
                   <option value="previous_customer">Previous customer / referral</option>
                   <option value="other">Other</option>
                 </select>
+              </div>
+              <div className="field">
+                <label htmlFor="voucher_code">Voucher code (optional)</label>
+                <input
+                  id="voucher_code"
+                  value={draft.voucher_code}
+                  maxLength={40}
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder="HA30-XXXX-XXXX"
+                  onChange={(event) => update('voucher_code', event.target.value)}
+                />
               </div>
               <label className="checkbox-option field-full">
                 <input

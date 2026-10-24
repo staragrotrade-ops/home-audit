@@ -1,6 +1,7 @@
 import { QuoteFlow } from '@/components/quote-flow'
 import { pageMetadata } from '@/lib/metadata'
 import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_HREF } from '@/lib/site'
+import { normalizeVoucherCode } from '@/lib/voucher-rules'
 
 export const metadata = pageMetadata({
   title: 'Inspection Quote',
@@ -11,11 +12,12 @@ export const metadata = pageMetadata({
 })
 
 type QuotePageProps = {
-  searchParams: Promise<{ service?: string }>
+  searchParams: Promise<{ service?: string; voucher?: string }>
 }
 
 export default async function QuotePage({ searchParams }: QuotePageProps) {
-  const { service } = await searchParams
+  const { service, voucher } = await searchParams
+  const initialVoucherCode = normalizeVoucherCode(voucher)
   const initialService =
     service === 'new-home'
       ? ('new_home' as const)
@@ -43,6 +45,7 @@ export default async function QuotePage({ searchParams }: QuotePageProps) {
           initialInspectionType={service === 'building-and-pest' ? 'building_and_pest' : ''}
           submissionEnabled={process.env.QUOTE_SUBMISSION_ENABLED === 'true'}
           turnstileSiteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
+          initialVoucherCode={initialVoucherCode}
         />
       </div>
     </main>

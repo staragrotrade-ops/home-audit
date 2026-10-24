@@ -8,6 +8,7 @@ import { earliestInstantDate } from '@/lib/pricing'
 import { SITE_URL } from '@/lib/site'
 import { syncJobToXero } from '@/lib/xero'
 import { STRIPE_SITE_KEY } from '@/lib/stripe-server'
+import { redeemJobVoucher } from '@/lib/vouchers'
 
 export const ORDER_COLUMNS =
   'id,public_reference,service_family,inspection_type,new_home_stages,status,quote_status,payment_status,quote_subtotal,gst,quote_total,pricing_decision,pricing_reasons,is_test,archived_at,customer_snapshot,property_snapshot,preferred_date_1,deadline,buyer_situation,access_choice,access_other_name,access_other_phone,agent_name,agent_phone,details_submitted_at,confirmed_start,booking_notified_at,paid_notified_at'
@@ -205,6 +206,7 @@ export async function settleCheckoutSession(supabase: SupabaseClient, session: S
     )
   }
 
+  await redeemJobVoucher(supabase, jobId)
   await notifyPaid(supabase, jobId, session.amount_total)
   return 'paid' as const
 }

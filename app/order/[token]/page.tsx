@@ -123,6 +123,13 @@ export default async function OrderPage({
         .eq('status', 'active')
     : { count: 0 }
   const total = centsOf(job.quote_total)
+  // Read separately so the page still works before the vouchers migration.
+  const { data: voucherRow } = await supabase
+    .from('jobs')
+    .select('voucher_code,voucher_discount_cents')
+    .eq('id', job.id)
+    .maybeSingle()
+  const voucherCents = Number(voucherRow?.voucher_discount_cents || 0)
 
   return (
     <main id="main-content" className="quote-page">
@@ -160,6 +167,12 @@ export default async function OrderPage({
                 <strong>{formatAud(total)}</strong>
               </dd>
             </dl>
+            {voucherCents > 0 && (
+              <p className="order-hint">
+                Includes your {formatAud(voucherCents)} voucher
+                {voucherRow?.voucher_code ? ` (${voucherRow.voucher_code})` : ''}.
+              </p>
+            )}
             <p>
               After payment you can tell us who to contact for access. We then arrange a time and email
               you the confirmed date. We provide a digital copy of the report after the inspection.
