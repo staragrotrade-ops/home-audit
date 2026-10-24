@@ -53,6 +53,17 @@ Never paste these values into chat or commit them to GitHub.
 - The online quote form only opens once Cloudflare Turnstile is set up
   (step 9). Until then it keeps using the email handoff.
 
+# Building & Pest vouchers from the 137B website (0.19.0)
+
+1. Supabase SQL Editor → run `supabase/migrations/20261024120000_vouchers.sql`
+   **before** the 0.19.0 deploy.
+2. Make one random secret of 32+ characters (for example 40 letters and
+   digits from a password manager). Vercel → home-audit → Environment
+   Variables (Production): `VOUCHER_ISSUE_SECRET` = that secret. Redeploy.
+3. Put the same value in the 137B website's Vercel project as
+   `HOME_AUDIT_VOUCHER_SECRET`. Without it the 137B website cannot issue
+   vouchers and sends none.
+
 # Instant quotes and payment (0.8.0)
 
 Do this after the steps above work.

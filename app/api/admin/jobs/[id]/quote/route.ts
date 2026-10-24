@@ -8,6 +8,8 @@ import { expireOpenSessions } from '@/lib/orders'
 import { gstFor } from '@/lib/pricing'
 import { getStripe } from '@/lib/stripe-server'
 import { readJsonBody } from '@/lib/request-guard'
+import { priceAfterVoucher } from '@/lib/voucher-rules'
+import { jobVoucherCents } from '@/lib/vouchers'
 
 export const runtime = 'nodejs'
 
@@ -38,9 +40,15 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       )
     }
 
-    const subtotalCents = Math.round(input.priceExGst * 100)
-    const gstCents = gstFor(subtotalCents)
-    const totalCents = subtotalCents + gstCents
+    // The price entered is before any Building & Pest voucher on the job.
+    const listSubtotalCents = Math.round(input.priceExGst * 100)
+    const voucherCents = await jobVoucherCents(supabase, id)
+    const {
+      subtotalCents,
+      gstCents,
+      totalCents,
+      discountCents,
+    } = priceAfterVoucher(listSubtotalCents, gstFor(listSubtotalCents), voucherCents)
 
     const { error } = await supabase
       .from('jobs')
@@ -73,7 +81,11 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       )
       emailed = result.sent
     }
-    await audit(supabase, id, 'manual_quote_sent', { total_cents: totalCents, emailed })
+    await audit(supabase, id, 'manual_quote_sent', {
+      total_cents: totalCents,
+      ...(discountCents ? { voucher_cents: discountCents } : {}),
+      emailed,
+    })
     return adminJson({ ok: true, url, emailed, totalCents })
   } catch (error) {
     return adminError(error, 'Unable to send the quote.')

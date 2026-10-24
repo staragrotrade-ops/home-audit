@@ -80,6 +80,8 @@ export const quoteRequestSchema = z
       error: 'Please confirm you have read the privacy notice.',
     }),
     website: z.string().max(200).default(''),
+    // Building & Pest voucher from the 137B website (optional).
+    voucher_code: z.string().trim().max(40).default(''),
     // How the visitor finished the form: the online submission, or the
     // email-app handoff used while online submission is switched off.
     intake_mode: z.enum(['submit', 'email_handoff']).default('submit'),

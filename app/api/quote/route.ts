@@ -11,6 +11,8 @@ import { referralCodeFromRequest } from '@/lib/referral-store'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { turnstileConfigured, verifyTurnstile } from '@/lib/turnstile'
 import { destinationAddress, driveMinutesFromBase } from '@/lib/travel'
+import { priceAfterVoucher } from '@/lib/voucher-rules'
+import { claimVoucherForJob, type VoucherClaim } from '@/lib/vouchers'
 
 export const runtime = 'nodejs'
 
@@ -56,6 +58,14 @@ function isSameOrigin(request: Request) {
   } catch {
     return false
   }
+}
+
+// What the quote page may show about the voucher: applied or not.
+function voucherResult(voucher: VoucherClaim) {
+  if (!voucher) return null
+  return voucher.applied
+    ? { applied: true, amountCents: voucher.amountCents }
+    : { applied: false }
 }
 
 export async function POST(request: Request) {
@@ -104,6 +114,7 @@ export async function POST(request: Request) {
     intake_mode: intakeMode,
     analytics_session_id: sessionId,
     turnstile_token: turnstileToken,
+    voucher_code: voucherCode,
     ...fields
   } = parsed.data
 
@@ -231,11 +242,28 @@ export async function POST(request: Request) {
     if (refError) console.error('quote_ref_code_failed', { code: refError.code })
   }
 
+  // A Building & Pest voucher from the 137B website. A code that cannot be
+  // used never blocks the request; the owner is told why in the email.
+  let voucher: VoucherClaim = null
+  try {
+    voucher = await claimVoucherForJob(supabase, jobId, voucherCode)
+  } catch (voucherError) {
+    console.error('quote_voucher_failed', {
+      message: voucherError instanceof Error ? voucherError.message : 'unknown',
+    })
+    voucher = { applied: false, code: voucherCode, note: `Voucher ${voucherCode} could not be checked; check it by hand.` }
+  }
+  const voucherNote = voucher
+    ? voucher.applied
+      ? `Voucher ${voucher.code}: $${(voucher.amountCents / 100).toFixed(2)} off (included in the price).`
+      : voucher.note
+    : null
+
   // The email handoff only keeps a copy; pricing happens on real submissions.
   if (intakeMode === 'email_handoff') {
     const { error: updateError } = await supabase.from('jobs').update(update).eq('id', jobId)
     if (updateError) console.error('quote_intake_update_failed', { code: updateError.code })
-    return NextResponse.json({ ok: true, reference }, { status: 201 })
+    return NextResponse.json({ ok: true, reference, voucher: voucherResult(voucher) }, { status: 201 })
   }
 
   const travel =
@@ -254,19 +282,25 @@ export async function POST(request: Request) {
     travelMinutes: travel?.minutes ?? null,
   })
 
+  const voucherCents = voucher?.applied ? voucher.amountCents : 0
+  const price =
+    pricing.decision === 'instant'
+      ? priceAfterVoucher(pricing.subtotalCents, pricing.gstCents, voucherCents)
+      : null
+
   Object.assign(update, {
     travel_minutes: travel?.minutes ?? null,
     travel_distance_m: travel?.distanceMeters ?? null,
     pricing_decision: pricing.decision,
     pricing_reasons: pricing.reasons,
     pricing_rule_version: PRICING_VERSION,
-    ...(pricing.decision === 'instant'
+    ...(price
       ? {
           quote_status: 'quoted',
           status: 'awaiting_payment',
-          quote_subtotal: pricing.subtotalCents / 100,
-          gst: pricing.gstCents / 100,
-          quote_total: pricing.totalCents / 100,
+          quote_subtotal: price.subtotalCents / 100,
+          gst: price.gstCents / 100,
+          quote_total: price.totalCents / 100,
         }
       : { quote_status: 'manual_review' }),
   })
@@ -282,7 +316,10 @@ export async function POST(request: Request) {
           reference: reference || jobId,
           address: fields.property_address,
           decision: 'manual',
-          reasons: ['The automatic price could not be saved. Check the request and price it by hand.'],
+          reasons: [
+            'The automatic price could not be saved. Check the request and price it by hand.',
+            ...(voucherNote ? [voucherNote] : []),
+          ],
           refCode,
           adminUrl: `${SITE_URL}/admin?q=${encodeURIComponent(reference || '')}#jobs`,
         }),
@@ -290,7 +327,10 @@ export async function POST(request: Request) {
       ),
       { supabase, jobId, templateKey: 'owner_new_request' },
     )
-    return NextResponse.json({ ok: true, reference, decision: 'manual' }, { status: 201 })
+    return NextResponse.json(
+      { ok: true, reference, decision: 'manual', voucher: voucherResult(voucher) },
+      { status: 201 },
+    )
   }
 
   let orderLink: string | null = null
@@ -307,12 +347,12 @@ export async function POST(request: Request) {
   if (orderLink) {
     const address = [fields.property_address, fields.suburb].filter(Boolean).join(', ')
     await sendEmail(
-      pricing.decision === 'instant'
+      price
         ? quoteReadyEmail({
             to: fields.email,
             firstName: fields.first_name,
             address,
-            totalCents: pricing.totalCents,
+            totalCents: price.totalCents,
             url: orderLink,
           })
         : requestReceivedEmail({
@@ -336,7 +376,7 @@ export async function POST(request: Request) {
         reference: reference || jobId,
         address: fields.property_address,
         decision: pricing.decision,
-        reasons: pricing.reasons,
+        reasons: [...pricing.reasons, ...(voucherNote ? [voucherNote] : [])],
         refCode,
         adminUrl: `${SITE_URL}/admin?q=${encodeURIComponent(reference || '')}#jobs`,
       }),
@@ -351,6 +391,7 @@ export async function POST(request: Request) {
       reference,
       decision: pricing.decision,
       orderUrl: orderLink,
+      voucher: voucherResult(voucher),
     },
     { status: 201 },
   )

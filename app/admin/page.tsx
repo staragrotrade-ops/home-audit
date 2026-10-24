@@ -449,6 +449,20 @@ export default async function AdminPage({
       referrer_override_none: boolean
     }[]).map((row) => [row.id, row]),
   )
+  // Building & Pest vouchers entered on quotes. Read separately so the page
+  // still works before the vouchers migration is applied.
+  const { data: voucherRows } = jobs.length
+    ? await supabase
+        .from('jobs')
+        .select('id,voucher_code,voucher_discount_cents')
+        .not('voucher_code', 'is', null)
+        .in('id', jobs.map((job) => job.id))
+    : { data: [] }
+  const voucherByJob = new Map(
+    ((voucherRows || []) as { id: string; voucher_code: string; voucher_discount_cents: number | null }[]).map(
+      (row) => [row.id, row],
+    ),
+  )
   const { data: refEvents } =
     referralsReady && sessions.length
       ? await supabase
@@ -792,6 +806,9 @@ export default async function AdminPage({
                         <dd>
                           {job.quote_total ? formatAud(Math.round(Number(job.quote_total) * 100)) : 'Not priced'}
                           {job.pricing_decision === 'instant' ? ' · instant' : ''}
+                          {voucherByJob.get(job.id)
+                            ? ` · voucher ${voucherByJob.get(job.id)!.voucher_code} −${formatAud(Number(voucherByJob.get(job.id)!.voucher_discount_cents || 0))} (included)`
+                            : ''}
                           {job.pricing_decision === 'manual' && job.pricing_reasons?.length
                             ? ` · review: ${job.pricing_reasons.join('; ')}`
                             : ''}

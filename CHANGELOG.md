@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.19.0 — 2026-10-24
+
+- Building & Pest vouchers (owner decision 2026-10-24; migration
+  `20261024120000_vouchers.sql`). The 137B website (same company, GXH
+  Consultancy Pty Ltd) emails its customers a $30 (incl. GST) voucher 7 days
+  after their 137B report is delivered; codes look like `HA30-K7QM-2XDP`,
+  last 6 months and work once.
+- Codes are issued only here, by `POST /api/vouchers/issue` with the shared
+  secret `VOUCHER_ISSUE_SECRET` (32+ characters, same value set on the 137B
+  website). The same 137B job always gets the same code.
+- Quote form: optional "Voucher code" field, prefilled from
+  `/quote?voucher=…`. On an online quote the code is checked and claimed for
+  that job and $30 comes off the GST-inclusive total (GST worked out of what
+  is left). A manual price set in Admin also takes the voucher off. A code
+  that cannot be used never blocks the request; the owner email says why.
+  The email handoff includes the code.
+- The order page shows "Includes your $30.00 voucher (code)"; Admin shows the
+  voucher beside the price. The voucher is marked used when the order is paid.
+
 ## 0.18.0 — 2026-10-22
 
 - Report template wording (`lib/report-terms.ts`, version 2026-10-22): the
