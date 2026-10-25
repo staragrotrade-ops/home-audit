@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.21.0 — 2026-10-25
+
+- Building & Pest and Pre-Purchase pages (the Google Ads landing pages):
+  "Get your price online" button in the hero with "Most homes are priced
+  instantly", and a registration line (Registered Building Inspector ·
+  IN-L 100094 · Insured · Photo-based report) linking to /credentials.
+- A second "Know the price before you book" call to action mid-page.
+- Phones: a bar fixed to the bottom of the screen with "Get your price" and
+  "Call". Hidden above 840px; a spacer keeps the footer clear.
+- No price is published (owner decision). Reason: in the week to 25 Oct,
+  10 phone ad visitors left after one page (6 within 10 seconds) and no ad
+  visitor opened the quote; desktop visitors went to /credentials.
+
 ## 0.20.0 — 2026-10-25
 
 - Referral partner email ("Email link" and approval): now an HTML email with

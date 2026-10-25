@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ThermalCaseStudy } from '@/components/case-study'
 import { JsonLd } from '@/components/json-ld'
+import { HeroPriceCta, InlinePriceCta, MobilePriceBar } from '@/components/price-cta'
 import { pageMetadata } from '@/lib/metadata'
 import { SITE_URL } from '@/lib/site'
 
@@ -95,6 +96,7 @@ export default function PrePurchaseInspectionPage() {
               significant visible defects, access limitations and areas that
               may need further investigation before you commit.
             </p>
+            <HeroPriceCta />
           </div>
           <div className="page-hero-aside">
             <strong>For houses, townhouses and units</strong>
@@ -135,6 +137,8 @@ export default function PrePurchaseInspectionPage() {
                 </div>
               ))}
             </div>
+
+            <InlinePriceCta />
 
             <ThermalCaseStudy />
 
@@ -232,6 +236,7 @@ export default function PrePurchaseInspectionPage() {
           </div>
         </div>
       </section>
+      <MobilePriceBar />
     </main>
   )
 }
