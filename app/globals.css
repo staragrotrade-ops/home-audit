@@ -3487,3 +3487,119 @@ button:focus-visible {
   gap: 6px;
   font-weight: 600;
 }
+
+/* Landing-page price calls to action (Google Ads pages, 25 Oct 2026) */
+.hero-price-cta {
+  display: grid;
+  gap: 18px;
+  margin-top: 30px;
+}
+
+.hero-price-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+}
+
+.hero-price-actions span {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.95rem;
+}
+
+.hero-price-button {
+  min-height: 56px;
+  padding-inline: 30px;
+  font-size: 1.05rem;
+}
+
+.hero-trust {
+  justify-self: start;
+  padding: 9px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.hero-trust:hover,
+.hero-trust:focus-visible {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.inline-price-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin: 34px 0;
+  padding: 22px 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--warm-ivory);
+}
+
+.inline-price-cta strong,
+.inline-price-cta span {
+  display: block;
+}
+
+.inline-price-cta strong {
+  font-size: 1.1rem;
+}
+
+.inline-price-cta span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.mobile-price-bar,
+.mobile-price-spacer {
+  display: none;
+}
+
+@media (max-width: 840px) {
+  .hero-price-actions .button {
+    width: 100%;
+  }
+
+  .hero-trust {
+    border-radius: var(--radius-sm);
+  }
+
+  .mobile-price-spacer {
+    display: block;
+    height: 84px;
+  }
+
+  .mobile-price-bar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: 10px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: rgba(255, 253, 249, 0.97);
+    box-shadow: 0 -10px 30px rgba(31, 57, 55, 0.12);
+  }
+
+  .mobile-price-bar .button {
+    min-height: 50px;
+    padding-inline: 12px;
+    box-shadow: none;
+  }
+
+  .mobile-price-bar .button:hover,
+  .mobile-price-bar .button:focus-visible {
+    transform: none;
+  }
+}

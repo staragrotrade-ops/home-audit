@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { JsonLd } from '@/components/json-ld'
 import { ThermalCaseStudy } from '@/components/case-study'
+import { HeroPriceCta, InlinePriceCta, MobilePriceBar } from '@/components/price-cta'
 import { pageMetadata } from '@/lib/metadata'
 import { SITE_URL } from '@/lib/site'
 
@@ -63,6 +64,7 @@ export default function BuildingAndPestPage() {
               building elements and timber-pest risk—organised to support a
               practical purchasing decision.
             </p>
+            <HeroPriceCta />
           </div>
           <div className="page-hero-aside">
             <strong>Melbourne &amp; Victoria</strong>
@@ -110,6 +112,8 @@ export default function BuildingAndPestPage() {
                 </div>
               ))}
             </div>
+
+            <InlinePriceCta />
 
             <ThermalCaseStudy />
 
@@ -195,6 +199,7 @@ export default function BuildingAndPestPage() {
           </div>
         </div>
       </section>
+      <MobilePriceBar />
     </main>
   )
 }
