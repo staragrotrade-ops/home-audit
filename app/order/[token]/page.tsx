@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { BookingDetailsForm } from '@/components/order/booking-details-form'
 import { FloorplanUpload } from '@/components/order/floorplan-upload'
+import { ReportDownload } from '@/components/order/report-download'
 import { AgreementText } from '@/components/agreement/agreement-text'
 import { AgreementConsent } from '@/components/order/agreement-consent'
 import { jobIdForToken } from '@/lib/access-tokens'
@@ -112,6 +113,7 @@ export default async function OrderPage({
 
   const customer = job.customer_snapshot || {}
   const paid = job.payment_status === 'paid'
+  const transfer = job.intake_channel === 'report_transfer'
   const agreement = await loadAgreementStatus(supabase, job.id)
   // Counted defensively: before the floorplan migration the table is missing.
   const { count: customerFloorplans } = paid
@@ -171,7 +173,7 @@ export default async function OrderPage({
           <section className="quote-panel">
             <h2>Your price</h2>
             <dl className="order-price">
-              <dt>Inspection</dt>
+              <dt>{transfer ? 'Report transfer' : 'Inspection'}</dt>
               <dd>{formatAud(centsOf(job.quote_subtotal))}</dd>
               <dt>GST</dt>
               <dd>{formatAud(centsOf(job.gst))}</dd>
@@ -186,10 +188,17 @@ export default async function OrderPage({
                 {voucherRow?.voucher_code ? ` (${voucherRow.voucher_code})` : ''}.
               </p>
             )}
-            <p>
-              After payment you can tell us who to contact for access. We then arrange a time and email
-              you the confirmed date. We provide a digital copy of the report after the inspection.
-            </p>
+            {transfer ? (
+              <p>
+                This is a copy of an inspection report already carried out at this property. After payment the
+                report is issued in your name and emailed to you straight away.
+              </p>
+            ) : (
+              <p>
+                After payment you can tell us who to contact for access. We then arrange a time and email
+                you the confirmed date. We provide a digital copy of the report after the inspection.
+              </p>
+            )}
             {isPayable(job) && <AgreementPanel token={token} mode="pay" label={`Agree and pay ${formatAud(total)}`} />}
             {pending && (
               <p className="order-hint">
@@ -207,11 +216,7 @@ export default async function OrderPage({
                   Report {sentReport.version_label}, issued {acceptedLabel(sentReport.issued_at)}. Start with the
                   Summary page: it lists any major defects and safety hazards and the repairs grouped by trade.
                 </p>
-                <p>
-                  <a className="button" href={`/api/order/${token}/report`}>
-                    Download the report (PDF)
-                  </a>
-                </p>
+                <ReportDownload token={token} />
                 <p className="order-hint">
                   Questions about the report? Email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> before
                   you sign a contract or let a cooling-off, finance or building condition date pass.
@@ -224,7 +229,13 @@ export default async function OrderPage({
                 Thank you{customer.first_name ? `, ${customer.first_name}` : ''}. We have received{' '}
                 {formatAud(total)}.
               </p>
-              {job.confirmed_start && job.booking_notified_at ? (
+              {transfer ? (
+                <p>
+                  {sentReport
+                    ? 'The report has been issued in your name.'
+                    : 'Your report is being prepared and will be emailed to you shortly.'}
+                </p>
+              ) : job.confirmed_start && job.booking_notified_at ? (
                 <p>
                   <strong>Inspection date: {inspectionDateLabel(job.confirmed_start)}</strong>
                 </p>
@@ -239,7 +250,7 @@ export default async function OrderPage({
               )}
             </section>
 
-            {!agreement.accepted ? (
+            {transfer ? null : !agreement.accepted ? (
               <section className="quote-panel">
                 <h2>Next: the inspection agreement</h2>
                 <AgreementPanel token={token} mode="accept" label="Accept the agreement" />
@@ -276,7 +287,7 @@ export default async function OrderPage({
             </section>
             )}
 
-            {paid && agreement.accepted && job.service_family === 'existing_home' && (
+            {paid && !transfer && agreement.accepted && job.service_family === 'existing_home' && (
               <section className="quote-panel">
                 <h2>Floorplan</h2>
                 <FloorplanUpload token={token} existing={customerFloorplans || 0} />

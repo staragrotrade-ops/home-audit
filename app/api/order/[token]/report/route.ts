@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { jobIdForToken } from '@/lib/access-tokens'
 import { loadOrder } from '@/lib/orders'
 import { REPORT_BUCKET } from '@/lib/reports'
+import { DOWNLOAD_COOKIE, hasAccess } from '@/lib/report-download'
 import { clientHash } from '@/lib/request-guard'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
@@ -34,6 +35,16 @@ export async function GET(request: Request, context: { params: Promise<{ token: 
   const job = jobId ? await loadOrder(supabase, jobId) : null
   if (!job) return reply('This link has expired. Please email us for a new one.', 404)
   if (job.payment_status !== 'paid') return reply('The report is available once the order is paid.', 409)
+  // The emailed code must have been confirmed in this browser.
+  const cookie = request.headers
+    .get('cookie')
+    ?.split(';')
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${DOWNLOAD_COOKIE}=`))
+    ?.slice(DOWNLOAD_COOKIE.length + 1)
+  if (!hasAccess(cookie ? decodeURIComponent(cookie) : undefined, job.id)) {
+    return NextResponse.redirect(new URL(`/order/${token}#report`, request.url), 303)
+  }
 
   const { data: report } = await supabase
     .from('inspection_reports')

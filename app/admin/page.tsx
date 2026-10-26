@@ -9,6 +9,7 @@ import { JobReferrerSelect } from '@/components/admin/job-referrer-select'
 import { ReferrerManager } from '@/components/admin/referrer-manager'
 import { StaffManager } from '@/components/admin/staff-manager'
 import { ReportSendButton } from '@/components/admin/report-send-button'
+import { ReportTransferPanel } from '@/components/admin/report-transfer-panel'
 import { XeroSyncButton } from '@/components/admin/xero-sync-button'
 import { CalendarSyncButton } from '@/components/admin/calendar-sync-button'
 import { FloorplanPanel } from '@/components/admin/floorplan-panel'
@@ -172,6 +173,7 @@ type JobRow = {
         sent_to?: string | null
         download_count?: number | null
         last_downloaded_at?: string | null
+        template_path?: string | null
       }[]
     | null
 }
@@ -954,6 +956,22 @@ export default async function AdminPage({
                             </li>
                           ))}
                         </ul>
+                        {job.intake_channel !== 'report_transfer' &&
+                          reports.some((report) => report.status === 'issued' && report.template_path) && (
+                            <ReportTransferPanel
+                              jobId={job.id}
+                              address={[job.property_snapshot?.address, job.property_snapshot?.suburb]
+                                .filter(Boolean)
+                                .join(', ')}
+                            />
+                          )}
+                      </div>
+                    )}
+                    {job.intake_channel === 'report_transfer' && job.payment_status === 'paid' && reports.length === 0 && (
+                      <div className="admin-reports">
+                        <h4>Report transfer</h4>
+                        <p className="admin-note">Paid, but the report has not been issued yet.</p>
+                        <ReportTransferPanel jobId={job.id} address="" transferJob={{ needsRetry: true }} />
                       </div>
                     )}
 

@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.25.0 — 2026-10-29
+
+- Report transfer (migration `20261029100000_report_transfer.sql`, safe to
+  run more than once). Admin: "Transfer QR code for the agent" next to the
+  report (QR PNG, link and email text). Another buyer opens `/r/<code>`,
+  enters their details, accepts the Inspection Agreement and pays $250 + GST
+  ($275). On payment the report is issued in their name (cover note "Report
+  transferred to … on …") and emailed; owner notified; Xero invoice as
+  "Inspection report transfer". Open for 30 days after the inspection.
+  Transfer orders are kept out of the inspector app's job list.
+- Reports from app 0.7+ are uploaded without the client's name and with the
+  places for it; the website prints the name in (`pdf-lib`), so a transferred
+  report never contains the first client's name.
+- Report downloads need a 6-digit code emailed to the order's address; a
+  confirmed browser can download for 12 hours.
+
 ## 0.24.0 — 2026-10-28
 
 - Report delivery (migration `20261028100000_report_delivery.sql`, safe to

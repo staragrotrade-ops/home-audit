@@ -9,9 +9,10 @@ import { SITE_URL } from '@/lib/site'
 import { syncJobToXero } from '@/lib/xero'
 import { STRIPE_SITE_KEY } from '@/lib/stripe-server'
 import { redeemJobVoucher } from '@/lib/vouchers'
+import { completeTransfer } from '@/lib/report-transfer'
 
 export const ORDER_COLUMNS =
-  'id,public_reference,service_family,inspection_type,new_home_stages,status,quote_status,payment_status,quote_subtotal,gst,quote_total,pricing_decision,pricing_reasons,is_test,archived_at,customer_snapshot,property_snapshot,preferred_date_1,deadline,buyer_situation,access_choice,access_other_name,access_other_phone,agent_name,agent_phone,details_submitted_at,confirmed_start,booking_notified_at,paid_notified_at'
+  'id,public_reference,service_family,inspection_type,new_home_stages,status,quote_status,payment_status,quote_subtotal,gst,quote_total,pricing_decision,pricing_reasons,is_test,archived_at,customer_snapshot,property_snapshot,preferred_date_1,deadline,buyer_situation,access_choice,access_other_name,access_other_phone,agent_name,agent_phone,details_submitted_at,confirmed_start,booking_notified_at,paid_notified_at,intake_channel'
 
 export type OrderJob = {
   id: string
@@ -43,6 +44,7 @@ export type OrderJob = {
   confirmed_start: string | null
   booking_notified_at: string | null
   paid_notified_at: string | null
+  intake_channel: string
 }
 
 export async function loadOrder(supabase: SupabaseClient, jobId: string) {
@@ -141,6 +143,24 @@ async function notifyPaid(supabase: SupabaseClient, jobId: string, amountCents: 
   if (!claimed) return
 
   const address = addressOf(job)
+  // A report transfer: issue the report in the buyer's name and email it;
+  // there is nothing to book.
+  if (job.intake_channel === 'report_transfer') {
+    try {
+      await completeTransfer(supabase, jobId)
+    } catch (error) {
+      await sendEmail(
+        {
+          to: ownerEmail(),
+          subject: `Report transfer needs attention – ${job.public_reference}`,
+          text: `The transfer for ${address} was paid but the report could not be issued automatically: ${error instanceof Error ? error.message : 'unknown error'}.\n\n${SITE_URL}/admin?q=${encodeURIComponent(job.public_reference)}#jobs`,
+        },
+        { supabase, jobId, templateKey: 'owner_transfer_failed' },
+      )
+    }
+    if (!job.is_test) await syncJobToXero(supabase, jobId)
+    return
+  }
   if (customer.email) {
     await sendEmail(
       paymentReceivedEmail({
