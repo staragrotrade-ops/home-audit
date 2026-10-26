@@ -130,6 +130,19 @@ export default async function OrderPage({
     .eq('id', job.id)
     .maybeSingle()
   const voucherCents = Number(voucherRow?.voucher_discount_cents || 0)
+  // The report the customer can download (sent to them and paid). Read
+  // defensively: before the report delivery migration the columns are missing.
+  const { data: sentReport } = paid
+    ? await supabase
+        .from('inspection_reports')
+        .select('version_label,issued_at')
+        .eq('job_id', job.id)
+        .eq('status', 'issued')
+        .not('sent_at', 'is', null)
+        .order('issued_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+    : { data: null }
 
   return (
     <main id="main-content" className="quote-page">
@@ -187,6 +200,24 @@ export default async function OrderPage({
           </section>
         ) : (
           <>
+            {sentReport && (
+              <section className="quote-panel order-report" id="report">
+                <h2>Your inspection report</h2>
+                <p>
+                  Report {sentReport.version_label}, issued {acceptedLabel(sentReport.issued_at)}. Start with the
+                  Summary page: it lists any major defects and safety hazards and the repairs grouped by trade.
+                </p>
+                <p>
+                  <a className="button" href={`/api/order/${token}/report`}>
+                    Download the report (PDF)
+                  </a>
+                </p>
+                <p className="order-hint">
+                  Questions about the report? Email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> before
+                  you sign a contract or let a cooling-off, finance or building condition date pass.
+                </p>
+              </section>
+            )}
             <section className="quote-panel">
               <h2>Payment received</h2>
               <p>

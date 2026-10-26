@@ -70,6 +70,7 @@ Prices, payment ids and the owner's internal notes are never sent to the app.
 | GET | `/api/app/catalog` | `?templatesSinceRev=` optional | `catalog {version, severities[], trades[], areas[], elements[]}`, `templates[]` (most used first) |
 | GET | `/api/app/jobs/{id}/inspection` | `?sinceRev=` optional | `floorplans[]` (with `url`, valid 1 hour), `defects[]`, `photos[]`, `serverRev` |
 | POST | `/api/app/jobs/{id}/assessment` | `Assessment` | `result {applied, stale}` |
+| POST | `/api/app/jobs/{id}/send-report` | – (issuers only; order must be paid) | `{reportId, version, sentTo}` – emails the customer a download link to the current report |
 | POST | `/api/app/templates` | `{templates: [{id, elementKey, severity, title, observation, recommendation?}]}` (max 50) | `result {saved[], duplicates{phoneId: existingId}}` |
 | POST | `/api/app/jobs/{id}/level-surveys` | `{surveys: LevelSurvey[]}` (max 50) | `result {applied[], stale[]}` |
 | POST | `/api/app/jobs/{id}/areas` | `{areas: Area[]}` (max 200) | `result {applied[], stale[]}` |

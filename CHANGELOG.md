@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.24.0 — 2026-10-28
+
+- Report delivery (migration `20261028100000_report_delivery.sql`, safe to
+  run more than once). Issuing a report no longer sets the job to "Report
+  sent" (it stays "Inspected"); jobs wrongly marked that way are corrected.
+- "Send to customer" in admin (Reports list) and in the app
+  (`POST /api/app/jobs/{id}/send-report`, issuers only): emails the customer
+  a link to their order page; paid orders only. The order page shows "Your
+  inspection report" with a download button (`/api/order/{token}/report`);
+  downloads are counted and shown in admin.
+
 ## 0.23.0 — 2026-10-27
 
 - Defect library from the app (migration `20261027100000_defect_library.sql`,

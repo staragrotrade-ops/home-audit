@@ -11,7 +11,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     z.uuid().parse(id)
     const { data, error } = await supabase
       .from('inspection_reports')
-      .select('id,report_kind,version_label,size_bytes,sha256,status,issued_at')
+      .select('id,report_kind,version_label,size_bytes,sha256,status,issued_at,sent_at,sent_to,download_count')
       .eq('job_id', id)
       .order('issued_at', { ascending: false })
     if (error) throw new Error(error.message)
