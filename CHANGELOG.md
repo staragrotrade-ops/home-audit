@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.25.1 — 2026-10-27
+
+- Fix: the app's report list (re-issue, Send to customer) failed with
+  "permission denied for table inspection_reports": migration
+  `20261030100000_report_column_grants.sql` grants the new sent/download
+  columns.
+
 ## 0.25.0 — 2026-10-29
 
 - Report transfer (migration `20261029100000_report_transfer.sql`, safe to
