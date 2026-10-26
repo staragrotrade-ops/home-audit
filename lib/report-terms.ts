@@ -16,7 +16,7 @@
 // Placeholders filled by the app: {company}, {acn}, {phone}, {email}.
 import { COMPANY_ACN, COMPANY_NAME, CONTACT_EMAIL, CONTACT_PHONE } from './site.ts'
 
-export const REPORT_TERMS_VERSION = '2026-10-26'
+export const REPORT_TERMS_VERSION = '2026-10-27'
 
 /** Which reports a block appears in. */
 export type TermsScope = 'all' | 'building' | 'pest'
@@ -286,6 +286,9 @@ export const REPORT_TERMS_SECTIONS: TermsSection[] = [
       },
       {
         text: 'This report is advice only and is not a certificate of compliance, a warranty against future defects, insurance or a valuation. It should not be the only basis for deciding to purchase, negotiating the price or valuing the property. Also obtain advice from your lawyer or conveyancer and quotations from licensed tradespeople.',
+      },
+      {
+        text: 'Keep your own copy of this report and its photographs. We are not obliged to store them or to provide them again (Inspection Agreement clauses 7.17 and 7.18). The report is for the Client only and must not be sold or passed on; copies for other buyers are available from us in their own name.',
       },
       {
         text: 'Our liability is as set out in clause 10 of the Inspection Agreement: limited to the inspection fee as far as the law allows. Nothing in this report or that agreement excludes, restricts or modifies your rights under the Australian Consumer Law or any other right that cannot lawfully be excluded.',
