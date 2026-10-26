@@ -8,8 +8,10 @@ alter table public.inspection_reports add column if not exists template_path tex
 alter table public.inspection_reports add column if not exists name_slots jsonb;
 alter table public.inspection_reports add column if not exists client_name text;
 
-alter table public.jobs add column if not exists transfer_of_report_id uuid
-  references public.inspection_reports(id) on delete set null;
+-- No foreign key on purpose: a second link between jobs and
+-- inspection_reports makes the API's jobs → inspection_reports embed ambiguous.
+alter table public.jobs add column if not exists transfer_of_report_id uuid;
+alter table public.jobs drop constraint if exists jobs_transfer_of_report_id_fkey;
 
 alter table public.jobs drop constraint if exists jobs_intake_channel_check;
 alter table public.jobs add constraint jobs_intake_channel_check check (
