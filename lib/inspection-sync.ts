@@ -154,3 +154,19 @@ export const assessmentInput = z.object({
   summary: z.string().max(4000).nullable().optional(),
   clientUpdatedAt: z.iso.datetime({ offset: true }),
 })
+
+const levelReading = z.object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1), mm: z.number().min(-2000).max(2000) })
+
+export const levelSurveyInput = z.object({
+  id: z.uuid(),
+  floorplanId: z.uuid().nullable().optional(),
+  readings: z.array(levelReading).max(300).default([]),
+  instrument: z.string().trim().max(120).nullable().optional(),
+  datum: z.string().trim().max(200).nullable().optional(),
+  result: z.enum(['minor', 'further_investigation', 'major']).nullable().optional(),
+  notes: z.string().max(2000).nullable().optional(),
+  deleted: z.boolean().optional(),
+  clientUpdatedAt: z.iso.datetime({ offset: true }),
+})
+
+export const levelSurveyBatch = z.object({ surveys: z.array(levelSurveyInput).max(50) })

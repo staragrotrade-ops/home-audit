@@ -70,6 +70,7 @@ Prices, payment ids and the owner's internal notes are never sent to the app.
 | GET | `/api/app/catalog` | `?templatesSinceRev=` optional | `catalog {version, severities[], trades[], areas[], elements[]}`, `templates[]` (most used first) |
 | GET | `/api/app/jobs/{id}/inspection` | `?sinceRev=` optional | `floorplans[]` (with `url`, valid 1 hour), `defects[]`, `photos[]`, `serverRev` |
 | POST | `/api/app/jobs/{id}/assessment` | `Assessment` | `result {applied, stale}` |
+| POST | `/api/app/jobs/{id}/level-surveys` | `{surveys: LevelSurvey[]}` (max 50) | `result {applied[], stale[]}` |
 | POST | `/api/app/jobs/{id}/areas` | `{areas: Area[]}` (max 200) | `result {applied[], stale[]}` |
 | POST | `/api/app/jobs/{id}/defects` | `{defects: Defect[]}` (max 200) | `result {applied[], stale[]}` |
 | POST | `/api/app/jobs/{id}/photos` | `Photo` | `{uploaded}`; when false also `{signedUrl, token, path}` |
@@ -107,6 +108,11 @@ weather?, occupancy?, summary?, clientUpdatedAt}` (all ratings optional). The in
 pull returns `assessment` (or null). The catalog also returns `reportTerms {version, scope[],
 terms[]}` – the standard report wording (lib/report-terms.ts); blocks have `scope`
 all|building|pest.
+
+**LevelSurvey** — relative floor levels on one floorplan: `{id, floorplanId?, readings:
+[{x, y (0–1 of the plan), mm (relative to datum, −2000…2000)}] (max 300), instrument?,
+datum?, result?: minor|further_investigation|major, notes?, deleted?, clientUpdatedAt}`. The
+inspection pull returns `levelSurveys[]`.
 
 **Area** — a room or part of the property in the "Areas inspected" list:
 `{id, name, kind: room|wet_area|roof_exterior|roof_space|subfloor|exterior|site|outbuilding,
