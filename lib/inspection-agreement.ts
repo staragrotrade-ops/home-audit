@@ -12,7 +12,7 @@
 // comments are to AS 4349.1-2007 (owner's copy).
 import { COMPANY_ACN, COMPANY_NAME, CONTACT_EMAIL, CONTACT_PHONE } from './site.ts'
 
-export const AGREEMENT_VERSION = '2026-10-19'
+export const AGREEMENT_VERSION = '2026-10-27'
 export const AGREEMENT_TITLE = 'Inspection Agreement'
 export const AGREEMENT_PATH = '/inspection-agreement'
 
@@ -26,6 +26,7 @@ export type AgreementSection = { id: string; heading: string; blocks: AgreementB
 /** SHA-256 of agreementPlainText() for each published version. */
 export const AGREEMENT_FINGERPRINTS: Record<string, string> = {
   '2026-10-19': 'e18fe2132da40a9c9a14f28b2f3d2e364cd67a03a855864bd24e30dee08cfc72',
+  '2026-10-27': '9b97522a8bf352659e8523baedf0504b0d1333bcdadbd828a03e71ca77bb1590',
 }
 
 // The plain-English summary shown above the tick box. It must not say
@@ -38,6 +39,7 @@ export const AGREEMENT_KEY_POINTS = [
   'You must read the full written report. Spoken comments are not guaranteed to be complete or accurate. Up to 15 minutes of phone time is included; extra time is charged.',
   'Cancelling 3 or more business days before the inspection costs $100. After that, the fee is not refunded.',
   'Our liability is limited to the inspection fee, as far as the law allows. Your rights under the Australian Consumer Law are not affected.',
+  'Download and keep your own copy of the report and its photos. We do not have to store them or send them again. The report is for you only; we may sell copies to other buyers in their own name, without your name or contact details.',
 ]
 
 export const AGREEMENT_SECTIONS: AgreementSection[] = [
@@ -189,6 +191,10 @@ export const AGREEMENT_SECTIONS: AgreementSection[] = [
       '7.12 A contract of sale may specify who must prepare a report for the purposes of a building inspection condition. The Client should confirm with the Client’s lawyer or conveyancer that the Report satisfies the contract before relying on that condition.',
       '7.13 A purchase at auction is usually unconditional. The Client should read the Report, raise any questions and obtain any advice required before bidding.',
       '7.14 Copyright in the Report, photographs and site notes remains with the Company.',
+      '7.15 Because copyright remains with the Company, the Company may provide the Report, or a copy of it, to any other person, including another prospective purchaser of the Property, and may charge that person a fee. A copy provided to another person is issued in that person’s name and does not include the Client’s name or contact details. The Client is not entitled to any part of that fee, and the Fee paid by the Client is not affected.',
+      '7.16 The Client must not sell, publish or give the Report to any other person, except as permitted by clause 7.9.',
+      '7.17 The Company provides the Report electronically, by a link sent to the Client’s email address. The Client is responsible for downloading the Report promptly and for keeping the Client’s own copy of the Report, including the photographs in it. The link is available for a limited period, currently 180 days after it is sent.',
+      '7.18 The Company is not obliged to store the Report, the photographs (whether or not they appear in the Report), site notes or any other record of the Inspection, or to provide a further copy of the Report or any photographs, except where the law requires the Company to keep a record. If the Report or photographs are lost by the Client, the Company has no liability for that loss. If the Company agrees to provide a further copy, it may charge a reasonable fee.',
     ],
   },
   {

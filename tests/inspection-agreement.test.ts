@@ -129,3 +129,14 @@ test('report uses stay consistent with the agreement (not the sole basis)', asyn
   const prePurchase = await source('app/pre-purchase-building-inspection/page.tsx')
   assert.match(prePurchase, /#how-buyers-use-the-report/)
 })
+
+test('inspection agreement: report copies may be sold; the client keeps their own copy', () => {
+  const text = a.agreementPlainText()
+  assert.match(text, /may provide the Report, or a copy of it, to any other person/)
+  assert.match(text, /does not include the Client’s name or contact details/)
+  assert.match(text, /must not sell, publish or give the Report/)
+  assert.match(text, /responsible for downloading the Report promptly/)
+  assert.match(text, /not obliged to store the Report, the photographs/)
+  assert.ok(a.AGREEMENT_KEY_POINTS.some((point: string) => point.includes('keep your own copy')))
+})
+
