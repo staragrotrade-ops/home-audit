@@ -273,3 +273,16 @@ test('assessment: ratings validated; route authenticates; catalog serves the ter
   assert.match(sql, /alter table public\.inspection_assessments enable row level security/)
   assert.match(sql, /revoke all on function public\.app_save_assessment\(uuid, uuid, jsonb\) from public, anon, authenticated/)
 })
+
+test('level surveys: readings validated; route authenticates; RLS and re-runnable migration', async () => {
+  const { levelSurveyInput } = await import('../lib/inspection-sync.ts')
+  const base = { id: '90000000-0000-4000-8000-000000000001', clientUpdatedAt: '2026-10-26T01:00:00Z' }
+  assert.equal(levelSurveyInput.safeParse({ ...base, readings: [{ x: 0.1, y: 0.2, mm: -18 }], result: 'major' }).success, true)
+  assert.equal(levelSurveyInput.safeParse({ ...base, readings: [{ x: 1.5, y: 0.2, mm: 0 }] }).success, false)
+  assert.equal(levelSurveyInput.safeParse({ ...base, result: 'medium' }).success, false)
+  assert.match(await source('app/api/app/jobs/[id]/level-surveys/route.ts'), /authenticateInspector\(request\)/)
+  const sql = await source('supabase/migrations/20261026100000_level_surveys.sql')
+  assert.match(sql, /create table if not exists public\.level_surveys/)
+  assert.match(sql, /alter table public\.level_surveys enable row level security/)
+  assert.match(sql, /revoke all on function public\.app_sync_level_surveys\(uuid, uuid, jsonb\) from public, anon, authenticated/)
+})

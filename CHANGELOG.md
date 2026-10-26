@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.22.0 — 2026-10-26
+
+- Floor level surveys for the inspector app (migration
+  `20261026100000_level_surveys.sql`, safe to run more than once):
+  relative floor levels (mm) marked on a floorplan, instrument, datum,
+  the inspector's result (minor / further investigation / major) and notes.
+  `POST /api/app/jobs/{id}/level-surveys`; included in the inspection pull.
+
 ## 0.21.0 — 2026-10-25
 
 - Building & Pest and Pre-Purchase pages (the Google Ads landing pages):
