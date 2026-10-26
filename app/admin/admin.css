@@ -367,6 +367,29 @@ body:has(.admin-shell) .site-footer {
   text-decoration: underline;
 }
 
+.admin-transfer {
+  margin-top: 8px;
+}
+
+.admin-transfer-body {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.admin-transfer-body img {
+  border: 1px solid var(--line, #ddd);
+  border-radius: 6px;
+}
+
+.admin-transfer-body textarea {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  font: inherit;
+  font-size: 0.85rem;
+}
+
 .admin-note {
   background: var(--warm-ivory);
   border-radius: 8px;

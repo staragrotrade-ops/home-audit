@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.25.0 — 2026-10-29
+
+- Report transfer (migration `20261029100000_report_transfer.sql`, safe to
+  run more than once). Admin: "Transfer QR code for the agent" next to the
+  report (QR PNG, link and email text). Another buyer opens `/r/<code>`,
+  enters their details, accepts the Inspection Agreement and pays $250 + GST
+  ($275). On payment the report is issued in their name (cover note "Report
+  transferred to … on …") and emailed; owner notified; Xero invoice as
+  "Inspection report transfer". Open for 30 days after the inspection.
+  Transfer orders are kept out of the inspector app's job list.
+- Reports from app 0.7+ are uploaded without the client's name and with the
+  places for it; the website prints the name in (`pdf-lib`), so a transferred
+  report never contains the first client's name.
+- Report downloads need a 6-digit code emailed to the order's address; a
+  confirmed browser can download for 12 hours.
+
+## 0.24.0 — 2026-10-28
+
+- Report delivery (migration `20261028100000_report_delivery.sql`, safe to
+  run more than once). Issuing a report no longer sets the job to "Report
+  sent" (it stays "Inspected"); jobs wrongly marked that way are corrected.
+- "Send to customer" in admin (Reports list) and in the app
+  (`POST /api/app/jobs/{id}/send-report`, issuers only): emails the customer
+  a link to their order page; paid orders only. The order page shows "Your
+  inspection report" with a download button (`/api/order/{token}/report`);
+  downloads are counted and shown in admin.
+
 ## 0.23.0 — 2026-10-27
 
 - Defect library from the app (migration `20261027100000_defect_library.sql`,

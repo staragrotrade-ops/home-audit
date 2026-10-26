@@ -64,6 +64,7 @@ export const CHANNEL_LABELS: Record<string, string> = {
   email_handoff: 'Form → email app',
   phone: 'Phone',
   app_manual: 'Inspector app',
+  report_transfer: 'Report transfer (QR)',
 }
 
 export function cleanSearch(value: string | undefined) {

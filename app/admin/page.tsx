@@ -8,6 +8,8 @@ import type { BookingRequestSummary } from '@/components/admin/booking-panel'
 import { JobReferrerSelect } from '@/components/admin/job-referrer-select'
 import { ReferrerManager } from '@/components/admin/referrer-manager'
 import { StaffManager } from '@/components/admin/staff-manager'
+import { ReportSendButton } from '@/components/admin/report-send-button'
+import { ReportTransferPanel } from '@/components/admin/report-transfer-panel'
 import { XeroSyncButton } from '@/components/admin/xero-sync-button'
 import { CalendarSyncButton } from '@/components/admin/calendar-sync-button'
 import { FloorplanPanel } from '@/components/admin/floorplan-panel'
@@ -160,7 +162,19 @@ type JobRow = {
     | { first_referrer: string | null; utm_source: string | null; normalized_source: string | null }[]
     | null
   inspection_reports:
-    | { id: string; report_kind: string; version_label: string; status: string; issued_at: string }[]
+    | {
+        id: string
+        report_kind: string
+        version_label: string
+        status: string
+        issued_at: string
+        // Present after the report delivery migration.
+        sent_at?: string | null
+        sent_to?: string | null
+        download_count?: number | null
+        last_downloaded_at?: string | null
+        template_path?: string | null
+      }[]
     | null
 }
 
@@ -316,7 +330,7 @@ export default async function AdminPage({
   let jobsQuery = supabase
     .from('jobs')
     .select(
-      'id,public_reference,service_family,inspection_type,new_home_stages,status,payment_status,intake_channel,is_test,archived_at,inspection_status,report_status,confirmed_start,preferred_date_1,preferred_date_2,deadline,flexible_booking,builder_name,expected_ready_date,access_contact,access_notes,source_self_reported,internal_notes,analytics_session_id,created_at,customer_snapshot,property_snapshot,quote_status,quote_total,price_guide_band,listing_url,travel_minutes,pricing_decision,pricing_reasons,paid_at,buyer_situation,access_choice,access_other_name,access_other_phone,details_submitted_at,agent_name,agent_agency,agent_phone,agent_email,listing_price_guide,listing_checked_at,agent_texted_at,booking_notified_at,review_requested_at,job_assignments(staff_id),job_attribution(first_referrer,utm_source,normalized_source),inspection_reports(id,report_kind,version_label,status,issued_at)',
+      'id,public_reference,service_family,inspection_type,new_home_stages,status,payment_status,intake_channel,is_test,archived_at,inspection_status,report_status,confirmed_start,preferred_date_1,preferred_date_2,deadline,flexible_booking,builder_name,expected_ready_date,access_contact,access_notes,source_self_reported,internal_notes,analytics_session_id,created_at,customer_snapshot,property_snapshot,quote_status,quote_total,price_guide_band,listing_url,travel_minutes,pricing_decision,pricing_reasons,paid_at,buyer_situation,access_choice,access_other_name,access_other_phone,details_submitted_at,agent_name,agent_agency,agent_phone,agent_email,listing_price_guide,listing_checked_at,agent_texted_at,booking_notified_at,review_requested_at,job_assignments(staff_id),job_attribution(first_referrer,utm_source,normalized_source),inspection_reports(*)',
     )
     .order('created_at', { ascending: false })
     .limit(60)
@@ -923,9 +937,41 @@ export default async function AdminPage({
                               </a>{' '}
                               · {formatDateTime(report.issued_at)}
                               {report.status !== 'issued' ? ` · ${report.status}` : ''}
+                              {report.sent_at ? ` · sent to ${report.sent_to} ${formatDateTime(report.sent_at)}` : ''}
+                              {report.status === 'issued' && !report.sent_at ? ' · not sent to the customer yet' : ''}
+                              {report.download_count
+                                ? ` · downloaded ${report.download_count}×${report.last_downloaded_at ? `, last ${formatDateTime(report.last_downloaded_at)}` : ''}`
+                                : ''}
+                              {report.status === 'issued' && (
+                                <>
+                                  {' '}
+                                  <ReportSendButton
+                                    jobId={job.id}
+                                    email={job.customer_snapshot?.email || null}
+                                    sent={Boolean(report.sent_at)}
+                                    paid={job.payment_status === 'paid'}
+                                  />
+                                </>
+                              )}
                             </li>
                           ))}
                         </ul>
+                        {job.intake_channel !== 'report_transfer' &&
+                          reports.some((report) => report.status === 'issued' && report.template_path) && (
+                            <ReportTransferPanel
+                              jobId={job.id}
+                              address={[job.property_snapshot?.address, job.property_snapshot?.suburb]
+                                .filter(Boolean)
+                                .join(', ')}
+                            />
+                          )}
+                      </div>
+                    )}
+                    {job.intake_channel === 'report_transfer' && job.payment_status === 'paid' && reports.length === 0 && (
+                      <div className="admin-reports">
+                        <h4>Report transfer</h4>
+                        <p className="admin-note">Paid, but the report has not been issued yet.</p>
+                        <ReportTransferPanel jobId={job.id} address="" transferJob={{ needsRetry: true }} />
                       </div>
                     )}
 

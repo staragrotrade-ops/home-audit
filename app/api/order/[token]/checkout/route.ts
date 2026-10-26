@@ -115,7 +115,9 @@ export async function POST(request: Request, context: { params: Promise<{ token:
     }
     const origin = new URL(request.url).origin
     const service =
-      job.service_family === 'new_home'
+      job.intake_channel === 'report_transfer'
+        ? 'Inspection report transfer'
+        : job.service_family === 'new_home'
         ? 'New home inspection'
         : `${INSPECTION_TYPE_LABELS[job.inspection_type || ''] || 'Building'} inspection`
     const metadata = {

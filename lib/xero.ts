@@ -178,13 +178,16 @@ type JobForXero = {
   quote_total: number | string | null
   customer_snapshot: Record<string, string | null>
   property_snapshot: Record<string, string | null>
+  intake_channel?: string | null
 }
 
 function describe(job: JobForXero) {
   const property = job.property_snapshot || {}
   const address = [property.address, property.suburb, property.postcode].filter(Boolean).join(', ')
   const service =
-    job.service_family === 'new_home'
+    job.intake_channel === 'report_transfer'
+      ? 'Inspection report transfer'
+      : job.service_family === 'new_home'
       ? `New home inspection (${(job.new_home_stages || []).map((stage) => STAGE_LABELS[stage] || stage).join(', ')})`
       : `${INSPECTION_TYPE_LABELS[job.inspection_type || ''] || 'Building'} inspection`
   return `${service} – ${address}`
@@ -225,7 +228,7 @@ export async function createPaidXeroInvoice(supabase: SupabaseClient, jobId: str
   const { data: job, error } = await supabase
     .from('jobs')
     .select(
-      'id,public_reference,service_family,inspection_type,new_home_stages,payment_status,paid_at,quote_subtotal,quote_total,customer_snapshot,property_snapshot',
+      'id,public_reference,service_family,inspection_type,new_home_stages,payment_status,paid_at,quote_subtotal,quote_total,customer_snapshot,property_snapshot,intake_channel',
     )
     .eq('id', jobId)
     .single()
