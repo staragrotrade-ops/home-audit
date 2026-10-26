@@ -9,6 +9,11 @@
 
 ## 0.25.0 — 2026-10-29
 
+- Inspection Agreement 2026-10-27: clauses 7.15–7.18 (the Company may sell
+  copies of the report to others in their own name; the client must not
+  sell or pass it on; the client keeps their own copy and photos; no duty to
+  store or resend). Key points and report wording 2026-10-27 updated.
+
 - Report transfer (migration `20261029100000_report_transfer.sql`, safe to
   run more than once). Admin: "Transfer QR code for the agent" next to the
   report (QR PNG, link and email text). Another buyer opens `/r/<code>`,
