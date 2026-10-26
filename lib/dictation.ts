@@ -6,7 +6,7 @@ const API = 'https://generativelanguage.googleapis.com/v1beta/models'
 
 export const DICTATION_MAX_BYTES = 4 * 1024 * 1024
 export const DICTATION_TYPES = ['audio/wav', 'audio/x-wav', 'audio/aac', 'audio/mp4', 'audio/m4a', 'audio/mpeg', 'audio/ogg', 'audio/flac'] as const
-export const DICTATION_FIELDS = ['observation', 'recommendation', 'title', 'limitation'] as const
+export const DICTATION_FIELDS = ['defect', 'observation', 'recommendation', 'title', 'limitation'] as const
 export type DictationField = (typeof DICTATION_FIELDS)[number]
 
 export type DictationContext = {
@@ -15,6 +15,16 @@ export type DictationContext = {
   severity?: string
   location?: string
   existing?: string
+  /** Room / area names of this job, so the AI can pick the matching one. */
+  rooms?: string
+}
+
+/** For field "defect": the whole defect, split into the editor's fields. */
+export type DictatedDefect = {
+  title: string
+  observation: string
+  recommendation: string
+  location: string
 }
 
 export type DictationResult = {
@@ -22,9 +32,12 @@ export type DictationResult = {
   language: string
   text: string
   notes: string
+  defect?: DictatedDefect
 }
 
 const FIELD_GUIDE: Record<DictationField, string> = {
+  defect:
+    'a complete DEFECT ENTRY. Put the observation in "text" as well as in "defect.observation".',
   observation:
     'an OBSERVATION: what was seen, where, extent and evidence (e.g. moisture meter readings). Plain past tense, e.g. "Cracked roof tiles were observed to the rear roof slope (approx. 4)." Do not add recommendations.',
   recommendation:
@@ -41,10 +54,22 @@ export function dictationPrompt(context: DictationContext) {
     '1. transcript: transcribe exactly what was said, in the original language(s).',
     '2. language: "en", "zh" or "mixed".',
     `3. text: rewrite it in professional Australian English as ${FIELD_GUIDE[context.field]}`,
+    'Write in the voice of the building inspector writing their own report: confident, factual and concise, in the third person or passive voice used in Australian pre-purchase reports (e.g. "Cracking was observed…", "It is recommended that…"). Never mention the AI, the recording or "the inspector said".',
+    context.field === 'defect'
+      ? [
+          '4. defect: split what was said into the defect entry fields:',
+          '   - title: at most 8 words, no full stop, e.g. "Cracked roof tiles – rear slope".',
+          '   - observation: what was seen, where, extent and evidence, in past tense. No recommendation here.',
+          '   - recommendation: the action and the trade, e.g. "Engage a licensed roof plumber to replace the cracked tiles." Empty string if none was said or clearly implied by the inspector.',
+          context.rooms
+            ? `   - location: the room or area. If it matches one of these job areas use that name exactly: ${context.rooms.slice(0, 1500)}. Otherwise the place the inspector said, or an empty string.`
+            : '   - location: the room or area the inspector said, or an empty string.',
+        ].join('\n')
+      : '4. defect: return empty strings for every field.',
     'Use standard building terms (e.g. 瓦片 = roof tiles, 水槽/天沟 = gutters, 落水管 = downpipes, 白蚁 = termites, 渗水 = water ingress, 裂缝 = cracking, 地板下 = subfloor, 屋顶空间 = roof space).',
     'Keep every number, measurement, quantity and location the inspector said. Remove filler words and repetition.',
     'Never add a defect, cause, severity, quantity or opinion the inspector did not say. If something is unclear, write [unclear] rather than guessing.',
-    '4. notes: one short sentence to the inspector if anything was unclear or you changed meaning-bearing words; otherwise an empty string.',
+    '5. notes: one short sentence to the inspector if anything was unclear or you changed meaning-bearing words; otherwise an empty string.',
     context.element ? `Context – element: ${context.element}.` : '',
     context.severity ? `Context – classification chosen by the inspector: ${context.severity}.` : '',
     context.location ? `Context – location: ${context.location}.` : '',
@@ -70,6 +95,16 @@ export function parseDictationReply(raw: string): DictationResult {
     language: ['en', 'zh', 'mixed'].includes(String(json.language)) ? String(json.language) : 'en',
     text: text(json.text, 4000),
     notes: text(json.notes, 500),
+  } as DictationResult
+  const defect = json.defect && typeof json.defect === 'object' ? (json.defect as Record<string, unknown>) : null
+  if (defect) {
+    const fields = {
+      title: text(defect.title, 120).replace(/\.$/, ''),
+      observation: text(defect.observation, 4000),
+      recommendation: text(defect.recommendation, 2000),
+      location: text(defect.location, 120),
+    }
+    if (Object.values(fields).some(Boolean)) result.defect = fields
   }
   if (!result.transcript && !result.text) throw new Error('No speech was recognised. Speak closer to the phone and try again.')
   return result
@@ -110,8 +145,18 @@ export async function transcribeDictation(audio: Uint8Array, mimeType: string, c
             language: { type: 'STRING', enum: ['en', 'zh', 'mixed'] },
             text: { type: 'STRING' },
             notes: { type: 'STRING' },
+            defect: {
+              type: 'OBJECT',
+              properties: {
+                title: { type: 'STRING' },
+                observation: { type: 'STRING' },
+                recommendation: { type: 'STRING' },
+                location: { type: 'STRING' },
+              },
+              required: ['title', 'observation', 'recommendation', 'location'],
+            },
           },
-          required: ['transcript', 'language', 'text', 'notes'],
+          required: ['transcript', 'language', 'text', 'notes', 'defect'],
         },
       },
     }),

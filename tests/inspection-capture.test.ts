@@ -170,6 +170,21 @@ test('dictation: prompt forbids invented findings; reply is validated; nothing s
   assert.throws(() => parseDictationReply('{"transcript":"","text":""}'), /No speech/)
   assert.equal(dictationMimeType('audio/x-wav'), 'audio/wav')
 
+  // Whole defect: inspector's voice, split into fields, room from the job's list.
+  const whole = dictationPrompt({ field: 'defect', rooms: 'Kitchen, Bathroom 2' })
+  assert.match(whole, /voice of the building inspector/)
+  assert.match(whole, /Kitchen, Bathroom 2/)
+  const split = parseDictationReply(
+    '{"transcript":"二号浴室淋浴间渗水","language":"zh","text":"Water ingress was observed.","notes":"","defect":{"title":"Shower leak.","observation":"Water ingress was observed.","recommendation":"Engage a waterproofer.","location":"Bathroom 2"}}',
+  )
+  assert.deepEqual(split.defect, {
+    title: 'Shower leak',
+    observation: 'Water ingress was observed.',
+    recommendation: 'Engage a waterproofer.',
+    location: 'Bathroom 2',
+  })
+  assert.equal(parseDictationReply('{"transcript":"x","text":"y","defect":{"title":"","observation":"","recommendation":"","location":""}}').defect, undefined)
+
   const route = await source('app/api/app/dictation/route.ts')
   assert.match(route, /authenticateInspector\(request\)/)
   assert.match(route, /consume_rate_limit/)
@@ -242,10 +257,10 @@ test('report terms: agree with the Inspection Agreement and Australian law', asy
   const all = JSON.stringify(payload)
   // Placeholders are filled; no unfilled {tokens} reach the report.
   assert.doesNotMatch(all, /\{(company|acn|phone|email)\}/)
-  assert.match(all, /GXH Consultancy Pty Ltd/)
-  // ACL rights preserved; no arbitration or indemnity clauses; complaints to CAV / VCAT.
+  // ACL rights preserved; no arbitration or indemnity clauses. (Complaint
+  // pathways are in the Inspection Agreement, not repeated in the report.)
   assert.match(all, /Australian Consumer Law/)
-  assert.match(all, /VCAT/)
+  assert.match(all, /Floor levels are not measured as a matter of course/)
   assert.doesNotMatch(all, /[Aa]rbitrat|indemnif/)
   assert.doesNotMatch(all, /Institute of Arbitrators/)
   // Standards and AS 4349.1 Appendix C ratings are defined.
@@ -285,4 +300,18 @@ test('level surveys: readings validated; route authenticates; RLS and re-runnabl
   assert.match(sql, /create table if not exists public\.level_surveys/)
   assert.match(sql, /alter table public\.level_surveys enable row level security/)
   assert.match(sql, /revoke all on function public\.app_sync_level_surveys\(uuid, uuid, jsonb\) from public, anon, authenticated/)
+})
+
+test('defect library: phones add wording; duplicates are not created; service role only', async () => {
+  const { templateBatch } = await import('../lib/inspection-sync.ts')
+  const item = { id: '7f1f6c1e-2a7b-4c7e-9a51-1d0c6b3f9a10', elementKey: 'gutter', severity: 'minor_defect', title: 'Blocked gutter', observation: 'Leaf litter was observed in the gutter.' }
+  assert.equal(templateBatch.parse({ templates: [item] }).templates.length, 1)
+  assert.throws(() => templateBatch.parse({ templates: [{ ...item, title: 'x' }] }))
+  assert.throws(() => templateBatch.parse({ templates: [{ ...item, severity: 'bad' }] }))
+  const sql = await source('supabase/migrations/20261027100000_defect_library.sql')
+  assert.match(sql, /lower\(title\) = lower\(v_title\)/)
+  assert.match(sql, /grant execute on function public\.app_save_defect_templates\(uuid, jsonb\) to service_role/)
+  assert.match(sql, /from public, anon, authenticated/)
+  const route = await source('app/api/app/templates/route.ts')
+  assert.match(route, /authenticateInspector\(request\)/)
 })

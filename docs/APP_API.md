@@ -70,6 +70,7 @@ Prices, payment ids and the owner's internal notes are never sent to the app.
 | GET | `/api/app/catalog` | `?templatesSinceRev=` optional | `catalog {version, severities[], trades[], areas[], elements[]}`, `templates[]` (most used first) |
 | GET | `/api/app/jobs/{id}/inspection` | `?sinceRev=` optional | `floorplans[]` (with `url`, valid 1 hour), `defects[]`, `photos[]`, `serverRev` |
 | POST | `/api/app/jobs/{id}/assessment` | `Assessment` | `result {applied, stale}` |
+| POST | `/api/app/templates` | `{templates: [{id, elementKey, severity, title, observation, recommendation?}]}` (max 50) | `result {saved[], duplicates{phoneId: existingId}}` |
 | POST | `/api/app/jobs/{id}/level-surveys` | `{surveys: LevelSurvey[]}` (max 50) | `result {applied[], stale[]}` |
 | POST | `/api/app/jobs/{id}/areas` | `{areas: Area[]}` (max 200) | `result {applied[], stale[]}` |
 | POST | `/api/app/jobs/{id}/defects` | `{defects: Defect[]}` (max 200) | `result {applied[], stale[]}` |
@@ -80,7 +81,7 @@ Prices, payment ids and the owner's internal notes are never sent to the app.
 | POST | `/api/app/jobs/{id}/floorplans/upload` | `{contentType, sizeBytes}` | `{path, signedUrl, token}` |
 | POST | `/api/app/jobs/{id}/floorplans/complete` | `{path, levelLabel}` | `floorplan` |
 | POST | `/api/app/jobs/{id}/submit` | – | hands fieldwork to review (`reportStatus: in_review`) |
-| POST | `/api/app/dictation` | multipart `audio` (wav/aac/m4a ≤ 4 MB) + `field` (observation\|recommendation\|title\|limitation), optional `element`, `severity`, `location`, `existing`, `jobId` | `result {transcript, language, text, notes}` – Gemini; nothing stored; 240/hour per inspector |
+| POST | `/api/app/dictation` | multipart `audio` (wav/aac/m4a ≤ 4 MB) + `field` (defect\|observation\|recommendation\|title\|limitation), optional `element`, `severity`, `location`, `existing`, `rooms`, `jobId` | `result {transcript, language, text, notes, defect?{title, observation, recommendation, location}}` – Gemini; nothing stored; 240/hour per inspector |
 
 **Defect** — the phone creates the `id` (UUID v4) so offline edits keep their
 identity. `{id, elementKey, severity, title, observation, recommendation?,

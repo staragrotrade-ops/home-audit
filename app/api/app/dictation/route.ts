@@ -18,6 +18,7 @@ const context = z.object({
   severity: z.string().trim().max(80).optional(),
   location: z.string().trim().max(120).optional(),
   existing: z.string().max(4000).optional(),
+  rooms: z.string().max(2000).optional(),
   jobId: z.uuid().optional(),
 })
 
@@ -51,6 +52,7 @@ export async function POST(request: Request) {
       severity: form.get('severity') || undefined,
       location: form.get('location') || undefined,
       existing: form.get('existing') || undefined,
+      rooms: form.get('rooms') || undefined,
       jobId: form.get('jobId') || undefined,
     })
 

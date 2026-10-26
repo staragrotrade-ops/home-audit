@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.23.0 — 2026-10-27
+
+- Defect library from the app (migration `20261027100000_defect_library.sql`,
+  safe to run more than once): saving a defect adds its wording to the shared
+  descriptions; the same title for the same element is not duplicated.
+  `POST /api/app/templates`.
+- AI dictation of a whole defect (`field=defect`, optional `rooms`): written
+  in the inspector's own report voice and split into title, observation,
+  recommendation and room / area.
+- Report wording 2026-10-26: complaint paragraph removed from the report (it
+  remains in the Inspection Agreement); new "Floor levels" limitation.
+
 ## 0.22.0 — 2026-10-26
 
 - Floor level surveys for the inspector app (migration

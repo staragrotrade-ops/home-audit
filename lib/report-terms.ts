@@ -16,7 +16,7 @@
 // Placeholders filled by the app: {company}, {acn}, {phone}, {email}.
 import { COMPANY_ACN, COMPANY_NAME, CONTACT_EMAIL, CONTACT_PHONE } from './site.ts'
 
-export const REPORT_TERMS_VERSION = '2026-10-22'
+export const REPORT_TERMS_VERSION = '2026-10-26'
 
 /** Which reports a block appears in. */
 export type TermsScope = 'all' | 'building' | 'pest'
@@ -182,6 +182,9 @@ export const REPORT_TERMS_SECTIONS: TermsSection[] = [
         text: 'Cracking. A visual inspection cannot predict whether a crack will widen. That depends on the foundation material, the footing design, the site and the history of the crack, which are outside the scope of this inspection. Wall cracks are described using the categories of AS 2870: 0 – hairline, less than 0.1 mm; 1 – fine, less than 1 mm; 2 – noticeable, 1 to 5 mm; 3 – 5 to 15 mm, repair needed and weather-tightness may be affected; 4 – 15 to 25 mm, extensive repair needed. Where cracking is reported as more than minor, or where you are concerned about it, obtain advice from a structural engineer before purchase.',
       },
       {
+        text: 'Floor levels. Floor levels are not measured as a matter of course. Using experience, the inspector takes readings only where a noticeable variation in floor level is seen, after allowing for factors that affect level such as construction tolerances, floor coverings, built-in fittings and the age of the building. Any readings and assessment are not a precise level survey; they are the inspector\'s judgement and advice at the time of inspection and must not be relied on as the only basis for a repair or purchase decision.',
+      },
+      {
         text: 'Elevated structures. Decks, balconies, verandahs, stairs and balustrades intended to carry people should be checked by an engineer or other suitably qualified person, and inspected regularly. This report does not assess whether any structure is suitable for a particular load or number of people. Balustrades and stairs in older homes may not meet the current National Construction Code.',
       },
       {
@@ -291,14 +294,11 @@ export const REPORT_TERMS_SECTIONS: TermsSection[] = [
   },
   {
     id: 'questions',
-    heading: '9. Questions and complaints',
+    heading: '9. Questions about this report',
     scope: 'all',
     blocks: [
       {
         text: 'Please contact the inspector if anything in this report is unclear – before signing a contract or letting a cooling-off, finance or building condition date pass. The inspection fee includes up to 15 minutes of telephone discussion about the report. Rely only on the written report; spoken comments on site or by phone are not part of our advice.',
-      },
-      {
-        text: 'If you have a complaint, contact {company} trading as Home Audit on {phone} or {email} and we will work with you to resolve it. If it is not resolved, you may contact Consumer Affairs Victoria or apply to the Victorian Civil and Administrative Tribunal (VCAT).',
       },
     ],
   },

@@ -170,3 +170,15 @@ export const levelSurveyInput = z.object({
 })
 
 export const levelSurveyBatch = z.object({ surveys: z.array(levelSurveyInput).max(50) })
+
+// A description the inspector added to the defect library from the app.
+export const templateInput = z.object({
+  id: z.uuid(),
+  elementKey: key,
+  severity: z.enum(SEVERITIES),
+  title: z.string().trim().min(2).max(120),
+  observation: z.string().trim().min(2).max(2000),
+  recommendation: z.string().trim().max(2000).nullable().optional(),
+})
+
+export const templateBatch = z.object({ templates: z.array(templateInput).max(50) })
