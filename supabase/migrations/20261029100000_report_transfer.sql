@@ -48,6 +48,10 @@ create index if not exists report_download_codes_job_idx on public.report_downlo
 alter table public.report_download_codes enable row level security;
 revoke all on table public.report_download_codes from anon, authenticated;
 
+-- The app reads jobs through this view with column grants; the filter below
+-- needs intake_channel too.
+grant select (intake_channel) on public.jobs to authenticated;
+
 create or replace view public.inspector_job_feed
 with (security_invoker = true)
 as
