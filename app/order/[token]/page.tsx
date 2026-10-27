@@ -199,7 +199,7 @@ export default async function OrderPage({
                 you the confirmed date. We provide a digital copy of the report after the inspection.
               </p>
             )}
-            {isPayable(job) && <AgreementPanel token={token} mode="pay" label={`Agree and pay ${formatAud(total)}`} />}
+            {isPayable(job) && <AgreementPanel token={token} mode="pay" label="Agree and pay" />}
             {pending && (
               <p className="order-hint">
                 If you have just paid, the payment may take a minute to show. Refresh this page shortly.

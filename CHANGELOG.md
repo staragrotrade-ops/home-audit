@@ -9,6 +9,10 @@
   transfer, cancellation). Booked by phone or prefilled email; no form, no
   Stripe. Linked from the Building & Pest and pre-purchase deadline callouts,
   added to the sitemap and the release gate.
+- Order page: the agreement summary no longer lists the liability limit or
+  the report copy/storage point (both stay in the full agreement, clauses
+  10 and 7.15–7.18; agreement version unchanged). The pay button reads
+  "Agree and pay" without the amount.
 
 ## 0.25.1 — 2026-10-27
 
