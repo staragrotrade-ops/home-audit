@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.27.2 — 2026-10-28
+
+- Quote form: an optional "Agent phone" next to "Agent email". The
+  "Agent, tenant or builder access contact" field is removed (access is
+  asked after payment).
+- The agent email and phone are saved on the job. After payment the order
+  page shows them in the access step (and picks "The selling agent"), so the
+  customer checks them instead of typing them again. Saved details are kept;
+  a different value from the customer is added to the access notes.
+
 ## 0.27.1 — 2026-10-28
 
 - Order page: the Chinese translation option is now one short line,

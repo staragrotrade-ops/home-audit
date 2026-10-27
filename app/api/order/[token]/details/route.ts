@@ -20,6 +20,7 @@ const schema = z
     otherPhone: phone.default(''),
     agentName: z.string().trim().max(120).default(''),
     agentPhone: phone.default(''),
+    agentEmail: z.union([z.literal(''), z.email().max(180)]).default(''),
     notes: z.string().trim().max(1000).default(''),
   })
   .superRefine((value, context) => {
@@ -71,11 +72,24 @@ export async function POST(request: Request, context: { params: Promise<{ token:
       access_other_phone: input.accessChoice === 'other' ? input.otherPhone : null,
       details_submitted_at: new Date().toISOString(),
     }
-    // Agent details from the customer are only a starting point; the owner's
-    // entries in the dashboard take priority.
-    if (input.agentName && !job.agent_name) update.agent_name = input.agentName
-    if (input.agentPhone && !job.agent_phone) update.agent_phone = input.agentPhone
-    if (input.notes) update.access_notes = input.notes
+    // Agent details from the customer fill empty fields only; what is already
+    // saved (the quote form or the owner's dashboard entries) is kept. A
+    // different value from the customer is added to the notes instead.
+    const changed: string[] = []
+    const agentFields = [
+      ['agent_name', 'name', input.agentName, job.agent_name],
+      ['agent_phone', 'phone', input.agentPhone, job.agent_phone],
+      ['agent_email', 'email', input.agentEmail, job.agent_email],
+    ] as const
+    for (const [column, label, given, saved] of agentFields) {
+      if (!given) continue
+      if (!saved) update[column] = given
+      else if (given.toLowerCase() !== saved.toLowerCase()) changed.push(`${label} ${given}`)
+    }
+    const notes = [input.notes, changed.length ? `Customer's agent details: ${changed.join(', ')}` : '']
+      .filter(Boolean)
+      .join('\n')
+    if (notes) update.access_notes = notes
 
     const { error } = await supabase.from('jobs').update(update).eq('id', job.id)
     if (error) throw new Error(error.message)

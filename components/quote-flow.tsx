@@ -70,6 +70,7 @@ const emptyDraft: Draft = {
   mobile: '',
   conveyancer_email: '',
   agent_email: '',
+  agent_phone: '',
   preferred_date_1: '',
   preferred_date_2: '',
   deadline: '',
@@ -120,6 +121,7 @@ const fieldInfo: Record<string, { label: string; step: number }> = {
   mobile: { label: 'Mobile', step: 2 },
   conveyancer_email: { label: 'Conveyancer / solicitor email', step: 2 },
   agent_email: { label: 'Agent email', step: 2 },
+  agent_phone: { label: 'Agent phone', step: 2 },
   preferred_date_1: { label: 'Preferred date', step: 3 },
   preferred_date_2: { label: 'Second preference', step: 3 },
   deadline: { label: 'Auction / contract deadline', step: 3 },
@@ -156,6 +158,7 @@ function requestBody(draft: Draft, intakeMode: 'submit' | 'email_handoff', turns
     mobile: draft.mobile.trim(),
     conveyancer_email: (draft.conveyancer_email || '').trim(),
     agent_email: (draft.agent_email || '').trim(),
+    agent_phone: (draft.agent_phone || '').trim(),
     intake_mode: intakeMode,
     analytics_session_id: currentVisitId(),
     turnstile_token: turnstileToken,
@@ -221,13 +224,13 @@ function buildEmailHref(draft: Draft, stageLabels: string) {
     `Email: ${draft.email}`,
     `Mobile: ${draft.mobile}`,
     draft.conveyancer_email && `Conveyancer / solicitor: ${draft.conveyancer_email}`,
-    draft.agent_email && `Agent: ${draft.agent_email}`,
+    draft.agent_email && `Agent email: ${draft.agent_email}`,
+    draft.agent_phone && `Agent phone: ${draft.agent_phone}`,
     '',
     draft.preferred_date_1 && `Preferred date: ${draft.preferred_date_1}`,
     draft.preferred_date_2 && `Second preference: ${draft.preferred_date_2}`,
     draft.deadline && `Auction / contract deadline: ${draft.deadline}`,
     draft.flexible_booking && 'Dates are flexible',
-    draft.access_contact && `Access contact: ${draft.access_contact}`,
     draft.access_notes && `Notes: ${draft.access_notes}`,
     draft.voucher_code && `Voucher code: ${draft.voucher_code}`,
   ].filter((line): line is string => typeof line === 'string')
@@ -392,6 +395,8 @@ export function QuoteFlow({
         errors.push('Check the conveyancer / solicitor email, or leave it blank.')
       if (draft.agent_email && !emailPattern.test(draft.agent_email.trim()))
         errors.push('Check the agent email, or leave it blank.')
+      if (draft.agent_phone && !/^[0-9+() -]{6,40}$/.test(draft.agent_phone.trim()))
+        errors.push('Check the agent phone (digits, spaces and + only), or leave it blank.')
     }
 
     if (target === 3) {
@@ -867,6 +872,15 @@ export function QuoteFlow({
                   onChange={(event) => update('agent_email', event.target.value)}
                 />
               </div>
+              <div className="field">
+                <label htmlFor="agent_phone">Agent phone</label>
+                <input
+                  id="agent_phone"
+                  type="tel"
+                  value={draft.agent_phone || ''}
+                  onChange={(event) => update('agent_phone', event.target.value)}
+                />
+              </div>
               <div className="field" aria-hidden="true" style={{ position: 'absolute', left: '-10000px' }}>
                 <label htmlFor="website">Website</label>
                 <input
@@ -957,14 +971,6 @@ export function QuoteFlow({
                 />
                 My dates are flexible
               </label>
-              <div className="field-full">
-                <label htmlFor="access_contact">Agent, tenant or builder access contact</label>
-                <input
-                  id="access_contact"
-                  value={draft.access_contact}
-                  onChange={(event) => update('access_contact', event.target.value)}
-                />
-              </div>
               <div className="field-full">
                 <label htmlFor="access_notes">Access or scope notes</label>
                 <textarea

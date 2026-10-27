@@ -301,6 +301,9 @@ export default async function OrderPage({
                     accessChoice: job.access_choice || '',
                     otherName: job.access_other_name || '',
                     otherPhone: job.access_other_phone || '',
+                    agentName: job.agent_name || '',
+                    agentPhone: job.agent_phone || '',
+                    agentEmail: job.agent_email || job.customer_snapshot?.agent_email || '',
                   }}
                 />
               )}

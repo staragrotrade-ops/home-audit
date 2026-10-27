@@ -165,11 +165,14 @@ export async function POST(request: Request) {
   }
 
   // Keep only the fields that belong to the chosen service family.
+  // The agent phone is saved on the job after it is created (the database
+  // function does not take it).
+  const { agent_phone: agentPhone, ...jobFields } = fields
   const payload =
-    fields.service_family === 'new_home'
-      ? { ...fields, inspection_type: '' as const }
+    jobFields.service_family === 'new_home'
+      ? { ...jobFields, inspection_type: '' as const }
       : {
-          ...fields,
+          ...jobFields,
           new_home_stages: [],
           builder_name: '',
           expected_ready_date: '' as const,
@@ -231,6 +234,16 @@ export async function POST(request: Request) {
     is_test: isTest,
     price_guide_band: fields.price_guide_band,
     listing_url: fields.listing_url || null,
+  }
+
+  // Agent details from the form, shown again on the order page after payment.
+  // Written on their own so a problem here never loses the request.
+  if (fields.agent_email || agentPhone) {
+    const { error: agentError } = await supabase
+      .from('jobs')
+      .update({ agent_email: fields.agent_email || null, agent_phone: agentPhone || null })
+      .eq('id', jobId)
+    if (agentError) console.error('quote_agent_details_failed', { code: agentError.code })
   }
 
   // The referral partner whose link the customer used (saved for 90 days).
