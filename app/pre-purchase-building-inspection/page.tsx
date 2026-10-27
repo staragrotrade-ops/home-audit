@@ -229,6 +229,13 @@ export default function PrePurchaseInspectionPage() {
                 so access, availability and reporting timing can be considered
                 together.
               </p>
+              <p>
+                Auction in the next day or two?{' '}
+                <Link className="text-link" href="/last-minute-building-inspection-melbourne">
+                  See our last-minute walk-through
+                </Link>
+                .
+              </p>
               <Link className="button" href="/quote?service=building-and-pest">
                 Request a pre-purchase quote
               </Link>

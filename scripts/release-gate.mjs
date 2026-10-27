@@ -12,6 +12,7 @@ const coreIndexableRoutes = [
   '/pre-purchase-building-inspection',
   '/new-home-inspections',
   '/practical-completion-inspection',
+  '/last-minute-building-inspection-melbourne',
   '/about',
   '/credentials',
   '/service-areas',
@@ -115,6 +116,7 @@ try {
   assert.equal(sitemap.response.statusCode, 200, '/sitemap.xml: expected HTTP 200')
   assert.match(sitemap.body, /pre-purchase-building-inspection/, 'Sitemap must include pre-purchase page')
   assert.match(sitemap.body, /practical-completion-inspection/, 'Sitemap must include PCI page')
+  assert.match(sitemap.body, /last-minute-building-inspection-melbourne/, 'Sitemap must include the last-minute page')
   assert.match(sitemap.body, /<loc>https:\/\/homeaudit\.com\.au\/guides<\/loc>/, 'Sitemap must include guides hub')
   assert.match(sitemap.body, /building-inspection-buyers-market/, 'Sitemap must include the market guide')
   assert.match(sitemap.body, /agent-pressure-skip-building-inspection/, 'Sitemap must include the agent-pressure guide')

@@ -192,6 +192,13 @@ export default function BuildingAndPestPage() {
                 Add the deadline to your quote request. Availability, property
                 access and reporting timing can then be considered together.
               </p>
+              <p>
+                Auction in the next day or two?{' '}
+                <Link className="text-link" href="/last-minute-building-inspection-melbourne">
+                  See our last-minute walk-through
+                </Link>
+                .
+              </p>
               <Link className="button" href="/quote?service=building-and-pest">
                 Request a quote
               </Link>

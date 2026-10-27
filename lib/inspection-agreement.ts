@@ -30,7 +30,9 @@ export const AGREEMENT_FINGERPRINTS: Record<string, string> = {
 }
 
 // The plain-English summary shown above the tick box. It must not say
-// anything the full text does not.
+// anything the full text does not. Liability (clause 10) and report copies
+// and storage (clauses 7.15–7.18) are in the full text only (owner decision,
+// 27 October 2026).
 export const AGREEMENT_KEY_POINTS = [
   'The inspection is visual and non-invasive. Only areas that can be reached safely on the day are inspected. Any access that needs a tool to open is treated as not accessible.',
   'Concealed areas, services such as electrical, plumbing and gas, pools, asbestos, timber pests (unless ordered) and compliance checks are not included.',
@@ -38,8 +40,6 @@ export const AGREEMENT_KEY_POINTS = [
   'The report is advice only. It must not be the only basis for deciding to buy, negotiating the price or valuing the property. Your decisions and your appetite for risk are your own.',
   'You must read the full written report. Spoken comments are not guaranteed to be complete or accurate. Up to 15 minutes of phone time is included; extra time is charged.',
   'Cancelling 3 or more business days before the inspection costs $100. After that, the fee is not refunded.',
-  'Our liability is limited to the inspection fee, as far as the law allows. Your rights under the Australian Consumer Law are not affected.',
-  'Download and keep your own copy of the report and its photos. We do not have to store them or send them again. The report is for you only; we may sell copies to other buyers in their own name, without your name or contact details.',
 ]
 
 export const AGREEMENT_SECTIONS: AgreementSection[] = [

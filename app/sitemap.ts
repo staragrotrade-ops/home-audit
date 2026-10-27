@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/pre-purchase-building-inspection',
     '/new-home-inspections',
     '/practical-completion-inspection',
+    '/last-minute-building-inspection-melbourne',
     '/about',
     '/credentials',
     '/service-areas',
