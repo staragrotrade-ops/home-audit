@@ -48,6 +48,12 @@ export const quoteRequestSchema = z
       .regex(/^[0-9+() -]+$/),
     conveyancer_email: optionalEmail,
     agent_email: optionalEmail,
+    agent_phone: z
+      .string()
+      .trim()
+      .max(40)
+      .regex(/^[0-9+() -]*$/)
+      .default(''),
     preferred_date_1: optionalDate.default(''),
     preferred_date_2: optionalDate.default(''),
     deadline: optionalDate.default(''),

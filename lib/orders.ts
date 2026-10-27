@@ -12,7 +12,7 @@ import { redeemJobVoucher } from '@/lib/vouchers'
 import { completeTransfer } from '@/lib/report-transfer'
 
 export const ORDER_COLUMNS =
-  'id,public_reference,service_family,inspection_type,new_home_stages,status,quote_status,payment_status,quote_subtotal,gst,quote_total,pricing_decision,pricing_reasons,is_test,archived_at,customer_snapshot,property_snapshot,preferred_date_1,deadline,buyer_situation,access_choice,access_other_name,access_other_phone,agent_name,agent_phone,details_submitted_at,confirmed_start,booking_notified_at,paid_notified_at,intake_channel'
+  'id,public_reference,service_family,inspection_type,new_home_stages,status,quote_status,payment_status,quote_subtotal,gst,quote_total,pricing_decision,pricing_reasons,is_test,archived_at,customer_snapshot,property_snapshot,preferred_date_1,deadline,buyer_situation,access_choice,access_other_name,access_other_phone,agent_name,agent_phone,agent_email,details_submitted_at,confirmed_start,booking_notified_at,paid_notified_at,intake_channel'
 
 export type OrderJob = {
   id: string
@@ -40,6 +40,7 @@ export type OrderJob = {
   access_other_phone: string | null
   agent_name: string | null
   agent_phone: string | null
+  agent_email: string | null
   details_submitted_at: string | null
   confirmed_start: string | null
   booking_notified_at: string | null

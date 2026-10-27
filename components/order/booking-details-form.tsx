@@ -9,10 +9,20 @@ export function BookingDetailsForm({
   initial,
 }: {
   token: string
-  initial: { buyerSituation: string; accessChoice: string; otherName: string; otherPhone: string }
+  initial: {
+    buyerSituation: string
+    accessChoice: string
+    otherName: string
+    otherPhone: string
+    agentName: string
+    agentPhone: string
+    agentEmail: string
+  }
 }) {
   const router = useRouter()
-  const [accessChoice, setAccessChoice] = useState(initial.accessChoice)
+  const knownAgent = Boolean(initial.agentName || initial.agentPhone || initial.agentEmail)
+  // Agent details given with the quote suggest the agent gives access.
+  const [accessChoice, setAccessChoice] = useState(initial.accessChoice || (knownAgent ? 'agent' : ''))
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null)
 
@@ -31,6 +41,7 @@ export function BookingDetailsForm({
         otherPhone: form.get('otherPhone') || '',
         agentName: form.get('agentName') || '',
         agentPhone: form.get('agentPhone') || '',
+        agentEmail: form.get('agentEmail') || '',
         notes: form.get('notes') || '',
       }),
     }).catch(() => null)
@@ -82,15 +93,21 @@ export function BookingDetailsForm({
       {accessChoice === 'agent' && (
         <div className="field-grid">
           <p className="field-full order-hint">
-            We will find the agent on the listing. If you know their details, add them here.
+            {knownAgent
+              ? 'These are the agent details you gave us. Check them, or add any that are missing.'
+              : 'We will find the agent on the listing. If you know their details, add them here.'}
           </p>
           <div className="field">
             <label htmlFor="agentName">Agent name</label>
-            <input id="agentName" name="agentName" maxLength={120} />
+            <input id="agentName" name="agentName" maxLength={120} defaultValue={initial.agentName} />
           </div>
           <div className="field">
             <label htmlFor="agentPhone">Agent phone</label>
-            <input id="agentPhone" name="agentPhone" type="tel" maxLength={40} />
+            <input id="agentPhone" name="agentPhone" type="tel" maxLength={40} defaultValue={initial.agentPhone} />
+          </div>
+          <div className="field">
+            <label htmlFor="agentEmail">Agent email</label>
+            <input id="agentEmail" name="agentEmail" type="email" maxLength={180} defaultValue={initial.agentEmail} />
           </div>
         </div>
       )}
