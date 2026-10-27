@@ -3603,3 +3603,59 @@ button:focus-visible {
     transform: none;
   }
 }
+
+/* 0.27.1 — report language, collapsed until the customer asks */
+.translation-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin: 14px 0 0;
+  color: #4d625d;
+  font-size: 0.92rem;
+}
+
+.text-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--eucalyptus);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.translation-choices {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.translation-choices .checkbox-option {
+  align-items: flex-start;
+}
+
+.translation-choices input {
+  margin-top: 2px;
+}
+
+.translation-choices small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

@@ -3,13 +3,17 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-// The paid Chinese translation, chosen before payment.
+// The report language, chosen before payment. Shown as one short line; the
+// choice opens only when the customer asks for it. A customer who already
+// chose Chinese sees that on the line without opening it.
 export function TranslationOption({ token, on, feeLabel }: { token: string; on: boolean; feeLabel: string }) {
   const router = useRouter()
+  const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
   async function change(next: boolean) {
+    if (next === on) return
     setBusy(true)
     setError('')
     const response = await fetch(`/api/order/${token}/translation`, {
@@ -28,14 +32,41 @@ export function TranslationOption({ token, on, feeLabel }: { token: string; on: 
 
   return (
     <div className="translation-option">
-      <label className="checkbox-option">
-        <input type="checkbox" checked={on} disabled={busy} onChange={(event) => void change(event.target.checked)} />
+      <p className="translation-summary">
         <span>
-          <strong>Chinese translation of the report 中文报告翻译</strong> (+{feeLabel}). A complete Simplified Chinese
-          copy of your report, with the same photos and floorplans, sent with the English report. The English
-          report is the official version.
+          Report language: <strong>{on ? `English + 简体中文 (+${feeLabel})` : 'English'}</strong>
         </span>
-      </label>
+        <button
+          type="button"
+          className="text-button"
+          aria-expanded={open}
+          aria-controls="report-language-choices"
+          onClick={() => setOpen(!open)}
+        >
+          {open ? 'Close' : 'Change language / 更改语言'}
+        </button>
+      </p>
+      {open && (
+        <fieldset id="report-language-choices" className="translation-choices" disabled={busy}>
+          <legend className="sr-only">Report language</legend>
+          <label className="checkbox-option">
+            <input type="radio" name="report-language" checked={!on} onChange={() => void change(false)} />
+            <span>
+              <strong>English</strong> (included)
+            </span>
+          </label>
+          <label className="checkbox-option">
+            <input type="radio" name="report-language" checked={on} onChange={() => void change(true)} />
+            <span>
+              <strong>English + 简体中文 copy</strong> (+{feeLabel})
+              <small>
+                Same photos and floorplans, sent with the English report. The English
+                report is the official version.
+              </small>
+            </span>
+          </label>
+        </fieldset>
+      )}
       {error && (
         <p className="quote-status" data-type="error" role="alert">
           {error}

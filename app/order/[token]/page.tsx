@@ -211,7 +211,7 @@ export default async function OrderPage({
             {isPayable(job) && !transfer && job.service_family === 'existing_home' && (
               <TranslationOption token={token} on={translationZh} feeLabel={formatAud(TRANSLATION_FEE_CENTS)} />
             )}
-            {translationZh && (
+            {translationZh && !(isPayable(job) && !transfer && job.service_family === 'existing_home') && (
               <p className="order-hint">
                 Includes the Chinese translation ({formatAud(Math.round(Number(translationRow?.translation_fee || 0) * 100))}).
               </p>
