@@ -48,7 +48,7 @@ export async function GET(request: Request, context: { params: Promise<{ token: 
 
   const { data: report } = await supabase
     .from('inspection_reports')
-    .select('id,storage_path')
+    .select('id,storage_path,zh_path')
     .eq('job_id', job.id)
     .eq('status', 'issued')
     .not('sent_at', 'is', null)
@@ -56,10 +56,15 @@ export async function GET(request: Request, context: { params: Promise<{ token: 
     .limit(1)
     .maybeSingle()
   if (!report) return reply('The report is not ready yet.', 404)
+  const chinese = new URL(request.url).searchParams.get('lang') === 'zh'
+  if (chinese && !report.zh_path) return reply('The Chinese translation is not ready yet.', 404)
+  const path = chinese ? (report.zh_path as string) : (report.storage_path as string)
 
   const { data, error } = await supabase.storage
     .from(REPORT_BUCKET)
-    .createSignedUrl(report.storage_path, 300, { download: `Home-Audit-report-${job.public_reference}.pdf` })
+    .createSignedUrl(path, 300, {
+      download: `Home-Audit-report-${job.public_reference}${chinese ? '-zh' : ''}.pdf`,
+    })
   if (error || !data) return reply('Unable to open the report. Please try again.', 500)
   await supabase.rpc('record_report_download', { p_report_id: report.id })
   return NextResponse.redirect(data.signedUrl, 303)

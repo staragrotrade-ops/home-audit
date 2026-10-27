@@ -20,6 +20,14 @@ const schema = z.object({
   // goes; the website prints the name in (and a new buyer's name on transfer).
   nameSlots: nameSlots.optional(),
   clientName: z.string().trim().max(120).optional(),
+  // The Chinese copy (translation add-on), uploaded with its own report-upload.
+  chinese: z
+    .object({
+      storagePath: z.string().min(40).max(300),
+      sizeBytes: z.number().int().positive().max(REPORT_MAX_BYTES),
+      nameSlots: nameSlots,
+    })
+    .optional(),
 })
 
 // Step 2 of 2: registers the uploaded PDF as an issued report.
@@ -36,6 +44,13 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     )
     if (!input.storagePath.startsWith(`${id}/`) || !expected.test(fileName)) {
       throw new Error('The report path does not belong to this job.')
+    }
+
+    if (input.chinese) {
+      const zhName = input.chinese.storagePath.slice(id.length + 1)
+      if (!input.chinese.storagePath.startsWith(`${id}/`) || !expected.test(zhName)) {
+        throw new Error('The Chinese report path does not belong to this job.')
+      }
     }
 
     const admin = getSupabaseAdmin()
@@ -82,14 +97,31 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       p_issued_at: input.issuedAt || new Date().toISOString(),
     })
     if (error) throw new Error(error.message)
-    if (input.nameSlots?.length) {
+    // The Chinese copy: print the name in the same way.
+    let zhPath: string | null = null
+    if (input.chinese) {
+      const { data: file, error: zhError } = await admin.storage.from(REPORT_BUCKET).download(input.chinese.storagePath)
+      if (zhError || !file) throw new Error('The uploaded Chinese PDF could not be read.')
+      const bytes = new Uint8Array(await file.arrayBuffer())
+      if (bytes.length !== input.chinese.sizeBytes) throw new Error('The uploaded Chinese PDF size does not match.')
+      const stamped = await stampReport(bytes, input.chinese.nameSlots, { clientName: input.clientName || '' })
+      zhPath = input.chinese.storagePath.replace(/\.pdf$/, '-client-zh.pdf')
+      const { error: zhUpload } = await admin.storage
+        .from(REPORT_BUCKET)
+        .upload(zhPath, stamped, { contentType: 'application/pdf', upsert: true })
+      if (zhUpload) throw new Error('The Chinese report could not be saved.')
+    }
+    if (input.nameSlots?.length || zhPath) {
       const reportId = (data as { id?: string } | null)?.id
       const { error: templateError } = await admin
         .from('inspection_reports')
         .update({
-          template_path: input.storagePath,
-          name_slots: input.nameSlots,
-          client_name: input.clientName || null,
+          ...(input.nameSlots?.length
+            ? { template_path: input.storagePath, name_slots: input.nameSlots, client_name: input.clientName || null }
+            : {}),
+          ...(zhPath && input.chinese
+            ? { zh_path: zhPath, zh_template_path: input.chinese.storagePath, zh_name_slots: input.chinese.nameSlots }
+            : {}),
         })
         .eq('id', reportId)
       if (templateError) throw new Error(templateError.message)

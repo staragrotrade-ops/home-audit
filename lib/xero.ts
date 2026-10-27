@@ -179,6 +179,7 @@ type JobForXero = {
   customer_snapshot: Record<string, string | null>
   property_snapshot: Record<string, string | null>
   intake_channel?: string | null
+  translation_zh?: boolean | null
 }
 
 function describe(job: JobForXero) {
@@ -190,7 +191,7 @@ function describe(job: JobForXero) {
       : job.service_family === 'new_home'
       ? `New home inspection (${(job.new_home_stages || []).map((stage) => STAGE_LABELS[stage] || stage).join(', ')})`
       : `${INSPECTION_TYPE_LABELS[job.inspection_type || ''] || 'Building'} inspection`
-  return `${service} – ${address}`
+  return `${service}${job.translation_zh ? ' with Chinese translation' : ''} – ${address}`
 }
 
 async function findOrCreateContact(supabase: SupabaseClient, job: JobForXero) {
@@ -228,7 +229,8 @@ export async function createPaidXeroInvoice(supabase: SupabaseClient, jobId: str
   const { data: job, error } = await supabase
     .from('jobs')
     .select(
-      'id,public_reference,service_family,inspection_type,new_home_stages,payment_status,paid_at,quote_subtotal,quote_total,customer_snapshot,property_snapshot,intake_channel',
+      // All columns: newer ones (translation) may not exist on every database yet.
+      '*',
     )
     .eq('id', jobId)
     .single()

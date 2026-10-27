@@ -174,6 +174,7 @@ type JobRow = {
         download_count?: number | null
         last_downloaded_at?: string | null
         template_path?: string | null
+        zh_path?: string | null
       }[]
     | null
 }
@@ -935,6 +936,14 @@ export default async function AdminPage({
                               <a href={`/api/admin/reports/${report.id}/download`} target="_blank" rel="noreferrer">
                                 {report.report_kind.replaceAll('_', ' ')} {report.version_label}
                               </a>{' '}
+                              {report.zh_path && (
+                                <>
+                                  {' '}
+                                  <a href={`/api/admin/reports/${report.id}/download?lang=zh`} target="_blank" rel="noreferrer">
+                                    中文
+                                  </a>
+                                </>
+                              )}{' '}
                               · {formatDateTime(report.issued_at)}
                               {report.status !== 'issued' ? ` · ${report.status}` : ''}
                               {report.sent_at ? ` · sent to ${report.sent_to} ${formatDateTime(report.sent_at)}` : ''}

@@ -7,7 +7,7 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 import { z } from 'zod'
 
 export const nameSlot = z.object({
-  kind: z.enum(['header', 'cover_client', 'note']),
+  kind: z.enum(['header', 'cover_client', 'note', 'name']),
   page: z.number().int().min(1).max(2000),
   x: z.number().min(0).max(2000),
   y: z.number().min(0).max(2000),
@@ -54,6 +54,7 @@ export type StampText = {
 export function slotText(slot: NameSlot, text: StampText) {
   if (slot.kind === 'header') return text.clientName ? `Prepared for ${text.clientName}` : ''
   if (slot.kind === 'cover_client') return text.clientName || '-'
+  if (slot.kind === 'name') return text.clientName
   return text.note || ''
 }
 

@@ -71,6 +71,7 @@ Prices, payment ids and the owner's internal notes are never sent to the app.
 | GET | `/api/app/jobs/{id}/inspection` | `?sinceRev=` optional | `floorplans[]` (with `url`, valid 1 hour), `defects[]`, `photos[]`, `serverRev` |
 | POST | `/api/app/jobs/{id}/assessment` | `Assessment` | `result {applied, stale}` |
 | POST | `/api/app/jobs/{id}/send-report` | – (issuers only; order must be paid) | `{reportId, version, sentTo}` – emails the customer a download link to the current report |
+| POST | `/api/app/translate` | `{lang: 'zh', texts: string[]}` (≤400 items, ≤4,000 chars each; issuers only) | `{translations: string[]}` – same order; cached on the website |
 | POST | `/api/app/templates` | `{templates: [{id, elementKey, severity, title, observation, recommendation?}]}` (max 50) | `result {saved[], duplicates{phoneId: existingId}}` |
 | POST | `/api/app/jobs/{id}/level-surveys` | `{surveys: LevelSurvey[]}` (max 50) | `result {applied[], stale[]}` |
 | POST | `/api/app/jobs/{id}/areas` | `{areas: Area[]}` (max 200) | `result {applied[], stale[]}` |
@@ -147,3 +148,6 @@ effort), the customer's upload on the order page, admin, or onsite capture.
 Creating jobs from the phone, report email delivery, push notifications,
 repair quotes and releasing trade leads to the tradie platform.
 New endpoints will be added under `/api/app/` without changing the ones above.
+
+
+`report-complete` also accepts `nameSlots`, `clientName` and, for orders with the Chinese translation (`translation_zh` in the job feed), `chinese: {storagePath, sizeBytes, nameSlots}` – the Chinese PDF uploaded with its own `report-upload`.

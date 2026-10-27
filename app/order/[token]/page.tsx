@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { BookingDetailsForm } from '@/components/order/booking-details-form'
 import { FloorplanUpload } from '@/components/order/floorplan-upload'
 import { ReportDownload } from '@/components/order/report-download'
+import { TranslationOption } from '@/components/order/translation-option'
+import { TRANSLATION_FEE_CENTS } from '@/lib/translation'
 import { AgreementText } from '@/components/agreement/agreement-text'
 import { AgreementConsent } from '@/components/order/agreement-consent'
 import { jobIdForToken } from '@/lib/access-tokens'
@@ -132,12 +134,19 @@ export default async function OrderPage({
     .eq('id', job.id)
     .maybeSingle()
   const voucherCents = Number(voucherRow?.voucher_discount_cents || 0)
+  // Read separately so the page still works before the translation migration.
+  const { data: translationRow } = await supabase
+    .from('jobs')
+    .select('translation_zh,translation_fee')
+    .eq('id', job.id)
+    .maybeSingle()
+  const translationZh = Boolean(translationRow?.translation_zh)
   // The report the customer can download (sent to them and paid). Read
   // defensively: before the report delivery migration the columns are missing.
   const { data: sentReport } = paid
     ? await supabase
         .from('inspection_reports')
-        .select('version_label,issued_at')
+        .select('*')
         .eq('job_id', job.id)
         .eq('status', 'issued')
         .not('sent_at', 'is', null)
@@ -199,6 +208,14 @@ export default async function OrderPage({
                 you the confirmed date. We provide a digital copy of the report after the inspection.
               </p>
             )}
+            {isPayable(job) && !transfer && job.service_family === 'existing_home' && (
+              <TranslationOption token={token} on={translationZh} feeLabel={formatAud(TRANSLATION_FEE_CENTS)} />
+            )}
+            {translationZh && (
+              <p className="order-hint">
+                Includes the Chinese translation ({formatAud(Math.round(Number(translationRow?.translation_fee || 0) * 100))}).
+              </p>
+            )}
             {isPayable(job) && <AgreementPanel token={token} mode="pay" label="Agree and pay" />}
             {pending && (
               <p className="order-hint">
@@ -216,7 +233,10 @@ export default async function OrderPage({
                   Report {sentReport.version_label}, issued {acceptedLabel(sentReport.issued_at)}. Start with the
                   Summary page: it lists any major defects and safety hazards and the repairs grouped by trade.
                 </p>
-                <ReportDownload token={token} />
+                <ReportDownload token={token} chinese={Boolean(sentReport.zh_path)} />
+                {translationZh && !sentReport.zh_path && (
+                  <p className="order-hint">The Chinese translation will be added here shortly.</p>
+                )}
                 <p className="order-hint">
                   Questions about the report? Email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> before
                   you sign a contract or let a cooling-off, finance or building condition date pass.

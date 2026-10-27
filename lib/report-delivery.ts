@@ -22,6 +22,7 @@ export function reportReadyEmail(input: {
   url: string
   version: string
   resend: boolean
+  chinese?: boolean
 }): EmailMessage {
   const updated = input.resend || input.version !== 'v1'
   return {
@@ -33,7 +34,7 @@ ${updated ? `An updated version (${input.version}) of the` : 'The'} inspection r
 
 View and download the report (PDF):
 ${input.url}
-
+${input.chinese ? '\nThe Chinese translation (中文翻译) is on the same page. The English report is the official version.\n' : ''}
 Start with the Summary page: it lists any major defects and safety hazards, the repairs grouped by trade and any further inspections we recommend. Defect numbers match the marks on the floorplans.
 
 If anything is unclear, reply to this email before you sign a contract or let a cooling-off, finance or building condition date pass. Up to 15 minutes of discussion with the inspector is included.
@@ -50,13 +51,13 @@ ${SITE_URL}`,
 export async function currentReport(supabase: SupabaseClient, jobId: string) {
   const { data } = await supabase
     .from('inspection_reports')
-    .select('id,version_label,issued_at,sent_at,status')
+    .select('*')
     .eq('job_id', jobId)
     .eq('status', 'issued')
     .order('issued_at', { ascending: false })
     .limit(1)
     .maybeSingle()
-  return data as (SentReport & { sent_at: string | null }) | null
+  return data as (SentReport & { sent_at: string | null; zh_path?: string | null }) | null
 }
 
 export async function sendReportToCustomer(
@@ -82,6 +83,7 @@ export async function sendReportToCustomer(
     url: `${orderUrl(token)}#report`,
     version: report.version_label,
     resend: Boolean(report.sent_at),
+    chinese: Boolean(report.zh_path),
   })
   const result = await sendEmail(markTest(message, job.is_test), {
     supabase,
