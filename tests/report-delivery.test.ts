@@ -49,7 +49,7 @@ test('customer download: valid link, paid, sent report only; counted; short-live
   assert.match(route, /consume_rate_limit/)
   const page = await source('app/order/[token]/page.tsx')
   assert.match(page, /id="report"/)
-  assert.match(page, /<ReportDownload token=\{token\} \/>/)
+  assert.match(page, /<ReportDownload token=\{token\}/)
   const button = await source('components/order/report-download.tsx')
   assert.match(button, /\/api\/order\/\$\{token\}\/report/)
 })
