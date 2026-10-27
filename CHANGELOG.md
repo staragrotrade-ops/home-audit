@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.26.0 — 2026-10-27
+
+- New test page `/last-minute-building-inspection-melbourne`: a short-notice
+  walk-through before auction in Melbourne's south-east. Two options,
+  $850 + GST (no report) and $1,100 + GST (short written summary). Its own
+  terms (not AS 4349.1, liability limited to the fee, invoice and bank
+  transfer, cancellation). Booked by phone or prefilled email; no form, no
+  Stripe. Linked from the Building & Pest and pre-purchase deadline callouts,
+  added to the sitemap and the release gate.
+
 ## 0.25.1 — 2026-10-27
 
 - Fix: the app's report list (re-issue, Send to customer) failed with
