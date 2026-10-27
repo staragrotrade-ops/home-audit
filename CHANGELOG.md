@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.27.1 — 2026-10-28
+
+- Order page: the Chinese translation option is now one short line,
+  "Report language: English · Change language / 更改语言". The choice
+  (English included, or English + 简体中文 copy +$50) opens only when the
+  customer clicks. A customer who chose Chinese sees it on the line.
+
 ## 0.27.0 — 2026-10-31
 
 - Chinese translation add-on (migration `20261031100000_report_translation.sql`,

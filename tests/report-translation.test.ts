@@ -45,3 +45,11 @@ test('customer wording does not mention AI; English stays the official version',
   const download = await source('app/api/order/[token]/report/route.ts')
   assert.match(download, /lang'\) === 'zh'/)
 })
+
+test('report language is one collapsed line until the customer opens it', async () => {
+  const option = await source('components/order/translation-option.tsx')
+  assert.match(option, /useState\(false\)/)
+  assert.match(option, /aria-expanded=\{open\}/)
+  assert.match(option, /Change language \/ 更改语言/)
+  assert.match(option, /\{open && \(/)
+})
