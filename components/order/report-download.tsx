@@ -4,8 +4,8 @@ import { useState } from 'react'
 
 // Download with a code emailed to the customer: a forwarded link alone does
 // not open the report.
-export function ReportDownload({ token }: { token: string }) {
-  const [stage, setStage] = useState<'start' | 'code'>('start')
+export function ReportDownload({ token, chinese = false }: { token: string; chinese?: boolean }) {
+  const [stage, setStage] = useState<'start' | 'code' | 'ready'>('start')
   const [sentTo, setSentTo] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -38,12 +38,22 @@ export function ReportDownload({ token }: { token: string }) {
     const { ok, result } = await post('report-verify', { code })
     setBusy(false)
     if (!ok) return setError(result.error || 'That code did not work.')
+    if (chinese) return setStage('ready')
     window.location.assign(`/api/order/${token}/report`)
   }
 
   return (
     <div className="report-download">
-      {stage === 'start' ? (
+      {stage === 'ready' ? (
+        <p className="button-row">
+          <a className="button" href={`/api/order/${token}/report`}>
+            Download the report (English)
+          </a>{' '}
+          <a className="button button-secondary" href={`/api/order/${token}/report?lang=zh`}>
+            下载中文翻译 (PDF)
+          </a>
+        </p>
+      ) : stage === 'start' ? (
         <>
           <p className="order-hint">
             To protect your report, we email a 6-digit code to the address on this order before it opens. In

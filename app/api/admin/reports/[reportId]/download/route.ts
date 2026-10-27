@@ -14,14 +14,17 @@ export async function GET(request: Request, context: { params: Promise<{ reportI
     z.uuid().parse(reportId)
     const { data: report, error } = await supabase
       .from('inspection_reports')
-      .select('storage_path')
+      .select('storage_path,zh_path')
       .eq('id', reportId)
       .maybeSingle()
     if (error || !report) throw new Error('Report not found.')
 
     const { data, error: signError } = await supabase.storage
       .from(REPORT_BUCKET)
-      .createSignedUrl(report.storage_path, 300)
+      .createSignedUrl(
+        new URL(request.url).searchParams.get('lang') === 'zh' && report.zh_path ? report.zh_path : report.storage_path,
+        300,
+      )
     if (signError || !data) throw new Error('Unable to open the report.')
     return Response.redirect(data.signedUrl, 303)
   } catch (error) {

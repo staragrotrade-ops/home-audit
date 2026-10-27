@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.27.0 — 2026-10-31
+
+- Chinese translation add-on (migration `20261031100000_report_translation.sql`,
+  safe to run more than once): on the order page, before payment, "Chinese
+  translation of the report 中文报告翻译" (+$50; the price, GST and the Stripe
+  line follow). The app (0.8+) makes a Simplified Chinese copy of the report
+  when it is issued; customers download it next to the English report, which
+  stays the official version. `POST /api/app/translate` (issuers; cached).
+  Admin shows a 中文 link; Xero/Stripe say "with Chinese translation".
+
 ## 0.26.0 — 2026-10-27
 
 - New test page `/last-minute-building-inspection-melbourne`: a short-notice

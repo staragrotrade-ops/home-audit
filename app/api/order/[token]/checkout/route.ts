@@ -114,6 +114,9 @@ export async function POST(request: Request, context: { params: Promise<{ token:
       )
     }
     const origin = new URL(request.url).origin
+    // Read separately so payment still works before the translation migration.
+    const { data: translationRow } = await supabase.from('jobs').select('*').eq('id', job.id).maybeSingle()
+    const translationZh = Boolean((translationRow as { translation_zh?: boolean } | null)?.translation_zh)
     const service =
       job.intake_channel === 'report_transfer'
         ? 'Inspection report transfer'
@@ -139,7 +142,7 @@ export async function POST(request: Request, context: { params: Promise<{ token:
             currency: 'aud',
             unit_amount: amount,
             product_data: {
-              name: `${service} (Home Audit)`,
+              name: `${service}${translationZh ? ' with Chinese translation' : ''} (Home Audit)`,
               description: addressOf(job).slice(0, 300) || job.public_reference,
             },
           },
