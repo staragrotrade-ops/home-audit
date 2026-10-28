@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.28.0 — 2026-11-01
+
+- Catalog v3: 16 new trades (handyman, gas fitter, roof tiler, restumper,
+  cabinet maker, floor coverings, renderer, insulation, garage door,
+  arborist, damp / ventilation, asbestos, geotechnical engineer, solar,
+  pool / spa, termite barrier) and new elements (solar panels, pool / spa,
+  termite barrier, gas appliances, garage door, trees, render, suspected
+  asbestos, site soil). Minor defects on doors and cabinetry default to a
+  handyman. Roof tiles stay with the roofer lead; fences with the fencer.
+- Manual jobs (migration `20261101100000_manual_jobs.sql`, safe to run more
+  than once): "+ New job (phone / in person)" in admin, and "Payment
+  received outside the website" on each job (bank transfer / cash / card /
+  other, amount, reference, date; undo). No automatic email or Xero
+  invoice for these. The admin job list reads all columns, so a new column
+  can no longer break it before its migration.
+
 ## 0.27.2 — 2026-10-28
 
 - Quote form: an optional "Agent phone" next to "Agent email". The

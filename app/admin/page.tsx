@@ -8,6 +8,8 @@ import type { BookingRequestSummary } from '@/components/admin/booking-panel'
 import { JobReferrerSelect } from '@/components/admin/job-referrer-select'
 import { ReferrerManager } from '@/components/admin/referrer-manager'
 import { StaffManager } from '@/components/admin/staff-manager'
+import { ManualPayment } from '@/components/admin/manual-payment'
+import { NewJobForm } from '@/components/admin/new-job-form'
 import { ReportSendButton } from '@/components/admin/report-send-button'
 import { ReportTransferPanel } from '@/components/admin/report-transfer-panel'
 import { XeroSyncButton } from '@/components/admin/xero-sync-button'
@@ -50,6 +52,7 @@ import {
   type StatementRow,
 } from '@/lib/referrals'
 import { SITE_URL } from '@/lib/site'
+import { TRANSLATION_FEE_CENTS } from '@/lib/translation'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { xeroConnectionName, xeroSetupMissing } from '@/lib/xero'
 import { calendarId, googleCalendarConnection, googleCalendarSetupMissing } from '@/lib/google-calendar'
@@ -161,6 +164,11 @@ type JobRow = {
     | { first_referrer: string | null; utm_source: string | null; normalized_source: string | null }
     | { first_referrer: string | null; utm_source: string | null; normalized_source: string | null }[]
     | null
+  // Present after the manual jobs migration.
+  manual_payment_method?: string | null
+  manual_payment_amount?: number | null
+  manual_payment_reference?: string | null
+  translation_zh?: boolean | null
   inspection_reports:
     | {
         id: string
@@ -331,7 +339,8 @@ export default async function AdminPage({
   let jobsQuery = supabase
     .from('jobs')
     .select(
-      'id,public_reference,service_family,inspection_type,new_home_stages,status,payment_status,intake_channel,is_test,archived_at,inspection_status,report_status,confirmed_start,preferred_date_1,preferred_date_2,deadline,flexible_booking,builder_name,expected_ready_date,access_contact,access_notes,source_self_reported,internal_notes,analytics_session_id,created_at,customer_snapshot,property_snapshot,quote_status,quote_total,price_guide_band,listing_url,travel_minutes,pricing_decision,pricing_reasons,paid_at,buyer_situation,access_choice,access_other_name,access_other_phone,details_submitted_at,agent_name,agent_agency,agent_phone,agent_email,listing_price_guide,listing_checked_at,agent_texted_at,booking_notified_at,review_requested_at,job_assignments(staff_id),job_attribution(first_referrer,utm_source,normalized_source),inspection_reports(*)',
+      // All job columns, so newer ones never break the list before a migration.
+      '*,job_assignments(staff_id),job_attribution(first_referrer,utm_source,normalized_source),inspection_reports(*)',
     )
     .order('created_at', { ascending: false })
     .limit(60)
@@ -738,6 +747,8 @@ export default async function AdminPage({
           </div>
         </div>
 
+        <NewJobForm translationFeeLabel={formatAud(TRANSLATION_FEE_CENTS)} />
+
         <form className="admin-search" action="/admin#jobs" method="get">
           <input type="hidden" name="period" value={period.key} />
           <input type="hidden" name="jobs" value={jobView.key} />
@@ -1047,6 +1058,18 @@ export default async function AdminPage({
 
                     <FloorplanPanel jobId={job.id} hasListing={Boolean(job.listing_url)} />
 
+                    {job.intake_channel !== 'report_transfer' && (
+                      <ManualPayment
+                        jobId={job.id}
+                        total={job.quote_total == null ? null : Number(job.quote_total)}
+                        paid={job.payment_status === 'paid'}
+                        method={job.manual_payment_method ?? null}
+                        amount={job.manual_payment_amount ?? null}
+                        reference={job.manual_payment_reference ?? null}
+                        paidAt={job.paid_at}
+                      />
+                    )}
+                    {job.translation_zh && <p className="admin-note">Chinese translation ordered.</p>}
                     <JobWorkflow
                       jobId={job.id}
                       paid={job.payment_status === 'paid'}

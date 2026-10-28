@@ -315,3 +315,23 @@ test('defect library: phones add wording; duplicates are not created; service ro
   const route = await source('app/api/app/templates/route.ts')
   assert.match(route, /authenticateInspector\(request\)/)
 })
+
+test('catalog v3: new trades, solar / pool / termite barrier elements, handyman for minor fixes only', async () => {
+  const { TRADES, ELEMENTS, CATALOG_VERSION, tradeFor, isTradeKey, catalogPayload } = await import('../lib/inspection-catalog.ts')
+  assert.equal(CATALOG_VERSION, 3)
+  for (const key of ['handyman', 'gas_fitter', 'roof_tiler', 'restumper', 'solar_installer', 'pool_technician', 'termite_barrier', 'arborist']) {
+    assert.ok(isTradeKey(key), key)
+  }
+  assert.equal(new Set(TRADES.map((trade) => trade.key)).size, TRADES.length)
+  assert.equal(new Set(ELEMENTS.map((element) => element.key)).size, ELEMENTS.length)
+  for (const element of ELEMENTS) assert.ok(isTradeKey(element.trade), element.key)
+  assert.equal(tradeFor('solar_panels', 'minor_defect'), 'solar_installer')
+  assert.equal(tradeFor('pool_spa', 'safety_hazard'), 'pool_technician')
+  assert.equal(tradeFor('termite_barrier', 'conducive_condition'), 'termite_barrier')
+  assert.equal(tradeFor('internal_door', 'minor_defect'), 'handyman')
+  assert.equal(tradeFor('internal_door', 'major_defect'), 'carpenter')
+  assert.equal(tradeFor('electrical_fitting', 'minor_defect'), 'electrician')
+  assert.equal(tradeFor('stumps', 'major_defect'), 'restumper')
+  assert.deepEqual(catalogPayload().handymanMinorElements, ['internal_door', 'external_door', 'cabinetry'])
+  assert.equal(tradeFor('fence', 'minor_defect'), 'fencer')
+})

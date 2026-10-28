@@ -676,3 +676,49 @@ a.admin-button {
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 8px;
 }
+
+.admin-new-job {
+  margin: 8px 0 12px;
+}
+
+.admin-new-job > summary {
+  display: inline-block;
+  cursor: pointer;
+  list-style: none;
+}
+
+.admin-new-job-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--line, #ddd);
+  border-radius: 8px;
+}
+
+.admin-new-job-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.admin-new-job-grid label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.admin-new-job-grid label.wide {
+  grid-column: 1 / -1;
+}
+
+.admin-new-job-grid label.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-manual-payment input,
+.admin-manual-payment select {
+  max-width: 160px;
+}
