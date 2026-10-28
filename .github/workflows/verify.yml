@@ -21,8 +21,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run verify:release
-      - name: TEMP show build errors
+      - name: TEMP show gate errors
         if: failure()
         run: |
-          npm run build > build.log 2>&1 || true
-          grep -nE "Error|error|Type |\.tsx?:" build.log | head -25 | while IFS= read -r line; do echo "::error::$line"; done
+          node scripts/release-gate.mjs > gate.log 2>&1 || true
+          grep -vE "^\s*$" gate.log | grep -iE "assert|error|expected|fail|✖|not ok|at " | head -30 | while IFS= read -r line; do echo "::error::$line"; done
