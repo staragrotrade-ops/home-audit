@@ -3,7 +3,7 @@
 // tradie can price it. The app downloads this from /api/app/catalog; the
 // database stores only the keys. Change keys never; add new ones freely.
 
-export const CATALOG_VERSION = 2
+export const CATALOG_VERSION = 3
 
 export const DEFECT_CATEGORIES = ['building', 'timber_pest'] as const
 export type DefectCategory = (typeof DEFECT_CATEGORIES)[number]
@@ -63,6 +63,22 @@ export const TRADES = [
   { key: 'hvac', label: 'Heating & cooling' },
   { key: 'builder', label: 'Builder (general)' },
   { key: 'structural_engineer', label: 'Structural engineer' },
+  { key: 'handyman', label: 'Handyman' },
+  { key: 'gas_fitter', label: 'Gas fitter' },
+  { key: 'roof_tiler', label: 'Roof tiler' },
+  { key: 'restumper', label: 'Restumping specialist' },
+  { key: 'cabinet_maker', label: 'Cabinet maker / joiner' },
+  { key: 'floor_coverer', label: 'Floor coverings / floor sander' },
+  { key: 'renderer', label: 'Renderer' },
+  { key: 'insulation_installer', label: 'Insulation installer' },
+  { key: 'garage_door', label: 'Garage door technician' },
+  { key: 'arborist', label: 'Arborist' },
+  { key: 'damp_specialist', label: 'Damp / ventilation specialist' },
+  { key: 'asbestos_assessor', label: 'Asbestos assessor / removalist' },
+  { key: 'geotechnical_engineer', label: 'Geotechnical engineer' },
+  { key: 'solar_installer', label: 'Solar installer' },
+  { key: 'pool_technician', label: 'Pool / spa technician' },
+  { key: 'termite_barrier', label: 'Termite barrier installer' },
 ] as const
 export type TradeKey = (typeof TRADES)[number]['key']
 
@@ -104,11 +120,13 @@ export const ELEMENTS: readonly CatalogElement[] = [
   { key: 'fascia_eaves', label: 'Fascia / eaves', area: 'roof_exterior', trade: 'carpenter', quantity: METRES },
   // Roof space
   { key: 'roof_framing', label: 'Roof framing', area: 'roof_space', trade: 'carpenter', quantity: COUNT('members', 'Number of members affected') },
-  { key: 'sarking', label: 'Sarking / insulation', area: 'roof_space', trade: 'builder', quantity: SQM },
+  { key: 'sarking', label: 'Sarking / insulation', area: 'roof_space', trade: 'insulation_installer', quantity: SQM },
   { key: 'roof_space_wiring', label: 'Roof space wiring', area: 'roof_space', trade: 'electrician', quantity: null },
+  { key: 'solar_panels', label: 'Solar panels / mounts', area: 'roof_exterior', trade: 'solar_installer', quantity: COUNT('panels', 'Number of panels') },
   // Exterior
   { key: 'brickwork', label: 'Brickwork / masonry', area: 'exterior', trade: 'bricklayer', quantity: METRES },
   { key: 'cladding', label: 'Cladding', area: 'exterior', trade: 'carpenter', quantity: SQM },
+  { key: 'render', label: 'Render / rendered walls', area: 'exterior', trade: 'renderer', quantity: SQM },
   { key: 'window_external', label: 'Windows (external)', area: 'exterior', trade: 'glazier', quantity: COUNT('windows', 'Number of windows') },
   { key: 'external_door', label: 'External doors', area: 'exterior', trade: 'carpenter', quantity: COUNT('doors', 'Number of doors') },
   { key: 'deck_pergola', label: 'Deck / pergola / verandah', area: 'exterior', trade: 'carpenter', quantity: SQM },
@@ -118,13 +136,15 @@ export const ELEMENTS: readonly CatalogElement[] = [
   // Interior
   { key: 'ceiling', label: 'Ceilings', area: 'interior', trade: 'plasterer', quantity: SQM },
   { key: 'internal_wall', label: 'Internal walls', area: 'interior', trade: 'plasterer', quantity: SQM },
-  { key: 'floor', label: 'Floors / floor coverings', area: 'interior', trade: 'carpenter', quantity: SQM },
+  { key: 'floor', label: 'Floors / floor coverings', area: 'interior', trade: 'floor_coverer', quantity: SQM },
   { key: 'internal_door', label: 'Internal doors', area: 'interior', trade: 'carpenter', quantity: COUNT('doors', 'Number of doors') },
   { key: 'window_internal', label: 'Windows (internal)', area: 'interior', trade: 'glazier', quantity: COUNT('windows', 'Number of windows') },
-  { key: 'cabinetry', label: 'Cabinetry / joinery', area: 'interior', trade: 'carpenter', quantity: null },
+  { key: 'cabinetry', label: 'Cabinetry / joinery', area: 'interior', trade: 'cabinet_maker', quantity: null },
   { key: 'electrical_fitting', label: 'Electrical fittings', area: 'interior', trade: 'electrician', quantity: COUNT('items', 'Number of items') },
   { key: 'smoke_alarm', label: 'Smoke alarms', area: 'interior', trade: 'electrician', quantity: COUNT('alarms', 'Number of alarms') },
   { key: 'heating_cooling', label: 'Heating / cooling', area: 'interior', trade: 'hvac', quantity: null },
+  { key: 'gas_appliance', label: 'Gas appliances / gas fittings', area: 'interior', trade: 'gas_fitter', quantity: COUNT('appliances', 'Number of appliances') },
+  { key: 'suspected_asbestos', label: 'Suspected asbestos material', area: 'interior', trade: 'asbestos_assessor', quantity: SQM },
   // Wet areas
   { key: 'shower', label: 'Shower / screen', area: 'wet_areas', trade: 'waterproofer', quantity: null },
   { key: 'wet_area_tiling', label: 'Wet area tiling / grout / silicone', area: 'wet_areas', trade: 'tiler', quantity: SQM },
@@ -132,9 +152,9 @@ export const ELEMENTS: readonly CatalogElement[] = [
   { key: 'hot_water', label: 'Hot water unit', area: 'wet_areas', trade: 'plumber', quantity: null },
   { key: 'wet_area_ventilation', label: 'Exhaust ventilation', area: 'wet_areas', trade: 'electrician', quantity: COUNT('fans', 'Number of fans') },
   // Subfloor
-  { key: 'stumps', label: 'Stumps / piers', area: 'subfloor', trade: 'builder', quantity: COUNT('stumps', 'Number of stumps affected') },
+  { key: 'stumps', label: 'Stumps / piers', area: 'subfloor', trade: 'restumper', quantity: COUNT('stumps', 'Number of stumps affected') },
   { key: 'bearers_joists', label: 'Bearers / joists', area: 'subfloor', trade: 'carpenter', quantity: COUNT('members', 'Number of members affected') },
-  { key: 'subfloor_moisture', label: 'Subfloor moisture / ventilation', area: 'subfloor', trade: 'builder', quantity: null },
+  { key: 'subfloor_moisture', label: 'Subfloor moisture / ventilation', area: 'subfloor', trade: 'damp_specialist', quantity: null },
   { key: 'footings_slab', label: 'Footings / slab', area: 'subfloor', trade: 'structural_engineer', quantity: null },
   // Site
   { key: 'stormwater', label: 'Stormwater / surface drainage', area: 'site', trade: 'drainer', quantity: METRES },
@@ -143,8 +163,13 @@ export const ELEMENTS: readonly CatalogElement[] = [
   { key: 'vegetation', label: 'Trees / garden beds / vegetation', area: 'site', trade: 'landscaper', quantity: null },
   { key: 'fence', label: 'Fences / gates', area: 'site', trade: 'fencer', quantity: METRES },
   { key: 'outbuilding', label: 'Shed / garage / carport', area: 'site', trade: 'builder', quantity: null },
+  { key: 'garage_door', label: 'Garage door / opener', area: 'site', trade: 'garage_door', quantity: COUNT('doors', 'Number of doors') },
+  { key: 'trees', label: 'Trees near the building', area: 'site', trade: 'arborist', quantity: COUNT('trees', 'Number of trees') },
+  { key: 'pool_spa', label: 'Pool / spa / pool fence', area: 'site', trade: 'pool_technician', quantity: null },
+  { key: 'site_soil', label: 'Site soil / ground movement', area: 'site', trade: 'geotechnical_engineer', quantity: null },
   // Timber pest — always routed to the pest controller.
   { key: 'termite_activity', label: 'Termite activity / damage', area: 'site', trade: 'pest_controller', quantity: null },
+  { key: 'termite_barrier', label: 'Termite barrier / management system', area: 'site', trade: 'termite_barrier', quantity: METRES },
   { key: 'timber_decay', label: 'Wood decay / borer', area: 'site', trade: 'carpenter', quantity: COUNT('members', 'Number of members affected') },
   { key: 'other', label: 'Other', area: 'site', trade: 'builder', quantity: null },
 ]
@@ -162,9 +187,14 @@ export function isTradeKey(key: string): key is TradeKey {
 
 // The trade a defect is routed to: an inspector override wins, otherwise the
 // element's default. Active termites always go to a pest controller first.
+// Small fixes a handyman normally does when the defect is minor. Licensed
+// work (electrical, plumbing, gas, glass) is never sent to a handyman.
+export const HANDYMAN_MINOR_ELEMENTS = ['internal_door', 'external_door', 'cabinetry'] as const
+
 export function tradeFor(elementKey: string, severity: Severity, override?: string | null): TradeKey {
   if (override && isTradeKey(override)) return override
   if (severity === 'active_termites') return 'pest_controller'
+  if (severity === 'minor_defect' && (HANDYMAN_MINOR_ELEMENTS as readonly string[]).includes(elementKey)) return 'handyman'
   return elementOf(elementKey)?.trade || 'builder'
 }
 
@@ -176,5 +206,6 @@ export function catalogPayload() {
     trades: TRADES,
     areas: AREA_GROUPS,
     elements: ELEMENTS,
+    handymanMinorElements: HANDYMAN_MINOR_ELEMENTS,
   }
 }
