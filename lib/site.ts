@@ -27,3 +27,18 @@ export const PRIMARY_NAV = [
   { href: '/service-areas', label: 'Service areas' },
   { href: '/guides', label: 'Guides' },
 ] as const
+
+// The Chinese site (归处 Home Audit) lives under /zh. Its header, menu and
+// footer use these links instead of PRIMARY_NAV.
+export const ZH_PATH = '/zh'
+export const ZH_BRAND_NAME = '归处'
+export const ZH_NAV = [
+  { href: '/zh#services', label: '服务项目' },
+  { href: '/zh#approach', label: '我们的理念' },
+  { href: '/zh#faq', label: '常见问题' },
+  { href: '/zh#contact', label: '联系我们' },
+] as const
+
+export function isZhPath(pathname: string | null | undefined) {
+  return pathname === ZH_PATH || Boolean(pathname?.startsWith(`${ZH_PATH}/`))
+}

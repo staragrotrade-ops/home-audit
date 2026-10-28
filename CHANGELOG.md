@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.29.0 — 2026-10-29
+
+- 归处 Home Audit, the Chinese site: `/zh` home page (slogan 历经远行，终有归处。,
+  services, what you get, FAQ, contact; no prices) with the owner's house
+  photo, and `/zh/quote`, the same quote form in Chinese (`lib/quote-copy.ts`).
+  A quote from the Chinese form is noted on the job ("Quote form filled in
+  Chinese"). The header, phone menu and footer switch to Chinese under /zh and
+  carry a 中文 / English link. hreflang between `/` and `/zh`, `/zh` in the
+  sitemap and the release gate. The order page, agreement and emails stay in
+  English for now.
+
 ## 0.28.0 — 2026-11-01
 
 - Catalog v3: 16 new trades (handyman, gas fitter, roof tiler, restumper,

@@ -167,7 +167,7 @@ export async function POST(request: Request) {
   // Keep only the fields that belong to the chosen service family.
   // The agent phone is saved on the job after it is created (the database
   // function does not take it).
-  const { agent_phone: agentPhone, ...jobFields } = fields
+  const { agent_phone: agentPhone, form_language: formLanguage, ...jobFields } = fields
   const payload =
     jobFields.service_family === 'new_home'
       ? { ...jobFields, inspection_type: '' as const }
@@ -234,6 +234,10 @@ export async function POST(request: Request) {
     is_test: isTest,
     price_guide_band: fields.price_guide_band,
     listing_url: fields.listing_url || null,
+    // Shown to the owner in the dashboard.
+    ...(formLanguage === 'zh'
+      ? { internal_notes: 'Quote form filled in Chinese (中文表格). Reply in Chinese if possible.' }
+      : {}),
   }
 
   // Agent details from the form, shown again on the order page after payment.

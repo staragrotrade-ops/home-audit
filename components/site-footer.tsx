@@ -1,13 +1,20 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import {
   COMPANY_ACN,
   COMPANY_NAME,
   CONTACT_EMAIL,
   CONTACT_PHONE,
   CONTACT_PHONE_HREF,
+  ZH_BRAND_NAME,
+  isZhPath,
 } from '@/lib/site'
 
 export function SiteFooter() {
+  const zh = isZhPath(usePathname())
+  if (zh) return <ChineseFooter />
   return (
     <footer className="site-footer">
       <div className="container footer-grid">
@@ -53,6 +60,48 @@ export function SiteFooter() {
             Referral partners
           </Link>
         </span>
+      </div>
+    </footer>
+  )
+}
+
+// The footer under /zh. Most detail pages are in English, which the labels say.
+function ChineseFooter() {
+  return (
+    <footer className="site-footer" lang="zh-Hans">
+      <div className="container footer-grid">
+        <div>
+          <div className="footer-brand">{ZH_BRAND_NAME} · Home Audit</div>
+          <p>历经远行，终有归处。</p>
+          <p>墨尔本独立验房：买房前房屋及白蚁检查、新房分阶段验收。</p>
+        </div>
+
+        <div>
+          <h2>服务</h2>
+          <Link href="/zh/quote?service=building-and-pest">买房前验房</Link>
+          <Link href="/zh/quote?service=new-home">新房分阶段验收</Link>
+          <a href="https://ownerbuilderinspection.melbourne">业主自建房 137B（英文网站）</a>
+          <Link href="/" hrefLang="en-AU" lang="en">
+            English
+          </Link>
+        </div>
+
+        <div>
+          <h2>联系与资料</h2>
+          <Link href="/zh/quote">获取报价</Link>
+          <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a>
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+          <Link href="/credentials">资质与保险（英文）</Link>
+          <Link href="/privacy">隐私说明（英文）</Link>
+          <Link href="/inspection-agreement">验房协议（英文）</Link>
+        </div>
+      </div>
+
+      <div className="container footer-bottom">
+        <span lang="en">
+          {COMPANY_NAME} · ACN {COMPANY_ACN}
+        </span>
+        <span>澳大利亚维多利亚州</span>
       </div>
     </footer>
   )

@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/new-home-inspections',
     '/practical-completion-inspection',
     '/last-minute-building-inspection-melbourne',
+    '/zh',
     '/about',
     '/credentials',
     '/service-areas',
@@ -34,6 +35,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       ),
       ...(route === ''
         ? { images: [`${SITE_URL}/home-audit-inspector-melbourne.webp`] }
+        : {}),
+      ...(route === '' || route === '/zh'
+        ? {
+            alternates: {
+              languages: { 'en-AU': `${SITE_URL}/`, 'zh-Hans-AU': `${SITE_URL}/zh` },
+            },
+          }
         : {}),
     })),
     ...GUIDES.map((guide) => ({

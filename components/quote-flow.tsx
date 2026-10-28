@@ -9,6 +9,7 @@ import { currentVisitId, trackVisitorEvent } from '@/lib/visitor-analytics'
 import { Turnstile } from '@/components/turnstile'
 import { isRedirectLink } from '@/lib/listing-url'
 import { captureAdAttribution, reportQuoteConversion } from '@/lib/google-ads'
+import { QUOTE_COPY, translateServerMessage, type QuoteLang } from '@/lib/quote-copy'
 
 type ServiceFamily = QuoteRequest['service_family'] | ''
 type Draft = Omit<
@@ -151,7 +152,12 @@ function track(event: keyof typeof VISITOR_EVENTS, params: { service_family: str
   }
 }
 
-function requestBody(draft: Draft, intakeMode: 'submit' | 'email_handoff', turnstileToken = '') {
+function requestBody(
+  draft: Draft,
+  intakeMode: 'submit' | 'email_handoff',
+  turnstileToken = '',
+  lang: QuoteLang = 'en',
+) {
   return JSON.stringify({
     ...draft,
     email: draft.email.trim(),
@@ -159,6 +165,7 @@ function requestBody(draft: Draft, intakeMode: 'submit' | 'email_handoff', turns
     conveyancer_email: (draft.conveyancer_email || '').trim(),
     agent_email: (draft.agent_email || '').trim(),
     agent_phone: (draft.agent_phone || '').trim(),
+    form_language: lang,
     intake_mode: intakeMode,
     analytics_session_id: currentVisitId(),
     turnstile_token: turnstileToken,
@@ -189,8 +196,8 @@ function readSavedDraft(): Partial<Draft> | null {
   return null
 }
 
-function formatShortDate(isoDate: string) {
-  return new Intl.DateTimeFormat('en-AU', {
+function formatShortDate(isoDate: string, locale = 'en-AU') {
+  return new Intl.DateTimeFormat(locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -248,7 +255,10 @@ export function QuoteFlow({
   submissionEnabled,
   turnstileSiteKey = '',
   initialVoucherCode = '',
+  lang = 'en',
 }: {
+  /** The language the customer reads. Values sent to the server are the same. */
+  lang?: QuoteLang
   initialService: ServiceFamily
   // From the link in the 137B website's voucher email (/quote?voucher=…).
   initialVoucherCode?: string
@@ -258,6 +268,7 @@ export function QuoteFlow({
   submissionEnabled: boolean
   turnstileSiteKey?: string
 }) {
+  const t = QUOTE_COPY[lang]
   const [turnstileToken, setTurnstileToken] = useState('')
   const [turnstileReset, setTurnstileReset] = useState(0)
   const needsTurnstile = submissionEnabled && Boolean(turnstileSiteKey)
@@ -320,9 +331,9 @@ export function QuoteFlow({
     () =>
       newHomeStages
         .filter(([value]) => draft.new_home_stages.includes(value))
-        .map(([, label]) => label)
-        .join(', '),
-    [draft.new_home_stages],
+        .map(([value]) => t.stages[value])
+        .join(lang === 'zh' ? '、' : ', '),
+    [draft.new_home_stages, t, lang],
   )
 
   function update<K extends keyof Draft>(key: K, value: Draft[K]) {
@@ -360,48 +371,46 @@ export function QuoteFlow({
     const errors: string[] = []
 
     if (target === 0) {
-      if (!draft.service_family) errors.push('Choose an existing home or a new home.')
+      if (!draft.service_family) errors.push(t.errors.chooseFamily)
       else if (draft.service_family === 'existing_home' && !draft.inspection_type)
-        errors.push('Choose an inspection type.')
+        errors.push(t.errors.chooseType)
       else if (draft.service_family === 'new_home' && draft.new_home_stages.length === 0)
-        errors.push('Choose at least one construction stage.')
+        errors.push(t.errors.chooseStage)
     }
 
     if (target === 1) {
       if (draft.property_address.trim().length < 5)
-        errors.push('Enter the property address.')
+        errors.push(t.errors.address)
       if (draft.postcode && !/^\d{4}$/.test(draft.postcode))
-        errors.push('Postcode must be four digits, or left blank.')
+        errors.push(t.errors.postcode)
       if (draft.service_family === 'existing_home') {
-        if (!draft.suburb.trim()) errors.push('Enter the suburb.')
-        if (!draft.price_guide_band) errors.push('Choose the price guide shown on the listing.')
+        if (!draft.suburb.trim()) errors.push(t.errors.suburb)
+        if (!draft.price_guide_band) errors.push(t.errors.priceGuide)
         if (draft.listing_url && !/^https?:\/\/\S+$/.test(draft.listing_url.trim()))
-          errors.push('Paste the full listing link, starting with https://, or leave it blank.')
+          errors.push(t.errors.listingUrl)
         else if (draft.listing_url && isRedirectLink(draft.listing_url))
-          errors.push(
-            'That is a Google link, not the listing. Open the listing on realestate.com.au or domain.com.au and copy the link from there, or leave it blank.',
-          )
+          errors.push(t.errors.listingRedirect)
       }
     }
 
     if (target === 2) {
-      if (!draft.first_name.trim()) errors.push('Enter your first name.')
-      if (!draft.last_name.trim()) errors.push('Enter your last name.')
+      if (!draft.first_name.trim()) errors.push(t.errors.firstName)
+      if (!draft.last_name.trim()) errors.push(t.errors.lastName)
       if (!emailPattern.test(draft.email.trim()))
-        errors.push('Enter a valid email address.')
+        errors.push(t.errors.email)
       if (!mobilePattern.test(draft.mobile.trim()))
-        errors.push('Enter a valid mobile number (digits, spaces and + only).')
+        errors.push(t.errors.mobile)
       if (draft.conveyancer_email && !emailPattern.test(draft.conveyancer_email.trim()))
-        errors.push('Check the conveyancer / solicitor email, or leave it blank.')
+        errors.push(t.errors.conveyancerEmail)
       if (draft.agent_email && !emailPattern.test(draft.agent_email.trim()))
-        errors.push('Check the agent email, or leave it blank.')
+        errors.push(t.errors.agentEmail)
       if (draft.agent_phone && !/^[0-9+() -]{6,40}$/.test(draft.agent_phone.trim()))
-        errors.push('Check the agent phone (digits, spaces and + only), or leave it blank.')
+        errors.push(t.errors.agentPhone)
     }
 
     if (target === 3) {
       if (!draft.privacy_consent)
-        errors.push('Please confirm you have read the privacy notice.')
+        errors.push(t.errors.privacy)
     }
 
     return errors
@@ -410,7 +419,7 @@ export function QuoteFlow({
   function showErrors(errors: string[]) {
     setStatus({
       type: 'error',
-      message: 'Please check the following before continuing:',
+      message: t.errors.checkBeforeContinuing,
       details: errors,
     })
   }
@@ -431,7 +440,7 @@ export function QuoteFlow({
     setDraft({ ...emptyDraft, attribution: draft.attribution })
     setStep(0)
     setSubmitted(false)
-    setStatus({ type: 'info', message: 'Saved details were removed from this device.' })
+    setStatus({ type: 'info', message: t.draftCleared })
   }
 
   async function submit() {
@@ -453,13 +462,19 @@ export function QuoteFlow({
       void fetch('/api/quote', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: requestBody(draft, 'email_handoff'),
+        body: requestBody(draft, 'email_handoff', '', lang),
         keepalive: true,
       }).catch(() => undefined)
-      window.location.href = buildEmailHref(draft, stageLabels)
+      window.location.href = buildEmailHref(
+        draft,
+        newHomeStages
+          .filter(([value]) => draft.new_home_stages.includes(value))
+          .map(([, label]) => label)
+          .join(', '),
+      )
       setStatus({
         type: 'info',
-        message: `Your email app should open with these details ready to send. If it does not, email ${CONTACT_EMAIL} with the property address and inspection needed.`,
+        message: t.emailHandoff(CONTACT_EMAIL),
       })
       return
     }
@@ -470,7 +485,7 @@ export function QuoteFlow({
       const response = await fetch('/api/quote', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: requestBody(draft, 'submit', turnstileToken),
+        body: requestBody(draft, 'submit', turnstileToken, lang),
       })
       const result = (await response.json().catch(() => ({}))) as {
         error?: string
@@ -490,16 +505,16 @@ export function QuoteFlow({
           setStep(firstStep)
           setStatus({
             type: 'error',
-            message: result.error || 'Please check the information below.',
+            message: result.error ? translateServerMessage(t, result.error) : t.errors.checkBelow,
             details: fields.map((field) => {
-              const label = fieldInfo[field]?.label || field
+              const label = t.fields[field] || fieldInfo[field]?.label || field
               const reason = result.issues?.[field]?.[0]
               return reason ? `${label}: ${reason}` : label
             }),
           })
           return
         }
-        throw new Error(result.error || 'Unable to submit request.')
+        throw new Error(result.error ? translateServerMessage(t, result.error) : t.errors.submitFailed)
       }
 
       window.localStorage.removeItem(DRAFT_KEY)
@@ -517,16 +532,12 @@ export function QuoteFlow({
       setSubmitted(true)
       const voucherMessage = result.voucher
         ? result.voucher.applied
-          ? ` Your $${((result.voucher.amountCents || 0) / 100).toFixed(0)} voucher is recorded and will come off the price.`
-          : ' We could not apply the voucher code automatically; we will check it when we price your inspection.'
+          ? t.voucherApplied(((result.voucher.amountCents || 0) / 100).toFixed(0))
+          : t.voucherNotApplied
         : ''
       setStatus({
         type: 'success',
-        message: `${
-          result.reference
-            ? `Request received. Your reference is ${result.reference}.`
-            : 'Request received.'
-        }${voucherMessage}`,
+        message: `${t.received(result.reference || null)}${voucherMessage}`,
       })
     } catch (error) {
       setStatus({
@@ -534,7 +545,7 @@ export function QuoteFlow({
         message:
           error instanceof Error
             ? error.message
-            : 'Unable to submit the request. Please try again.',
+            : t.errors.submitFailed,
       })
     } finally {
       setSubmitting(false)
@@ -545,19 +556,18 @@ export function QuoteFlow({
     return (
       <div className="quote-shell">
         <div className="quote-panel quote-success">
-          <h2>Thank you. Your request is with us.</h2>
+          <h2>{t.successTitle}</h2>
           {status && (
             <div className="quote-status" data-type="success" role="status">
               {status.message}
             </div>
           )}
           <p>
-            We will check the details and email you a price, with a link to pay
-            online. Questions in the meantime? Call <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a> or email{' '}
+            {t.successBefore} <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a> {t.successOr}{' '}
             <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
           </p>
           <button className="button button-secondary" type="button" onClick={clearDraft}>
-            Start another request
+            {t.startAnother}
           </button>
         </div>
       </div>
@@ -567,7 +577,7 @@ export function QuoteFlow({
   return (
     <div className="quote-shell">
       <div className="quote-nav" aria-label="Quote sections">
-        {['Inspection', 'Property', 'Contact', 'Timing'].map((label, index) => (
+        {t.steps.map((label, index) => (
           <span key={label} data-active={index === step} aria-current={index === step ? 'step' : undefined}>
             {label}
           </span>
@@ -578,8 +588,8 @@ export function QuoteFlow({
         {step === 0 && (
           <>
             <div className="quote-panel-heading">
-              <h2>What do you need inspected?</h2>
-              <p>Choose the property journey first. The next questions will adapt to it.</p>
+              <h2>{t.step0Title}</h2>
+              <p>{t.step0Intro}</p>
             </div>
 
             <div className="choice-grid">
@@ -591,8 +601,8 @@ export function QuoteFlow({
                 onClick={() => selectService('existing_home')}
               >
                 <em aria-hidden="true">✓</em>
-                <strong>Existing home</strong>
-                <span>Buying, bidding on or reviewing an established property.</span>
+                <strong>{t.existingHome[0]}</strong>
+                <span>{t.existingHome[1]}</span>
               </button>
               <button
                 className="choice-card"
@@ -602,20 +612,20 @@ export function QuoteFlow({
                 onClick={() => selectService('new_home')}
               >
                 <em aria-hidden="true">✓</em>
-                <strong>New home</strong>
-                <span>Construction stage or practical completion inspection.</span>
+                <strong>{t.newHome[0]}</strong>
+                <span>{t.newHome[1]}</span>
               </button>
               <a className="choice-card" href="https://ownerbuilderinspection.melbourne">
-                <strong>Owner Builder 137B</strong>
-                <span>Open the dedicated 137B eligibility and quote service.</span>
+                <strong>{t.ownerBuilder[0]}</strong>
+                <span>{t.ownerBuilder[1]}</span>
               </a>
             </div>
 
             {draft.service_family === 'existing_home' && (
               <div className="field-full" style={{ marginTop: 26 }}>
-                <span className="fieldset-label">Inspection type</span>
+                <span className="fieldset-label">{t.fields.inspection_type}</span>
                 <div className="choice-grid">
-                  {existingTypes.map(([value, title, description]) => (
+                  {existingTypes.map(([value]) => (
                     <button
                       key={value}
                       className="choice-card"
@@ -625,8 +635,8 @@ export function QuoteFlow({
                       onClick={() => update('inspection_type', value)}
                     >
                       <em aria-hidden="true">✓</em>
-                      <strong>{title}</strong>
-                      <span>{description}</span>
+                      <strong>{t.existingTypes[value][0]}</strong>
+                      <span>{t.existingTypes[value][1]}</span>
                     </button>
                   ))}
                 </div>
@@ -635,9 +645,9 @@ export function QuoteFlow({
 
             {draft.service_family === 'new_home' && (
               <div className="field-full" style={{ marginTop: 26 }}>
-                <span className="fieldset-label">Construction stage</span>
+                <span className="fieldset-label">{t.fields.new_home_stages}</span>
                 <div className="checkbox-grid">
-                  {newHomeStages.map(([value, label]) => (
+                  {newHomeStages.map(([value]) => (
                     <label className="checkbox-option" key={value}>
                       <input
                         type="checkbox"
@@ -649,7 +659,7 @@ export function QuoteFlow({
                           update('new_home_stages', next)
                         }}
                       />
-                      {label}
+                      {t.stages[value]}
                     </label>
                   ))}
                 </div>
@@ -661,16 +671,16 @@ export function QuoteFlow({
         {step === 1 && (
           <>
             <div className="quote-panel-heading">
-              <h2>Tell us about the property</h2>
+              <h2>{t.step1Title}</h2>
               <p>
                 {draft.service_family === 'new_home'
-                  ? `Selected: ${stageLabels || 'new home inspection'}.`
-                  : 'These details help determine scope, travel and inspection time.'}
+                  ? t.step1Selected(stageLabels)
+                  : t.step1Intro}
               </p>
             </div>
             <div className="field-grid">
               <div className="field-full">
-                <label htmlFor="property_address">Property address *</label>
+                <label htmlFor="property_address">{t.fields.property_address} *</label>
                 <input
                   id="property_address"
                   required
@@ -680,7 +690,7 @@ export function QuoteFlow({
                 />
               </div>
               <div className="field">
-                <label htmlFor="suburb">Suburb</label>
+                <label htmlFor="suburb">{t.fields.suburb}</label>
                 <input
                   id="suburb"
                   value={draft.suburb}
@@ -688,7 +698,7 @@ export function QuoteFlow({
                 />
               </div>
               <div className="field">
-                <label htmlFor="postcode">Postcode</label>
+                <label htmlFor="postcode">{t.fields.postcode}</label>
                 <input
                   id="postcode"
                   inputMode="numeric"
@@ -698,7 +708,7 @@ export function QuoteFlow({
                 />
               </div>
               <div className="field">
-                <label htmlFor="property_type">Property type</label>
+                <label htmlFor="property_type">{t.fields.property_type}</label>
                 <select
                   id="property_type"
                   value={draft.property_type}
@@ -706,15 +716,16 @@ export function QuoteFlow({
                     update('property_type', event.target.value as Draft['property_type'])
                   }
                 >
-                  <option value="">Choose</option>
-                  <option value="house">House</option>
-                  <option value="townhouse">Townhouse</option>
-                  <option value="unit_apartment">Unit / apartment</option>
-                  <option value="other">Other</option>
+                  <option value="">{t.choose}</option>
+                  {(['house', 'townhouse', 'unit_apartment', 'other'] as const).map((value) => (
+                    <option key={value} value={value}>
+                      {t.propertyTypes[value]}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="storeys">Storeys</label>
+                <label htmlFor="storeys">{t.fields.storeys}</label>
                 <select
                   id="storeys"
                   value={draft.storeys}
@@ -722,14 +733,16 @@ export function QuoteFlow({
                     update('storeys', event.target.value as Draft['storeys'])
                   }
                 >
-                  <option value="">Choose</option>
-                  <option value="1">Single storey</option>
-                  <option value="2">Two storeys</option>
-                  <option value="3_plus">Three or more</option>
+                  <option value="">{t.choose}</option>
+                  {(['1', '2', '3_plus'] as const).map((value) => (
+                    <option key={value} value={value}>
+                      {t.storeyOptions[value]}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="bedrooms">Bedrooms</label>
+                <label htmlFor="bedrooms">{t.fields.bedrooms}</label>
                 <input
                   id="bedrooms"
                   inputMode="numeric"
@@ -738,7 +751,7 @@ export function QuoteFlow({
                 />
               </div>
               <div className="field">
-                <label htmlFor="bathrooms">Bathrooms</label>
+                <label htmlFor="bathrooms">{t.fields.bathrooms}</label>
                 <input
                   id="bathrooms"
                   inputMode="numeric"
@@ -750,7 +763,7 @@ export function QuoteFlow({
               {draft.service_family === 'existing_home' && (
                 <>
                   <div className="field">
-                    <label htmlFor="price_guide_band">Price guide on the listing *</label>
+                    <label htmlFor="price_guide_band">{t.priceGuideLabel}</label>
                     <select
                       id="price_guide_band"
                       value={draft.price_guide_band}
@@ -758,16 +771,16 @@ export function QuoteFlow({
                         update('price_guide_band', event.target.value as Draft['price_guide_band'])
                       }
                     >
-                      <option value="">Choose</option>
-                      {PRICE_GUIDE_BANDS.map(([value, label]) => (
+                      <option value="">{t.choose}</option>
+                      {PRICE_GUIDE_BANDS.map(([value]) => (
                         <option key={value} value={value}>
-                          {label}
+                          {t.priceBands[value]}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div className="field">
-                    <label htmlFor="listing_url">Listing link</label>
+                    <label htmlFor="listing_url">{t.fields.listing_url}</label>
                     <input
                       id="listing_url"
                       type="url"
@@ -783,7 +796,7 @@ export function QuoteFlow({
               {draft.service_family === 'new_home' && (
                 <>
                   <div className="field">
-                    <label htmlFor="builder_name">Builder</label>
+                    <label htmlFor="builder_name">{t.fields.builder_name}</label>
                     <input
                       id="builder_name"
                       value={draft.builder_name}
@@ -791,7 +804,7 @@ export function QuoteFlow({
                     />
                   </div>
                   <div className="field">
-                    <label htmlFor="expected_ready_date">Expected inspection-ready date</label>
+                    <label htmlFor="expected_ready_date">{t.fields.expected_ready_date}</label>
                     <input
                       id="expected_ready_date"
                       type="date"
@@ -808,12 +821,12 @@ export function QuoteFlow({
         {step === 2 && (
           <>
             <div className="quote-panel-heading">
-              <h2>Your contact details</h2>
-              <p>We use these details only to prepare and manage your inspection request.</p>
+              <h2>{t.step2Title}</h2>
+              <p>{t.step2Intro}</p>
             </div>
             <div className="field-grid">
               <div className="field">
-                <label htmlFor="first_name">First name *</label>
+                <label htmlFor="first_name">{t.fields.first_name} *</label>
                 <input
                   id="first_name"
                   required
@@ -823,7 +836,7 @@ export function QuoteFlow({
                 />
               </div>
               <div className="field">
-                <label htmlFor="last_name">Last name *</label>
+                <label htmlFor="last_name">{t.fields.last_name} *</label>
                 <input
                   id="last_name"
                   required
@@ -833,7 +846,7 @@ export function QuoteFlow({
                 />
               </div>
               <div className="field">
-                <label htmlFor="email">Email *</label>
+                <label htmlFor="email">{t.fields.email} *</label>
                 <input
                   id="email"
                   required
@@ -844,7 +857,7 @@ export function QuoteFlow({
                 />
               </div>
               <div className="field">
-                <label htmlFor="mobile">Mobile *</label>
+                <label htmlFor="mobile">{t.fields.mobile} *</label>
                 <input
                   id="mobile"
                   required
@@ -855,7 +868,7 @@ export function QuoteFlow({
                 />
               </div>
               <div className="field">
-                <label htmlFor="conveyancer_email">Conveyancer / solicitor email</label>
+                <label htmlFor="conveyancer_email">{t.fields.conveyancer_email}</label>
                 <input
                   id="conveyancer_email"
                   type="email"
@@ -864,7 +877,7 @@ export function QuoteFlow({
                 />
               </div>
               <div className="field">
-                <label htmlFor="agent_email">Agent email</label>
+                <label htmlFor="agent_email">{t.fields.agent_email}</label>
                 <input
                   id="agent_email"
                   type="email"
@@ -873,7 +886,7 @@ export function QuoteFlow({
                 />
               </div>
               <div className="field">
-                <label htmlFor="agent_phone">Agent phone</label>
+                <label htmlFor="agent_phone">{t.fields.agent_phone}</label>
                 <input
                   id="agent_phone"
                   type="tel"
@@ -898,16 +911,15 @@ export function QuoteFlow({
         {step === 3 && (
           <>
             <div className="quote-panel-heading">
-              <h2>Timing and access</h2>
+              <h2>{t.step3Title}</h2>
               <p>
-                Dates are preferences until the appointment is confirmed.
-                {earliestDate &&
-                  ` The online price applies to inspections from ${formatShortDate(earliestDate)} onwards. For anything sooner, send the request and we will check availability and price.`}
+                {t.step3Intro}
+                {earliestDate && t.step3Earliest(formatShortDate(earliestDate, t.dateLocale))}
               </p>
             </div>
             <div className="field-grid">
               <div className="field">
-                <label htmlFor="preferred_date_1">Preferred date</label>
+                <label htmlFor="preferred_date_1">{t.fields.preferred_date_1}</label>
                 <input
                   id="preferred_date_1"
                   type="date"
@@ -916,7 +928,7 @@ export function QuoteFlow({
                 />
               </div>
               <div className="field">
-                <label htmlFor="preferred_date_2">Second preference</label>
+                <label htmlFor="preferred_date_2">{t.fields.preferred_date_2}</label>
                 <input
                   id="preferred_date_2"
                   type="date"
@@ -925,7 +937,7 @@ export function QuoteFlow({
                 />
               </div>
               <div className="field">
-                <label htmlFor="deadline">Auction / contract deadline</label>
+                <label htmlFor="deadline">{t.fields.deadline}</label>
                 <input
                   id="deadline"
                   type="date"
@@ -934,24 +946,22 @@ export function QuoteFlow({
                 />
               </div>
               <div className="field">
-                <label htmlFor="source_self_reported">How did you hear about us?</label>
+                <label htmlFor="source_self_reported">{t.heardAbout}</label>
                 <select
                   id="source_self_reported"
                   value={draft.source_self_reported}
                   onChange={(event) => update('source_self_reported', event.target.value)}
                 >
-                  <option value="">Choose</option>
-                  <option value="google">Google</option>
-                  <option value="chatgpt_ai">ChatGPT or another AI assistant</option>
-                  <option value="conveyancer">Conveyancer / solicitor</option>
-                  <option value="agent">Real estate agent</option>
-                  <option value="buyers_agent">Buyer&apos;s agent</option>
-                  <option value="previous_customer">Previous customer / referral</option>
-                  <option value="other">Other</option>
+                  <option value="">{t.choose}</option>
+                  {Object.entries(t.sources).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="voucher_code">Voucher code (optional)</label>
+                <label htmlFor="voucher_code">{t.voucherLabel}</label>
                 <input
                   id="voucher_code"
                   value={draft.voucher_code}
@@ -969,10 +979,10 @@ export function QuoteFlow({
                   checked={draft.flexible_booking}
                   onChange={(event) => update('flexible_booking', event.target.checked)}
                 />
-                My dates are flexible
+                {t.flexible}
               </label>
               <div className="field-full">
-                <label htmlFor="access_notes">Access or scope notes</label>
+                <label htmlFor="access_notes">{t.fields.access_notes}</label>
                 <textarea
                   id="access_notes"
                   maxLength={1500}
@@ -987,11 +997,12 @@ export function QuoteFlow({
                   onChange={(event) => update('privacy_consent', event.target.checked)}
                 />
                 <span>
-                  I have read the{' '}
+                  {t.privacyBefore}{lang === 'zh' ? '' : ' '}
                   <a href="/privacy" target="_blank" rel="noopener">
-                    privacy notice
-                  </a>{' '}
-                  and agree to my details being used to respond to this request. *
+                    {t.privacyLink}
+                  </a>
+                  {lang === 'zh' ? '' : ' '}
+                  {t.privacyAfter}
                 </span>
               </label>
             </div>
@@ -1022,16 +1033,16 @@ export function QuoteFlow({
         <div className="quote-actions">
           {step > 0 ? (
             <button className="back-button" type="button" onClick={() => setStep((current) => current - 1)}>
-              ← Back
+              {t.back}
             </button>
           ) : (
             <button className="link-button" type="button" onClick={clearDraft}>
-              Clear saved details
+              {t.clear}
             </button>
           )}
           {step < 3 ? (
             <button className="button" type="button" onClick={continueForward}>
-              Continue
+              {t.continue}
             </button>
           ) : (
             <button
@@ -1041,10 +1052,10 @@ export function QuoteFlow({
               disabled={submitting || (needsTurnstile && !turnstileToken)}
             >
               {submitting
-                ? 'Checking…'
+                ? t.checking
                 : submissionEnabled
-                  ? 'Get my price'
-                  : 'Email this request'}
+                  ? t.getPrice
+                  : t.emailRequest}
             </button>
           )}
         </div>

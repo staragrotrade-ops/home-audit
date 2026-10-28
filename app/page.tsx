@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { JsonLd } from '@/components/json-ld'
@@ -5,6 +6,14 @@ import { ThermalCaseStudy } from '@/components/case-study'
 import { FEATURED_GUIDE } from '@/lib/guides'
 import { SERVICE_AREAS } from '@/lib/service-areas'
 import { SITE_URL } from '@/lib/site'
+
+// The Chinese home page (/zh) is the same page in Chinese.
+export const metadata: Metadata = {
+  alternates: {
+    canonical: '/',
+    languages: { 'en-AU': '/', 'zh-Hans-AU': '/zh', 'x-default': '/' },
+  },
+}
 
 const trustPoints = [
   'Registered Building Inspector (Limited)',

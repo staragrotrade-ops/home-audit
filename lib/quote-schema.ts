@@ -48,6 +48,8 @@ export const quoteRequestSchema = z
       .regex(/^[0-9+() -]+$/),
     conveyancer_email: optionalEmail,
     agent_email: optionalEmail,
+    // The language of the form the customer filled in (the values are the same).
+    form_language: z.enum(['en', 'zh']).default('en'),
     agent_phone: z
       .string()
       .trim()
