@@ -32,6 +32,9 @@ export const PRIMARY_NAV = [
 // footer use these links instead of PRIMARY_NAV.
 export const ZH_PATH = '/zh'
 export const ZH_BRAND_NAME = '归处'
+// hreflang for the two home pages. Typed as a plain record: Next's language
+// list does not include every valid tag (such as zh-Hans).
+export const HOME_LANGUAGES: Record<string, string> = { 'en-AU': '/', 'zh-Hans': '/zh', 'x-default': '/' }
 export const ZH_NAV = [
   { href: '/zh#services', label: '服务项目' },
   { href: '/zh#approach', label: '我们的理念' },

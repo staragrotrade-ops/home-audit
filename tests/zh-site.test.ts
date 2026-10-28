@@ -11,7 +11,7 @@ test('归处: the Chinese home page keeps the slogan, links its English page and
   const page = await source('app/zh/page.tsx')
   assert.match(page, /历经远行，终有归处。/)
   assert.match(page, /ZH_BRAND_NAME/)
-  assert.match(page, /'zh-Hans': '\/zh'/)
+  assert.match(page, /languages: HOME_LANGUAGES/)
   assert.match(page, /lang="zh-Hans"/)
   assert.doesNotMatch(page, /\$\s?\d|formatAud|PRICE/, 'no prices (owner decision)')
   assert.doesNotMatch(page, /长期照料/, 'no promise of ongoing care')
@@ -19,7 +19,8 @@ test('归处: the Chinese home page keeps the slogan, links its English page and
   assert.match(page, /href: '\/zh\/quote\?service=building-and-pest'/)
   assert.match(await source('lib/site.ts'), /ZH_BRAND_NAME = '归处'/)
   const home = await source('app/page.tsx')
-  assert.match(home, /'zh-Hans': '\/zh'/)
+  assert.match(home, /languages: HOME_LANGUAGES/)
+  assert.match(await source('lib/site.ts'), /'zh-Hans': '\/zh'/)
 })
 
 test('the Chinese quote page uses the same form in Chinese and is not indexed', async () => {

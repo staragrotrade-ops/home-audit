@@ -6,6 +6,7 @@ import {
   CONTACT_EMAIL,
   CONTACT_PHONE,
   CONTACT_PHONE_HREF,
+  HOME_LANGUAGES,
   INSPECTOR_REGISTRATION,
   SITE_URL,
   ZH_BRAND_NAME,
@@ -23,7 +24,7 @@ export const metadata = pageMetadata({
   path: '/zh',
   appendSiteName: false,
   locale: 'zh_CN',
-  languages: { 'en-AU': '/', 'zh-Hans': '/zh', 'x-default': '/' },
+  languages: HOME_LANGUAGES,
 })
 
 const services = [

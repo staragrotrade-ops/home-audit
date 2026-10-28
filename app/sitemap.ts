@@ -3,6 +3,9 @@ import { GUIDES } from '@/lib/guides'
 import { SERVICE_AREAS } from '@/lib/service-areas'
 import { SITE_URL } from '@/lib/site'
 
+// hreflang for the two home pages (see HOME_LANGUAGES).
+const homeLanguages: Record<string, string> = { 'en-AU': `${SITE_URL}/`, 'zh-Hans': `${SITE_URL}/zh` }
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = [
     '',
@@ -39,7 +42,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       ...(route === '' || route === '/zh'
         ? {
             alternates: {
-              languages: { 'en-AU': `${SITE_URL}/`, 'zh-Hans': `${SITE_URL}/zh` },
+              languages: homeLanguages,
             },
           }
         : {}),
