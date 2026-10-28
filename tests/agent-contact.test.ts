@@ -16,7 +16,7 @@ test('quote form asks for agent email and phone, and no longer for an access con
 
 test('the quote saves the agent details on the job, apart from the database function', async () => {
   const route = await source('app/api/quote/route.ts')
-  assert.match(route, /const \{ agent_phone: agentPhone, \.\.\.jobFields \} = fields/)
+  assert.match(route, /const \{ agent_phone: agentPhone, form_language: formLanguage, \.\.\.jobFields \} = fields/)
   assert.match(route, /update\(\{ agent_email: fields\.agent_email \|\| null, agent_phone: agentPhone \|\| null \}\)/)
 })
 
