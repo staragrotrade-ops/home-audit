@@ -39,7 +39,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       ...(route === '' || route === '/zh'
         ? {
             alternates: {
-              languages: { 'en-AU': `${SITE_URL}/`, 'zh-Hans-AU': `${SITE_URL}/zh` },
+              languages: { 'en-AU': `${SITE_URL}/`, 'zh-Hans': `${SITE_URL}/zh` },
             },
           }
         : {}),

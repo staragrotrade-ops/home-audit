@@ -23,7 +23,7 @@ export const metadata = pageMetadata({
   path: '/zh',
   appendSiteName: false,
   locale: 'zh_CN',
-  languages: { 'en-AU': '/', 'zh-Hans-AU': '/zh', 'x-default': '/' },
+  languages: { 'en-AU': '/', 'zh-Hans': '/zh', 'x-default': '/' },
 })
 
 const services = [

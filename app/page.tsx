@@ -11,7 +11,7 @@ import { SITE_URL } from '@/lib/site'
 export const metadata: Metadata = {
   alternates: {
     canonical: '/',
-    languages: { 'en-AU': '/', 'zh-Hans-AU': '/zh', 'x-default': '/' },
+    languages: { 'en-AU': '/', 'zh-Hans': '/zh', 'x-default': '/' },
   },
 }
 
