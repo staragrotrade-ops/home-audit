@@ -14,7 +14,12 @@ import { QUOTE_COPY, translateServerMessage, type QuoteLang } from '@/lib/quote-
 type ServiceFamily = QuoteRequest['service_family'] | ''
 type Draft = Omit<
   QuoteRequest,
-  'service_family' | 'privacy_consent' | 'intake_mode' | 'analytics_session_id' | 'turnstile_token'
+  | 'service_family'
+  | 'privacy_consent'
+  | 'intake_mode'
+  | 'analytics_session_id'
+  | 'turnstile_token'
+  | 'form_language'
 > & {
   service_family: ServiceFamily
   privacy_consent: boolean
