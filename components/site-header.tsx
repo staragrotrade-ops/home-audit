@@ -18,8 +18,9 @@ export function SiteHeader() {
             HA
           </span>
           <span className="brand-copy">
-            <strong>Home Audit</strong>
-            <small>{zh ? `${ZH_BRAND_NAME} · 验房 · 白蚁 · 新房` : 'Building · Pest · New Homes'}</small>
+            {/* 归处 is the company's Chinese name: it sits with the name, not in the service line. */}
+            <strong>{zh ? `${ZH_BRAND_NAME} Home Audit` : 'Home Audit'}</strong>
+            <small>{zh ? '验房 · 白蚁 · 新房' : 'Building · Pest · New Homes'}</small>
           </span>
         </Link>
 

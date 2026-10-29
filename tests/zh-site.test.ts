@@ -54,7 +54,11 @@ test('header, phone menu and footer switch to Chinese under /zh', async () => {
     const file = await source(path)
     assert.match(file, /isZhPath\(/, path)
   }
-  assert.match(await source('components/site-header.tsx'), /\{zh \? 'English' : '中文'\}/)
+  const header = await source('components/site-header.tsx')
+  assert.match(header, /\{zh \? 'English' : '中文'\}/)
+  // The Chinese name goes with the company name, not in the service line.
+  assert.match(header, /`\$\{ZH_BRAND_NAME\} Home Audit`/)
+  assert.match(header, /'验房 · 白蚁 · 新房'/)
   assert.match(await source('app/sitemap.ts'), /'\/zh',/)
   assert.match(await source('scripts/release-gate.mjs'), /'\/zh',/)
 })
