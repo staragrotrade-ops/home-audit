@@ -182,3 +182,29 @@ export const templateInput = z.object({
 })
 
 export const templateBatch = z.object({ templates: z.array(templateInput).max(50) })
+
+// An upper floorplan aligned onto the floor below, its wet areas, and
+// moisture readings taken on this floor's ceilings.
+export const WET_AREA_KINDS = ['shower_bath', 'toilet_basin', 'laundry', 'kitchen', 'ac_unit', 'balcony'] as const
+const finite = z.number().finite().min(-1e6).max(1e6)
+export const planOverlayInput = z.object({
+  id: z.uuid(),
+  floorplanId: z.uuid(),
+  baseFloorplanId: z.uuid().nullable().optional(),
+  align: z
+    .object({ a: finite, b: finite, tx: finite, ty: finite, wu: z.number().positive(), hu: z.number().positive(), wl: z.number().positive(), hl: z.number().positive() })
+    .nullable()
+    .optional(),
+  wetAreas: z
+    .array(z.object({ x1: coordinate, y1: coordinate, x2: coordinate, y2: coordinate, kind: z.enum(WET_AREA_KINDS) }))
+    .max(100)
+    .default([]),
+  moisture: z
+    .array(z.object({ x: coordinate, y: coordinate, value: z.number().min(0).max(100), note: z.string().max(200).optional() }))
+    .max(300)
+    .default([]),
+  deleted: z.boolean().optional(),
+  clientUpdatedAt: z.iso.datetime({ offset: true }),
+})
+
+export const planOverlayBatch = z.object({ overlays: z.array(planOverlayInput).max(50) })
