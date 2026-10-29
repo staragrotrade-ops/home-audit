@@ -12,7 +12,8 @@ export async function GET(request: Request) {
   if (supabase instanceof Response) return supabase
   const code = normaliseRefCode(new URL(request.url).searchParams.get('code'))
   if (!code) return adminJson({ ok: false, error: 'Unknown referral code.' }, 400)
-  return new Response(new Uint8Array(qrPng(referralLink(SITE_URL, code))), {
+  const language = new URL(request.url).searchParams.get('lang') === 'zh' ? 'zh' : 'en'
+  return new Response(new Uint8Array(qrPng(referralLink(SITE_URL, code, language))), {
     headers: {
       'Content-Type': 'image/png',
       'Content-Disposition': `inline; filename="home-audit-referral-${code}.png"`,

@@ -27,6 +27,7 @@ export function PartnerRegistrationForm({ turnstileSiteKey }: { turnstileSiteKey
         mobile: form.get('mobile') || '',
         email: form.get('email') || '',
         notes: form.get('notes') || '',
+        language: form.get('language') || 'en',
         agree: form.get('agree') === 'on',
         turnstileToken: token,
         website: form.get('website') || '',
@@ -83,6 +84,13 @@ export function PartnerRegistrationForm({ turnstileSiteKey }: { turnstileSiteKey
       <div className="field-full">
         <label htmlFor="email">Email *</label>
         <input id="email" name="email" type="email" required maxLength={180} autoComplete="email" />
+      </div>
+      <div className="field-full">
+        <label htmlFor="language">Your clients mostly speak</label>
+        <select id="language" name="language" defaultValue="en">
+          <option value="en">English</option>
+          <option value="zh">中文 Chinese – we send you the Chinese website link</option>
+        </select>
       </div>
       <div className="field-full">
         <label htmlFor="notes">Anything we should know (optional)</label>

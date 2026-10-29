@@ -19,7 +19,8 @@ export const REFERRER_FIELDS =
 export async function loadReferrers(supabase: SupabaseClient) {
   const { data, error } = await supabase
     .from('referrers')
-    .select(REFERRER_FIELDS)
+    // All columns: newer ones (language) never break the list before a migration.
+    .select('*')
     .order('created_at', { ascending: false })
   if (error) return { referrers: [] as ReferrerRecord[], ready: false }
   return { referrers: (data || []) as ReferrerRecord[], ready: true }

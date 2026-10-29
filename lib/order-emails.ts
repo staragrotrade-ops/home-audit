@@ -1,6 +1,7 @@
 // Plain-text emails for the quote, payment and booking steps.
 import type { EmailMessage } from '@/lib/email'
 import { formatAud } from '@/lib/pricing'
+import { TRANSLATION_FEE_CENTS } from '@/lib/translation'
 import { CONTACT_EMAIL, CONTACT_PHONE, OWNER_MOBILE, OWNER_SIGNATURE_NAME, SITE_URL } from '@/lib/site'
 import { smsSafe } from '@/lib/sms'
 
@@ -388,3 +389,67 @@ ${signature.join('\n')}`,
     attachments: [{ filename: REFERRAL_QR_FILENAME, content: input.qrPngBase64, contentId: REFERRAL_QR_CONTENT_ID }],
   }
 }
+
+// The same email for partners whose clients speak Chinese: the link opens
+// the Chinese website, and the email says the Chinese pages and the Chinese
+// report translation are available.
+export function referrerLinkEmailZh(input: {
+  to: string
+  name: string
+  link: string
+  qrPngBase64: string
+  justApproved: boolean
+}): EmailMessage {
+  const first = input.name.trim().split(/\s+/)[0] || ''
+  const greeting = `${first ? `${first}，` : ''}您好！`
+  const opening = input.justApproved
+    ? '感谢您的注册，您已成为 Home Audit 推荐合作伙伴。'
+    : '您是 Home Audit 的推荐合作伙伴。'
+  const news = [
+    'Home Audit 中文网站已上线：客户可以用中文了解验房服务、在线报价和预约。',
+    `验房报告可加购完整的中文翻译版（${formatAud(TRANSLATION_FEE_CENTS)}），与英文报告同时提供，照片和平面图齐全，方便华人买家看懂每一项缺陷。英文报告为正式版本。`,
+  ]
+  const explain =
+    '客户通过下面的链接或二维码进入网站，并在 90 天内预约验房，这单就会记在您的名下。您可以通过微信、短信或邮件发送链接，也可以把二维码放在您的客户资料里。'
+  const signature = [OWNER_SIGNATURE_NAME, 'Home Audit', `Mobile ${OWNER_MOBILE}`, `Office ${CONTACT_PHONE}`, CONTACT_EMAIL, SITE_URL]
+  const p = 'margin:0 0 14px'
+  const html = `<!doctype html><html lang="zh-CN"><body style="margin:0;background:#f7f1e8;font-family:Arial,'PingFang SC','Microsoft YaHei',sans-serif;font-size:15px;line-height:1.7;color:#252b2a">
+<div style="max-width:600px;margin:0 auto;padding:24px 16px"><div style="background:#fffdf9;border:1px solid #cdd5ce;border-radius:12px;padding:26px">
+<p style="${p}">${escapeHtml(greeting)}</p>
+<p style="${p}">${escapeHtml(opening)}</p>
+<p style="margin:0 0 6px"><strong>新上线</strong></p>
+<ul style="margin:0 0 16px;padding-left:20px">${news.map((line) => `<li style="margin:0 0 6px">${escapeHtml(line)}</li>`).join('')}</ul>
+<p style="margin:0 0 6px"><strong>您的专属推荐链接（中文网站）</strong></p>
+<p style="margin:0 0 18px"><a href="${escapeHtml(input.link)}" style="display:inline-block;background:#294b4a;color:#ffffff;text-decoration:none;padding:11px 18px;border-radius:8px;font-weight:700">打开我的推荐链接</a><br><span style="font-size:13px;color:#64716c">${escapeHtml(input.link)}</span></p>
+<p style="margin:0 0 6px"><strong>您的二维码</strong>——可打印或给客户扫码，扫码打开的是同一个链接。附件里也有。</p>
+<p style="margin:0 0 18px"><img src="cid:${REFERRAL_QR_CONTENT_ID}" width="200" height="200" alt="Home Audit 推荐链接二维码" style="display:block;border:1px solid #cdd5ce;border-radius:8px"></p>
+<p style="${p}">${escapeHtml(explain)}</p>
+<p style="${p}">有任何问题，直接回复这封邮件或给我打电话。</p>
+<p style="margin:0">${signature.map(escapeHtml).join('<br>')}</p>
+</div></div></body></html>`
+
+  return {
+    to: input.to,
+    subject: 'Home Audit 中文网站和中文验房报告已上线 – 您的推荐链接',
+    text: `${greeting}
+
+${opening}
+
+新上线：
+${news.map((line) => `- ${line}`).join('\n')}
+
+您的专属推荐链接（中文网站）：
+${input.link}
+
+${explain}
+
+二维码在附件里，可打印或给客户扫码，扫码打开的是同一个链接。
+
+有任何问题，直接回复这封邮件或给我打电话。
+
+${signature.join('\n')}`,
+    html,
+    attachments: [{ filename: REFERRAL_QR_FILENAME, content: input.qrPngBase64, contentId: REFERRAL_QR_CONTENT_ID }],
+  }
+}
+

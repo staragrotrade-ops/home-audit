@@ -94,6 +94,7 @@ export function ReferrerManager({ referrers, siteUrl }: { referrers: ReferrerRec
           mobile: String(form.get('mobile') || ''),
           email: String(form.get('email') || ''),
           notes: String(form.get('notes') || ''),
+          language: String(form.get('language') || 'en'),
           commissionType: String(form.get('commissionType') || ''),
           commissionValue: String(form.get('commissionValue') || ''),
         }),
@@ -117,7 +118,7 @@ export function ReferrerManager({ referrers, siteUrl }: { referrers: ReferrerRec
       ) : (
         <ul className="admin-referrer-list">
           {referrers.map((referrer) => {
-            const link = referralLink(siteUrl, referrer.ref_code)
+            const link = referralLink(siteUrl, referrer.ref_code, referrer.language)
             return (
               <li key={referrer.id}>
                 <div className="admin-referrer-head">
@@ -144,9 +145,25 @@ export function ReferrerManager({ referrers, siteUrl }: { referrers: ReferrerRec
                   >
                     Copy link
                   </button>
+                  <select
+                    aria-label="Clients' language"
+                    value={referrer.language === 'zh' ? 'zh' : 'en'}
+                    disabled={busy}
+                    onChange={(event) =>
+                      void run(
+                        () => call('PATCH', { action: 'language', id: referrer.id, language: event.target.value }),
+                        event.target.value === 'zh'
+                          ? `${referrer.name}: Chinese link and email.`
+                          : `${referrer.name}: English link and email.`,
+                      )
+                    }
+                  >
+                    <option value="en">English clients</option>
+                    <option value="zh">中文客户</option>
+                  </select>
                   <a
                     className="admin-button small"
-                    href={`/api/admin/referrers/qr?code=${encodeURIComponent(referrer.ref_code)}`}
+                    href={`/api/admin/referrers/qr?code=${encodeURIComponent(referrer.ref_code)}${referrer.language === 'zh' ? '&lang=zh' : ''}`}
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -259,6 +276,13 @@ export function ReferrerManager({ referrers, siteUrl }: { referrers: ReferrerRec
             </label>
             <CommissionFields />
           </div>
+          <label>
+            Clients&apos; language
+            <select name="language" defaultValue="en">
+              <option value="en">English – English website link and email</option>
+              <option value="zh">中文 – Chinese website link and email</option>
+            </select>
+          </label>
           <label>
             Notes
             <textarea name="notes" rows={2} maxLength={1000} />
