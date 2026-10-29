@@ -33,8 +33,8 @@ export default async function ChineseQuotePage({ searchParams }: QuotePageProps)
       <div className="container">
         <div className="quote-heading">
           <p className="eyebrow">验房报价</p>
-          <h1>先告诉我们房子在哪里，其余的交给我们。</h1>
-          <p>填写的内容会自动保存在这台设备上。日期是您的意向，以我们确认的时间为准。</p>
+          <h1>验房，您买的不是一件商品，而是专业知识和保障。</h1>
+          <p>验房是一门科学，科学都有严谨的流程。请按流程回答以下问题，我们需要足够的信息，才能把工作做好。</p>
           <p className="quote-contact">
             想直接沟通？请致电 <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a>，或发邮件到{' '}
             <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>。

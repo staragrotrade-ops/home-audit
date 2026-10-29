@@ -20,6 +20,10 @@
   legal advice; enquiry by phone or email) and `/zh/about` 关于归处.
   Header: 归处 Home Audit / 房屋检查 · 建筑技术咨询; Chinese nav and footer
   follow the two lines. Maintenance and the partner network are not shown.
+- Owner wording: Chinese quote page opens with 验房，您买的不是一件商品，
+  而是专业知识和保障; 每个缺陷都配照片; 检查范围和检查深度都由卖方决定;
+  about principle 清晰; two new inspection FAQs (what is inspected — AS 4349.1
+  / AS 4349.3; does a wall crack mean the footings have moved).
 
 ## 0.29.0 — 2026-11-02
 

@@ -39,6 +39,13 @@ test('归处: two business lines today; maintenance and the partner network are 
     assert.ok(inspection.includes(service), service)
   }
   assert.match(inspection, /href: '\/zh\/quote\?service=building-and-pest'/)
+  // Owner wording, 30 October 2026.
+  assert.match(inspection, /AS 4349\.1/)
+  assert.match(inspection, /不能单凭一条裂缝就认定地基有问题/)
+  assert.match(inspection, /检查范围和检查深度都由卖方决定/)
+  assert.match(await source('app/zh/page.tsx'), /每个缺陷都配照片/)
+  assert.match(await source('app/zh/about/page.tsx'), /\['清晰', /)
+  assert.match(await source('app/zh/quote/page.tsx'), /您买的不是一件商品，而是专业知识和保障/)
   const consulting = await source('app/zh/consulting/page.tsx')
   for (const service of ['建筑缺陷调查', '技术评估', '建筑纠纷专家报告', '专家证人']) {
     assert.ok(consulting.includes(service), service)
