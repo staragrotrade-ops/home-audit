@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.30.0 — 2026-10-29
+
+- 归处 Home Audit, the Chinese site: `/zh` home page (slogan 历经远行，终有归处。,
+  services, what you get, FAQ, contact; no prices) with the owner's house
+  photo, and `/zh/quote`, the same quote form in Chinese (`lib/quote-copy.ts`).
+  A quote from the Chinese form is noted on the job ("Quote form filled in
+  Chinese"). The header, phone menu and footer switch to Chinese under /zh and
+  carry a 中文 / English link. hreflang between `/` and `/zh`, `/zh` in the
+  sitemap and the release gate. The order page, agreement and emails stay in
+  English for now.
+- 归处 is the brand; the site shows the two business lines offered today:
+  `/zh` brand home (slogan, two line cards, why 归处, approach, contact),
+  `/zh/inspection` 归处 · 房屋检查 (pre-purchase, pre-auction, new home
+  stages, 137B, 房屋状况评估 incl. dilapidation reports; FAQ),
+  `/zh/consulting` 归处 · 建筑技术咨询 (defect investigation, technical
+  assessment, dispute expert reports, expert witness; residential Class 1/10
+  within the inspector's registration; expert's duty to the tribunal; no
+  legal advice; enquiry by phone or email) and `/zh/about` 关于归处.
+  Header: 归处 Home Audit / 房屋检查 · 建筑技术咨询; Chinese nav and footer
+  follow the two lines. Maintenance and the partner network are not shown.
+- Owner wording: Chinese quote page opens with 验房，您买的不是一件商品，
+  而是专业知识和保障; 每个缺陷都配照片; 检查范围和检查深度都由卖方决定;
+  about principle 清晰; two new inspection FAQs (what is inspected — AS 4349.1
+  / AS 4349.3; does a wall crack mean the footings have moved).
+- 137B links on the Chinese pages (inspection page, footer, Chinese quote
+  form) go to the 137B website's Chinese pages (/zh). 都值得研究; the
+  structural-engineer sentence and the credentials note on the inspection
+  page removed.
+- The thermal ceiling-leak case study in Chinese (`ThermalCaseStudy
+  lang="zh"`) on the 归处 home and 房屋检查 pages.
+
 ## 0.29.0 — 2026-11-02
 
 - Floor overlays for the inspector app (migration

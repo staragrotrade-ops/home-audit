@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { PRIMARY_NAV } from '@/lib/site'
+import { PRIMARY_NAV, ZH_NAV, ZH_PATH, isZhPath } from '@/lib/site'
 
 // The phone menu. It closes when a link is tapped, when the page changes,
 // when the visitor taps anywhere outside it, scrolls, or presses Escape, so
@@ -12,6 +12,8 @@ export function MobileMenu() {
   const ref = useRef<HTMLDetailsElement>(null)
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const zh = isZhPath(pathname)
+  const nav: readonly { href: string; label: string }[] = zh ? ZH_NAV : PRIMARY_NAV
 
   function close() {
     if (ref.current) ref.current.open = false
@@ -46,15 +48,20 @@ export function MobileMenu() {
 
   return (
     <details className="mobile-menu" ref={ref} onToggle={(event) => setOpen(event.currentTarget.open)}>
-      <summary aria-label={open ? 'Close navigation' : 'Open navigation'}>{open ? 'Close' : 'Menu'}</summary>
-      <nav aria-label="Mobile navigation">
-        {PRIMARY_NAV.map((item) => (
+      <summary aria-label={open ? (zh ? '关闭菜单' : 'Close navigation') : zh ? '打开菜单' : 'Open navigation'}>
+        {open ? (zh ? '关闭' : 'Close') : zh ? '菜单' : 'Menu'}
+      </summary>
+      <nav aria-label={zh ? '手机导航' : 'Mobile navigation'}>
+        {nav.map((item) => (
           <Link href={item.href} key={item.href} onClick={close}>
             {item.label}
           </Link>
         ))}
-        <Link className="button" href="/quote" onClick={close}>
-          Get a quote
+        <Link href={zh ? '/' : ZH_PATH} hrefLang={zh ? 'en-AU' : 'zh-Hans'} onClick={close}>
+          {zh ? 'English' : '中文'}
+        </Link>
+        <Link className="button" href={zh ? '/zh/quote' : '/quote'} onClick={close}>
+          {zh ? '获取报价' : 'Get a quote'}
         </Link>
       </nav>
     </details>

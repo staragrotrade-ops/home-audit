@@ -3,6 +3,9 @@ import { GUIDES } from '@/lib/guides'
 import { SERVICE_AREAS } from '@/lib/service-areas'
 import { SITE_URL } from '@/lib/site'
 
+// hreflang for the two home pages (see HOME_LANGUAGES).
+const homeLanguages: Record<string, string> = { 'en-AU': `${SITE_URL}/`, 'zh-Hans': `${SITE_URL}/zh` }
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = [
     '',
@@ -11,6 +14,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/new-home-inspections',
     '/practical-completion-inspection',
     '/last-minute-building-inspection-melbourne',
+    '/zh',
+    '/zh/inspection',
+    '/zh/consulting',
+    '/zh/about',
     '/about',
     '/credentials',
     '/service-areas',
@@ -34,6 +41,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       ),
       ...(route === ''
         ? { images: [`${SITE_URL}/home-audit-inspector-melbourne.webp`] }
+        : {}),
+      ...(route === '' || route === '/zh'
+        ? {
+            alternates: {
+              languages: homeLanguages,
+            },
+          }
         : {}),
     })),
     ...GUIDES.map((guide) => ({

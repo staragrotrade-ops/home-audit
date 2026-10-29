@@ -17,6 +17,8 @@ export function pageMetadata({
   openGraphType = 'website',
   publishedTime,
   modifiedTime,
+  locale = 'en_AU',
+  languages,
 }: {
   title: string
   description: string
@@ -27,13 +29,17 @@ export function pageMetadata({
   openGraphType?: 'website' | 'article'
   publishedTime?: string
   modifiedTime?: string
+  /** Open Graph locale, e.g. 'zh_CN' for the Chinese pages. */
+  locale?: string
+  /** hreflang alternates: language tag → path. */
+  languages?: Record<string, string>
 }): Metadata {
   const fullTitle = appendSiteName ? `${title} | ${SITE_NAME}` : title
 
   return {
     title: appendSiteName ? title : { absolute: title },
     description,
-    alternates: { canonical: path },
+    alternates: languages ? { canonical: path, languages } : { canonical: path },
     // A child segment replaces the whole `robots` object from the root layout,
     // so the Googlebot preview directives must be repeated here.
     robots: {
@@ -56,7 +62,7 @@ export function pageMetadata({
             description,
             url: path,
             siteName: SITE_NAME,
-            locale: 'en_AU',
+            locale,
             type: 'article' as const,
             publishedTime,
             modifiedTime,
@@ -67,7 +73,7 @@ export function pageMetadata({
             description,
             url: path,
             siteName: SITE_NAME,
-            locale: 'en_AU',
+            locale,
             type: 'website' as const,
             images: [socialImage],
           },

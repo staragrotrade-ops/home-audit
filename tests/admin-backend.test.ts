@@ -120,7 +120,7 @@ test('online quote submission still needs its own switch', async () => {
   assert.match(route, /consume_rate_limit/)
 
   const flow = await source('components/quote-flow.tsx')
-  assert.match(flow, /requestBody\(draft, 'email_handoff'\)/)
+  assert.match(flow, /requestBody\(draft, 'email_handoff'/)
 })
 
 test('quote copies and rate-limit hashes are protected', async () => {

@@ -74,7 +74,8 @@ test('the code is applied to online quotes, manual prices and the order page, an
   assert.match(read('lib/orders.ts'), /await redeemJobVoucher\(supabase, jobId\)/)
   assert.match(read("app/order/[token]/page.tsx"), /voucher_discount_cents/)
   const flow = read('components/quote-flow.tsx')
-  assert.match(flow, /Voucher code \(optional\)/)
+  assert.match(flow, /\{t\.voucherLabel\}/)
+  assert.match(read('lib/quote-copy.ts'), /Voucher code \(optional\)/)
   assert.match(flow, /Voucher code: \$\{draft\.voucher_code\}/)
 })
 
