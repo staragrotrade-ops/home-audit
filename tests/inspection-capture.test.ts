@@ -335,3 +335,27 @@ test('catalog v3: new trades, solar / pool / termite barrier elements, handyman 
   assert.deepEqual(catalogPayload().handymanMinorElements, ['internal_door', 'external_door', 'cabinetry'])
   assert.equal(tradeFor('fence', 'minor_defect'), 'fencer')
 })
+
+test('floor overlays: alignment, wet areas and moisture validated; route authenticates; app can read them', async () => {
+  const { planOverlayInput } = await import('../lib/inspection-sync.ts')
+  const base = { id: '7f1f6c1e-2a7b-4c7e-9a51-1d0c6b3f9a11', floorplanId: '7f1f6c1e-2a7b-4c7e-9a51-1d0c6b3f9a12', clientUpdatedAt: '2026-10-29T10:00:00Z' }
+  const ok = planOverlayInput.parse({
+    ...base,
+    baseFloorplanId: '7f1f6c1e-2a7b-4c7e-9a51-1d0c6b3f9a13',
+    align: { a: 1.1, b: -0.02, tx: 30, ty: -12, wu: 600, hu: 400, wl: 700, hl: 900 },
+    wetAreas: [{ x1: 0.1, y1: 0.1, x2: 0.3, y2: 0.25, kind: 'shower_bath' }],
+    moisture: [{ x: 0.4, y: 0.5, value: 18.5 }],
+  })
+  assert.equal(ok.wetAreas.length, 1)
+  assert.throws(() => planOverlayInput.parse({ ...base, wetAreas: [{ x1: 0, y1: 0, x2: 2, y2: 0, kind: 'shower_bath' }] }))
+  assert.throws(() => planOverlayInput.parse({ ...base, wetAreas: [{ x1: 0, y1: 0, x2: 1, y2: 1, kind: 'pool' }] }))
+  assert.throws(() => planOverlayInput.parse({ ...base, moisture: [{ x: 0.1, y: 0.1, value: 101 }] }))
+  const route = await source('app/api/app/jobs/[id]/plan-overlays/route.ts')
+  assert.match(route, /authenticateInspector\(request\)/)
+  const sql = await source('supabase/migrations/20261102100000_plan_overlays.sql')
+  assert.match(sql, /grant select on public\.plan_overlays to authenticated/)
+  assert.match(sql, /The floor below does not belong to this job/)
+  assert.match(sql, /grant execute on function public\.app_sync_plan_overlays\(uuid, uuid, jsonb\) to service_role/)
+  const pull = await source('app/api/app/jobs/[id]/inspection/route.ts')
+  assert.match(pull, /planOverlays:/)
+})

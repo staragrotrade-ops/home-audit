@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.29.0 — 2026-11-02
+
+- Floor overlays for the inspector app (migration
+  `20261102100000_plan_overlays.sql`, safe to run more than once): an upper
+  floorplan aligned onto the floor below by two stair corners, its wet
+  areas, and ceiling moisture readings. `POST /api/app/jobs/{id}/plan-overlays`;
+  included in the inspection pull (`planOverlays`, skipped if the table is
+  not there yet).
+
 ## 0.28.0 — 2026-11-01
 
 - Catalog v3: 16 new trades (handyman, gas fitter, roof tiler, restumper,

@@ -18,7 +18,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     const since = new URL(request.url).searchParams.get('sinceRev')
     const sinceRev = since ? z.coerce.number().int().min(0).parse(since) : 0
 
-    const [floorplans, defects, photos, areas, assessment, levels] = await Promise.all([
+    const [floorplans, defects, photos, areas, assessment, levels, overlays] = await Promise.all([
       supabase
         .from('job_floorplans')
         .select('id,level_label,sort_order,content_type,size_bytes,width_px,height_px,source,status,updated_at')
@@ -35,7 +35,9 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       supabase.from('inspection_areas').select('*').eq('job_id', id).gt('sync_rev', sinceRev).order('sync_rev'),
       supabase.from('inspection_assessments').select('*').eq('job_id', id).gt('sync_rev', sinceRev).maybeSingle(),
       supabase.from('level_surveys').select('*').eq('job_id', id).gt('sync_rev', sinceRev).order('sync_rev'),
+      supabase.from('plan_overlays').select('*').eq('job_id', id).gt('sync_rev', sinceRev).order('sync_rev'),
     ])
+    // Floor overlays are optional: before their migration the job still loads.
     const failed = floorplans.error || defects.error || photos.error || areas.error || assessment.error || levels.error
     if (failed) throw new Error(failed.message)
 
@@ -63,6 +65,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       ...(areas.data || []),
       ...(assessment.data ? [assessment.data] : []),
       ...(levels.data || []),
+      ...(overlays.error ? [] : overlays.data || []),
     ] as { sync_rev: number }[]
     const serverRev = rows.reduce((max, row) => Math.max(max, Number(row.sync_rev)), sinceRev)
 
@@ -76,6 +79,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
         areas: areas.data || [],
         assessment: assessment.data || null,
         levelSurveys: levels.data || [],
+        planOverlays: overlays.error ? [] : overlays.data || [],
       },
       { headers: { 'Cache-Control': 'no-store' } },
     )
