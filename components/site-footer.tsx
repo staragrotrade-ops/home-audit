@@ -8,6 +8,7 @@ import {
   CONTACT_EMAIL,
   CONTACT_PHONE,
   CONTACT_PHONE_HREF,
+  OWNER_BUILDER_ZH_URL,
   ZH_BRAND_NAME,
   ZH_TAGLINE,
   isZhPath,
@@ -81,7 +82,7 @@ function ChineseFooter() {
           <h2>业务</h2>
           <Link href="/zh/inspection">房屋检查</Link>
           <Link href="/zh/consulting">建筑技术咨询</Link>
-          <a href="https://ownerbuilderinspection.melbourne">业主自建房 137B（英文网站）</a>
+          <a href={OWNER_BUILDER_ZH_URL}>业主自建房 137B</a>
           <Link href="/zh/about">关于归处</Link>
           <Link href="/" hrefLang="en-AU" lang="en">
             English

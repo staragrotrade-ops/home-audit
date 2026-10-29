@@ -620,7 +620,7 @@ export function QuoteFlow({
                 <strong>{t.newHome[0]}</strong>
                 <span>{t.newHome[1]}</span>
               </button>
-              <a className="choice-card" href="https://ownerbuilderinspection.melbourne">
+              <a className="choice-card" href={t.ownerBuilderHref}>
                 <strong>{t.ownerBuilder[0]}</strong>
                 <span>{t.ownerBuilder[1]}</span>
               </a>

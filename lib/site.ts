@@ -38,6 +38,8 @@ export const HOME_LANGUAGES: Record<string, string> = { 'en-AU': '/', 'zh-Hans':
 // Business lines on the site: 房屋检查 and 建筑技术咨询. Maintenance and the
 // partner network are not offered yet and are not shown (owner decision,
 // 30 October 2026).
+// The 137B website's Chinese pages.
+export const OWNER_BUILDER_ZH_URL = 'https://ownerbuilderinspection.melbourne/zh'
 export const ZH_TAGLINE = '房屋检查 · 建筑技术咨询'
 export const ZH_NAV = [
   { href: '/zh/inspection', label: '房屋检查' },

@@ -49,7 +49,7 @@ export default function ChineseAboutPage() {
         <p className="zh-eyebrow">关于归处</p>
         <h1 id="zh-page-title">历经远行，终有归处。</h1>
         <p>
-          归处是 Home Audit 的中文名。很多人走了很远的路，才在这里安下一个家。买房、建房、住进去以后，每一步都值得看清楚。我们从了解一栋房子开始。
+          归处是 Home Audit 的中文名。很多人走了很远的路，才在这里安下一个家。买房、建房、住进去以后，每一步都值得研究。我们从了解一栋房子开始。
         </p>
       </section>
 

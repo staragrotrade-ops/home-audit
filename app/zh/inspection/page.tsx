@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { JsonLd } from '@/components/json-ld'
 import { ZhContact } from '@/components/zh/zh-contact'
 import { pageMetadata } from '@/lib/metadata'
-import { CONTACT_EMAIL, INSPECTOR_REGISTRATION, SITE_URL } from '@/lib/site'
+import { CONTACT_EMAIL, INSPECTOR_REGISTRATION, OWNER_BUILDER_ZH_URL, SITE_URL } from '@/lib/site'
 
 // 归处 · 房屋检查. No prices on the Chinese pages (owner decision).
 
@@ -35,8 +35,8 @@ const services = [
   },
   {
     title: '业主自建房 137B 报告',
-    text: '自建房在建成后 6.5 年内出售，需要 137B 报告。由我们的专门网站办理（英文）。',
-    href: 'https://ownerbuilderinspection.melbourne',
+    text: '自建房在建成后 6.5 年内出售，需要 137B 报告。由我们的 137B 专门网站办理。',
+    href: OWNER_BUILDER_ZH_URL,
     external: true,
   },
   {
@@ -56,7 +56,7 @@ const faqs = [
   {
     question: '墙上有裂缝，是不是地基下沉？',
     answer:
-      '不一定。判断地基问题，关键是看裂缝的形态、位置和分布，以及有没有其他沉降迹象，比如门窗变形关不严、地面倾斜。不能单凭一条裂缝就认定地基有问题。需要时，我们会建议请结构工程师进一步评估。',
+      '不一定。判断地基问题，关键是看裂缝的形态、位置和分布，以及有没有其他沉降迹象，比如门窗变形关不严、地面倾斜。不能单凭一条裂缝就认定地基有问题。',
   },
   {
     question: '验房能发现房子所有的问题吗？',
@@ -184,13 +184,6 @@ export default function ChineseInspectionPage() {
             </details>
           ))}
         </div>
-        <p className="zh-note">
-          注册信息可以在{' '}
-          <Link className="text-link" href="/credentials">
-            资质与保险（英文）
-          </Link>{' '}
-          页面查看。
-        </p>
       </section>
 
       <ZhContact text="告诉我们房屋地址和您需要的检查，在网上用中文填写报价表。" />

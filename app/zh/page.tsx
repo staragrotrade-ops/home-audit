@@ -97,7 +97,7 @@ export default function ChineseHomePage() {
       <section className="zh-section" id="services" aria-labelledby="zh-lines-title">
         <div className="zh-intro">
           <p className="zh-eyebrow">我们的业务</p>
-          <h2 id="zh-lines-title">每一个关于家的决定，都值得看清楚。</h2>
+          <h2 id="zh-lines-title">每一个关于家的决定，都值得研究。</h2>
         </div>
         <div className="zh-lines">
           {lines.map((line) => (

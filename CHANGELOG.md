@@ -24,6 +24,10 @@
   而是专业知识和保障; 每个缺陷都配照片; 检查范围和检查深度都由卖方决定;
   about principle 清晰; two new inspection FAQs (what is inspected — AS 4349.1
   / AS 4349.3; does a wall crack mean the footings have moved).
+- 137B links on the Chinese pages (inspection page, footer, Chinese quote
+  form) go to the 137B website's Chinese pages (/zh). 都值得研究; the
+  structural-engineer sentence and the credentials note on the inspection
+  page removed.
 
 ## 0.29.0 — 2026-11-02
 
