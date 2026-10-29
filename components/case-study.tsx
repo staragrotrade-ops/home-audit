@@ -61,8 +61,32 @@ function CaseStudy({ eyebrow, heading, steps, body, note, cta, images, variant =
 
 // Building and pest: a cold spot on a ground-floor ceiling, confirmed as
 // water from a leak upstairs. Thermal imaging is an extra check only
-// (Inspection Agreement clause 5.1(w)).
-export function ThermalCaseStudy({ variant = 'full' }: { variant?: 'full' | 'home' }) {
+// (Inspection Agreement clause 5.1(w)). lang="zh" is the same case for the
+// Chinese pages (归处).
+export function ThermalCaseStudy({ variant = 'full', lang = 'en' }: { variant?: 'full' | 'home'; lang?: 'en' | 'zh' }) {
+  const image = {
+    src: '/case-study-thermal-ceiling-leak.webp',
+    width: 900,
+    height: 1200,
+  }
+  if (lang === 'zh') {
+    return (
+      <CaseStudy
+        variant={variant}
+        eyebrow="来自最近的一次房屋 + 白蚁检查"
+        heading="看起来没问题的天花板，藏着楼上的漏水。"
+        steps={[
+          ['看起来正常。', '一楼天花板没有水渍，也看不出损坏。'],
+          ['发现冷点。', '热成像仪显示有一块比周围天花板低约 1.4 °C。'],
+          ['确认有水。', '湿度计确认这个位置有水，水来自楼上的地面。'],
+        ]}
+        body={['这个发现连同照片写进了书面报告。买家用它重新议价。']}
+        note="在条件允许且有必要时，验房师可能会用热成像作为辅助检查。"
+        cta={{ href: '/zh/quote?service=building-and-pest', label: '获取验房报价' }}
+        images={[{ ...image, alt: '热成像仪显示一楼天花板上的冷点，原因是楼上漏水' }]}
+      />
+    )
+  }
   return (
     <CaseStudy
       variant={variant}
@@ -78,10 +102,8 @@ export function ThermalCaseStudy({ variant = 'full' }: { variant?: 'full' | 'hom
       cta={{ href: '/quote?service=building-and-pest', label: 'Get a quote' }}
       images={[
         {
-          src: '/case-study-thermal-ceiling-leak.webp',
+          ...image,
           alt: 'Thermal camera showing a cold spot on a ground-floor ceiling, caused by a water leak from the floor above',
-          width: 900,
-          height: 1200,
         },
       ]}
     />

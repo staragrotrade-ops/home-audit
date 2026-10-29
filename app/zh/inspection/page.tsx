@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ThermalCaseStudy } from '@/components/case-study'
 import { JsonLd } from '@/components/json-ld'
 import { ZhContact } from '@/components/zh/zh-contact'
 import { pageMetadata } from '@/lib/metadata'
@@ -169,6 +170,14 @@ export default function ChineseInspectionPage() {
             )
           })}
         </div>
+      </section>
+
+      <section className="zh-section" aria-labelledby="zh-case-title">
+        <div className="zh-intro">
+          <p className="zh-eyebrow">验房案例</p>
+          <h2 id="zh-case-title">看不见的问题，才最需要专业检查</h2>
+        </div>
+        <ThermalCaseStudy lang="zh" />
       </section>
 
       <section className="zh-section" id="faq" aria-labelledby="zh-faq-title">

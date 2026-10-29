@@ -49,6 +49,13 @@ test('归处: two business lines today; maintenance and the partner network are 
   assert.match(await source('components/quote-flow.tsx'), /href=\{t\.ownerBuilderHref\}/)
   assert.match(await source('lib/quote-copy.ts'), /ownerBuilderHref: 'https:\/\/ownerbuilderinspection\.melbourne\/zh'/)
   assert.match(await source('app/zh/page.tsx'), /都值得研究/)
+  // The thermal case study, in Chinese, on the home and inspection pages.
+  assert.match(await source('app/zh/page.tsx'), /<ThermalCaseStudy variant="home" lang="zh" \/>/)
+  assert.match(inspection, /<ThermalCaseStudy lang="zh" \/>/)
+  const caseStudy = await source('components/case-study.tsx')
+  assert.match(caseStudy, /看起来没问题的天花板，藏着楼上的漏水。/)
+  assert.match(caseStudy, /在条件允许且有必要时，验房师可能会用热成像作为辅助检查/)
+  assert.match(caseStudy, /href: '\/zh\/quote\?service=building-and-pest'/)
   assert.match(await source('app/zh/page.tsx'), /每个缺陷都配照片/)
   assert.match(await source('app/zh/about/page.tsx'), /\['清晰', /)
   assert.match(await source('app/zh/quote/page.tsx'), /您买的不是一件商品，而是专业知识和保障/)

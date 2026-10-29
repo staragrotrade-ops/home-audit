@@ -28,6 +28,8 @@
   form) go to the 137B website's Chinese pages (/zh). 都值得研究; the
   structural-engineer sentence and the credentials note on the inspection
   page removed.
+- The thermal ceiling-leak case study in Chinese (`ThermalCaseStudy
+  lang="zh"`) on the 归处 home and 房屋检查 pages.
 
 ## 0.29.0 — 2026-11-02
 

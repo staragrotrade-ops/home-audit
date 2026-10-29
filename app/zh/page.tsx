@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { ThermalCaseStudy } from '@/components/case-study'
 import { JsonLd } from '@/components/json-ld'
 import { ZhContact } from '@/components/zh/zh-contact'
 import { pageMetadata } from '@/lib/metadata'
@@ -109,6 +110,12 @@ export default function ChineseHomePage() {
               </span>
             </Link>
           ))}
+        </div>
+      </section>
+
+      <section className="section thermal-case-section" aria-label="验房案例">
+        <div className="container">
+          <ThermalCaseStudy variant="home" lang="zh" />
         </div>
       </section>
 
