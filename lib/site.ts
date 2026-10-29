@@ -35,10 +35,14 @@ export const ZH_BRAND_NAME = '归处'
 // hreflang for the two home pages. Typed as a plain record: Next's language
 // list does not include every valid tag (such as zh-Hans).
 export const HOME_LANGUAGES: Record<string, string> = { 'en-AU': '/', 'zh-Hans': '/zh', 'x-default': '/' }
+// Business lines on the site: 房屋检查 and 建筑技术咨询. Maintenance and the
+// partner network are not offered yet and are not shown (owner decision,
+// 30 October 2026).
+export const ZH_TAGLINE = '房屋检查 · 建筑技术咨询'
 export const ZH_NAV = [
-  { href: '/zh#services', label: '服务项目' },
-  { href: '/zh#approach', label: '我们的理念' },
-  { href: '/zh#faq', label: '常见问题' },
+  { href: '/zh/inspection', label: '房屋检查' },
+  { href: '/zh/consulting', label: '建筑技术咨询' },
+  { href: '/zh/about', label: '关于归处' },
   { href: '/zh#contact', label: '联系我们' },
 ] as const
 

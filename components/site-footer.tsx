@@ -9,6 +9,7 @@ import {
   CONTACT_PHONE,
   CONTACT_PHONE_HREF,
   ZH_BRAND_NAME,
+  ZH_TAGLINE,
   isZhPath,
 } from '@/lib/site'
 
@@ -73,14 +74,15 @@ function ChineseFooter() {
         <div>
           <div className="footer-brand">{ZH_BRAND_NAME} · Home Audit</div>
           <p>历经远行，终有归处。</p>
-          <p>墨尔本独立验房：买房前房屋及白蚁检查、新房分阶段验收。</p>
+          <p>{ZH_TAGLINE}</p>
         </div>
 
         <div>
-          <h2>服务</h2>
-          <Link href="/zh/quote?service=building-and-pest">买房前验房</Link>
-          <Link href="/zh/quote?service=new-home">新房分阶段验收</Link>
+          <h2>业务</h2>
+          <Link href="/zh/inspection">房屋检查</Link>
+          <Link href="/zh/consulting">建筑技术咨询</Link>
           <a href="https://ownerbuilderinspection.melbourne">业主自建房 137B（英文网站）</a>
+          <Link href="/zh/about">关于归处</Link>
           <Link href="/" hrefLang="en-AU" lang="en">
             English
           </Link>

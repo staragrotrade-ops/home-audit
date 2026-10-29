@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { MobileMenu } from '@/components/mobile-menu'
-import { CONTACT_PHONE, CONTACT_PHONE_HREF, PRIMARY_NAV, ZH_BRAND_NAME, ZH_NAV, ZH_PATH, isZhPath } from '@/lib/site'
+import { CONTACT_PHONE, CONTACT_PHONE_HREF, PRIMARY_NAV, ZH_BRAND_NAME, ZH_NAV, ZH_PATH, ZH_TAGLINE, isZhPath } from '@/lib/site'
 
 // The same header in English and, under /zh, in Chinese.
 export function SiteHeader() {
@@ -20,7 +20,7 @@ export function SiteHeader() {
           <span className="brand-copy">
             {/* 归处 is the company's Chinese name: it sits with the name, not in the service line. */}
             <strong>{zh ? `${ZH_BRAND_NAME} Home Audit` : 'Home Audit'}</strong>
-            <small>{zh ? '验房 · 白蚁 · 新房' : 'Building · Pest · New Homes'}</small>
+            <small>{zh ? ZH_TAGLINE : 'Building · Pest · New Homes'}</small>
           </span>
         </Link>
 

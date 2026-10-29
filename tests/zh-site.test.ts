@@ -16,11 +16,47 @@ test('归处: the Chinese home page keeps the slogan, links its English page and
   assert.doesNotMatch(page, /\$\s?\d|formatAud|PRICE/, 'no prices (owner decision)')
   assert.doesNotMatch(page, /长期照料/, 'no promise of ongoing care')
   assert.doesNotMatch(page, /Alan|0416/)
-  assert.match(page, /href: '\/zh\/quote\?service=building-and-pest'/)
+  assert.match(page, /href: '\/zh\/inspection'/)
+  assert.match(page, /href: '\/zh\/consulting'/)
   assert.match(await source('lib/site.ts'), /ZH_BRAND_NAME = '归处'/)
   const home = await source('app/page.tsx')
   assert.match(home, /languages: HOME_LANGUAGES/)
   assert.match(await source('lib/site.ts'), /'zh-Hans': '\/zh'/)
+})
+
+test('归处: two business lines today; maintenance and the partner network are not shown', async () => {
+  const pages = ['app/zh/page.tsx', 'app/zh/inspection/page.tsx', 'app/zh/consulting/page.tsx', 'app/zh/about/page.tsx']
+  for (const path of pages) {
+    const page = await source(path)
+    assert.match(page, /lang="zh-Hans"/, path)
+    assert.match(page, /locale: 'zh_CN'/, path)
+    assert.doesNotMatch(page, /\$\s?\d|formatAud/, `${path}: no prices`)
+    assert.doesNotMatch(page, /房屋维护|合作伙伴网络|加盟|全生命周期|即将推出/, `${path}: only services offered today`)
+    assert.doesNotMatch(page, /Alan|0416/, path)
+  }
+  const inspection = await source('app/zh/inspection/page.tsx')
+  for (const service of ['购房前验房', '新房阶段检查', '137B', '房屋状况评估', 'Dilapidation']) {
+    assert.ok(inspection.includes(service), service)
+  }
+  assert.match(inspection, /href: '\/zh\/quote\?service=building-and-pest'/)
+  const consulting = await source('app/zh/consulting/page.tsx')
+  for (const service of ['建筑缺陷调查', '技术评估', '建筑纠纷专家报告', '专家证人']) {
+    assert.ok(consulting.includes(service), service)
+  }
+  assert.doesNotMatch(consulting, /技术鉴定|保证|胜诉|打赢/)
+  assert.match(consulting, /专家首先对审理机构负责/)
+  assert.match(consulting, /Class 1/)
+  assert.match(consulting, /我们不提供法律意见/)
+  assert.match(consulting, /quote=\{false\}/)
+  const sitemap = await source('app/sitemap.ts')
+  const gate = await source('scripts/release-gate.mjs')
+  for (const route of ['/zh/inspection', '/zh/consulting', '/zh/about']) {
+    assert.ok(sitemap.includes(`'${route}'`), route)
+    assert.ok(gate.includes(`'${route}'`), route)
+  }
+  const site = await source('lib/site.ts')
+  assert.match(site, /href: '\/zh\/inspection', label: '房屋检查'/)
+  assert.match(site, /href: '\/zh\/consulting', label: '建筑技术咨询'/)
 })
 
 test('the Chinese quote page uses the same form in Chinese and is not indexed', async () => {
@@ -58,7 +94,8 @@ test('header, phone menu and footer switch to Chinese under /zh', async () => {
   assert.match(header, /\{zh \? 'English' : '中文'\}/)
   // The Chinese name goes with the company name, not in the service line.
   assert.match(header, /`\$\{ZH_BRAND_NAME\} Home Audit`/)
-  assert.match(header, /'验房 · 白蚁 · 新房'/)
+  assert.match(header, /ZH_TAGLINE/)
+  assert.match(await source('lib/site.ts'), /ZH_TAGLINE = '房屋检查 · 建筑技术咨询'/)
   assert.match(await source('app/sitemap.ts'), /'\/zh',/)
   assert.match(await source('scripts/release-gate.mjs'), /'\/zh',/)
 })

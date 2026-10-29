@@ -10,7 +10,16 @@
   carry a 中文 / English link. hreflang between `/` and `/zh`, `/zh` in the
   sitemap and the release gate. The order page, agreement and emails stay in
   English for now.
-  The Chinese header reads 归处 Home Audit, with 验房 · 白蚁 · 新房 below.
+- 归处 is the brand; the site shows the two business lines offered today:
+  `/zh` brand home (slogan, two line cards, why 归处, approach, contact),
+  `/zh/inspection` 归处 · 房屋检查 (pre-purchase, pre-auction, new home
+  stages, 137B, 房屋状况评估 incl. dilapidation reports; FAQ),
+  `/zh/consulting` 归处 · 建筑技术咨询 (defect investigation, technical
+  assessment, dispute expert reports, expert witness; residential Class 1/10
+  within the inspector's registration; expert's duty to the tribunal; no
+  legal advice; enquiry by phone or email) and `/zh/about` 关于归处.
+  Header: 归处 Home Audit / 房屋检查 · 建筑技术咨询; Chinese nav and footer
+  follow the two lines. Maintenance and the partner network are not shown.
 
 ## 0.29.0 — 2026-11-02
 

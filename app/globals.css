@@ -3920,3 +3920,127 @@ button:focus-visible {
     padding: 48px 0;
   }
 }
+
+.zh-page-hero {
+  width: min(860px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 64px 0 48px;
+  text-align: center;
+}
+
+.zh-page-hero h1 {
+  margin: 0 0 16px;
+  color: var(--eucalyptus);
+  font-size: clamp(1.7rem, 3.4vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.zh-page-hero p {
+  color: var(--muted);
+  line-height: 1.9;
+}
+
+.zh-lines {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.zh-line-card {
+  display: block;
+  padding: 30px;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--eucalyptus);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: inherit;
+  text-decoration: none;
+}
+
+.zh-line-card strong {
+  display: block;
+  color: var(--eucalyptus);
+  font-size: 1.25rem;
+}
+
+.zh-line-card p {
+  margin: 10px 0 18px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.zh-line-action {
+  color: var(--eucalyptus);
+  font-weight: 700;
+}
+
+.zh-line-card:hover .zh-line-action,
+.zh-line-card:focus-visible .zh-line-action {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.zh-points.zh-points-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.zh-points.zh-points-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.zh-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: zh-step;
+}
+
+.zh-steps li {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  counter-increment: zh-step;
+}
+
+.zh-steps li::before {
+  content: '0' counter(zh-step);
+  display: block;
+  margin-bottom: 8px;
+  color: var(--sandstone);
+  font-weight: 800;
+}
+
+.zh-steps strong {
+  color: var(--eucalyptus);
+}
+
+.zh-steps p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.93rem;
+  line-height: 1.75;
+}
+
+@media (max-width: 900px) {
+  .zh-steps,
+  .zh-points.zh-points-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .zh-lines,
+  .zh-steps,
+  .zh-points.zh-points-2,
+  .zh-points.zh-points-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .zh-page-hero {
+    padding: 44px 0 32px;
+  }
+}
