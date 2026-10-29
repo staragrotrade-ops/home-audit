@@ -53,7 +53,7 @@ test('归处: two business lines today; maintenance and the partner network are 
   assert.match(await source('app/zh/page.tsx'), /<ThermalCaseStudy variant="home" lang="zh" \/>/)
   assert.match(inspection, /<ThermalCaseStudy lang="zh" \/>/)
   const caseStudy = await source('components/case-study.tsx')
-  assert.match(caseStudy, /看起来没问题的天花板，藏着楼上的漏水。/)
+  assert.match(caseStudy, /看起来完好的天花板，隐藏着漏水问题。/)
   assert.match(caseStudy, /在条件允许且有必要时，验房师可能会用热成像作为辅助检查/)
   assert.match(caseStudy, /href: '\/zh\/quote\?service=building-and-pest'/)
   assert.match(await source('app/zh/page.tsx'), /每个缺陷都配照片/)

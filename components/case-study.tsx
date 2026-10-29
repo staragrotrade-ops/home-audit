@@ -74,7 +74,7 @@ export function ThermalCaseStudy({ variant = 'full', lang = 'en' }: { variant?: 
       <CaseStudy
         variant={variant}
         eyebrow="来自最近的一次房屋 + 白蚁检查"
-        heading="看起来没问题的天花板，藏着楼上的漏水。"
+        heading="看起来完好的天花板，隐藏着漏水问题。"
         steps={[
           ['看起来正常。', '一楼天花板没有水渍，也看不出损坏。'],
           ['发现冷点。', '热成像仪显示有一块比周围天花板低约 1.4 °C。'],
