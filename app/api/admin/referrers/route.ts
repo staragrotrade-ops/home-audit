@@ -24,6 +24,7 @@ const createSchema = z
     mobile: z.string().trim().max(30).regex(/^[0-9+() -]*$/, 'Use digits, spaces and + in the mobile number.').default(''),
     email: z.union([z.literal(''), z.email('Check the email address.').max(180)]).default(''),
     notes: optional(1000),
+    language: z.enum(['en', 'zh']).default('en'),
     ...commission,
   })
   .strict()
@@ -32,6 +33,7 @@ const updateSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('status'), id: z.uuid(), status: z.enum(['pending', 'active', 'disabled']) }).strict(),
   z.object({ action: z.literal('commission'), id: z.uuid(), ...commission }).strict(),
   z.object({ action: z.literal('email'), id: z.uuid() }).strict(),
+  z.object({ action: z.literal('language'), id: z.uuid(), language: z.enum(['en', 'zh']) }).strict(),
 ])
 
 // Adds a referrer straight away as active (the owner is adding them).
@@ -56,6 +58,7 @@ export async function POST(request: Request) {
         mobile: input.mobile || null,
         email: input.email.toLowerCase() || null,
         notes: input.notes || null,
+        ...(input.language === 'zh' ? { language: 'zh' } : {}),
         ref_code: refCode,
         status: 'active',
         source: 'admin',
@@ -82,6 +85,14 @@ export async function PATCH(request: Request) {
 
     if (input.action === 'email') {
       await emailReferrerLink(supabase, input.id, false)
+      return adminJson({ ok: true })
+    }
+    if (input.action === 'language') {
+      const { error } = await supabase
+        .from('referrers')
+        .update({ language: input.language, updated_at: new Date().toISOString() })
+        .eq('id', input.id)
+      if (error) throw new Error(error.message)
       return adminJson({ ok: true })
     }
 

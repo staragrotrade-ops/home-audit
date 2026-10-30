@@ -44,6 +44,8 @@ export type ReferrerRecord = {
   commission_percent?: number | string | null
   approved_at?: string | null
   created_at?: string | null
+  /** en | zh – present after the referrer language migration. */
+  language?: string | null
 }
 
 // Codes are lower-case letters and digits, 3 to 12 characters, e.g. "js4kq".
@@ -72,8 +74,9 @@ export function codeSuffix(bytes: ArrayLike<number>) {
   return value
 }
 
-export function referralLink(siteUrl: string, code: string) {
-  return `${siteUrl.replace(/\/$/, '')}/?ref=${encodeURIComponent(code)}`
+export function referralLink(siteUrl: string, code: string, language?: string | null) {
+  const path = language === 'zh' ? '/zh' : '/'
+  return `${siteUrl.replace(/\/$/, '')}${path}?ref=${encodeURIComponent(code)}`
 }
 
 export function referrerOffice(referrer: Pick<ReferrerRecord, 'agency' | 'branch'>) {

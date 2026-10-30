@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.31.0 — 2026-11-03
+
+- Referral partners have a clients' language (migration
+  `20261103100000_referrer_language.sql`, safe to run more than once).
+  Chinese: the link opens the Chinese website (`/zh?ref=CODE`), the QR code
+  follows it, and "Email link" sends a Chinese email saying the Chinese
+  website and the Chinese report translation are available. Set in admin
+  (per partner) or by the partner when registering.
+
 ## 0.30.0 — 2026-10-29
 
 - 归处 Home Audit, the Chinese site: `/zh` home page (slogan 历经远行，终有归处。,
