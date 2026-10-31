@@ -60,6 +60,13 @@ const nextConfig: NextConfig = {
         destination: 'https://homeaudit.com.au/:path*',
         permanent: true,
       },
+      // A cut-off link to the service areas page (Search Console 404,
+      // first seen 24 October 2026).
+      {
+        source: '/service-',
+        destination: '/service-areas',
+        permanent: true,
+      },
     ]
   },
 }
