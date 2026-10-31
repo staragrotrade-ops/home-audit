@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.31.1 — 2026-10-31
+
+- `/service-` (a cut-off link reported as 404 in Search Console) redirects
+  permanently to `/service-areas`.
+
 ## 0.31.0 — 2026-11-03
 
 - Referral partners have a clients' language (migration
